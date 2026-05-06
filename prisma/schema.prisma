@@ -3,12 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum UserRole {
   USER
   ADMIN
   BANNED
@@ -27,7 +26,7 @@ enum ProjectStatus {
   archived
 }
 
-enum TeamRole {
+enum TeamMemberRole {
   OWNER
   ADMIN
   MEMBER
@@ -44,7 +43,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  role          Role      @default(USER)
+  role          UserRole  @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -53,7 +52,7 @@ model User {
   subscription Subscription?
   projects     Project[]
   teamMembers  TeamMember[]
-  ownedTeams   Team[]       @relation("TeamOwner")
+  ownedTeams   Team[]      @relation("TeamOwner")
   auditLogs    AuditLog[]
 }
 
@@ -81,7 +80,8 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -112,7 +112,7 @@ model Project {
   id          String        @id @default(cuid())
   name        String
   slug        String        @unique
-  description String?
+  description String?       @db.Text
   userId      String
   teamId      String?
   status      ProjectStatus @default(active)
@@ -131,18 +131,18 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner    User         @relation("TeamOwner", fields: [ownerId], references: [id])
-  members  TeamMember[]
-  invites  TeamInvite[]
+  owner   User         @relation("TeamOwner", fields: [ownerId], references: [id])
+  members TeamMember[]
+  invites TeamInvite[]
   projects Project[]
 }
 
 model TeamMember {
-  id       String   @id @default(cuid())
+  id       String         @id @default(cuid())
   teamId   String
   userId   String
-  role     TeamRole @default(MEMBER)
-  joinedAt DateTime @default(now())
+  role     TeamMemberRole @default(MEMBER)
+  joinedAt DateTime       @default(now())
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -151,13 +151,13 @@ model TeamMember {
 }
 
 model TeamInvite {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   teamId    String
   email     String
-  role      TeamRole @default(MEMBER)
-  token     String   @unique @default(cuid())
+  role      TeamMemberRole @default(MEMBER)
+  token     String         @unique @default(cuid())
   expiresAt DateTime
-  createdAt DateTime @default(now())
+  createdAt DateTime       @default(now())
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 }
@@ -167,7 +167,7 @@ model AuditLog {
   userId     String
   action     String
   resource   String
-  resourceId String
+  resourceId String?
   metadata   Json     @default("{}")
   ipHash     String
   createdAt  DateTime @default(now())

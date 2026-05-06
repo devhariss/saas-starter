@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getConsent, hasConsent, type ConsentState, type ConsentCategory } from '@/components/compliance/ConsentManager'
+import { getConsent, type ConsentState } from '@/components/compliance/ConsentManager'
 
 export function useConsentState() {
   const [consent, setConsent] = useState<ConsentState | null>(null)
@@ -10,8 +10,5 @@ export function useConsentState() {
     setConsent(getConsent())
   }, [])
 
-  return {
-    consent,
-    hasConsent: (category: ConsentCategory) => hasConsent(category),
-  }
+  return consent
 }

@@ -9,46 +9,44 @@ interface Notification {
   createdAt: Date
 }
 
-interface UIState {
+interface UIStore {
   sidebarCollapsed: boolean
-  commandPaletteOpen: boolean
-  notifications: Notification[]
-  unreadCount: number
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
-  openCommandPalette: () => void
-  closeCommandPalette: () => void
+
+  commandPaletteOpen: boolean
+  setCommandPaletteOpen: (open: boolean) => void
+
+  notifications: Notification[]
   addNotification: (n: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void
   markAllRead: () => void
-  removeNotification: (id: string) => void
+  unreadCount: () => number
 }
 
-export const useUIStore = create<UIState>((set, get) => ({
+export const useUIStore = create<UIStore>((set, get) => ({
   sidebarCollapsed: false,
+  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+  setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+
   commandPaletteOpen: false,
+  setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+
   notifications: [
     {
       id: '1',
-      title: 'Welcome to SaasStarter!',
-      message: 'Your account is ready. Start building.',
-      type: 'success',
+      title: 'Welcome to SaasStarter',
+      message: 'Your account is ready. Start by creating your first project.',
+      type: 'info',
       read: false,
       createdAt: new Date(),
     },
   ],
-  get unreadCount() {
-    return get().notifications.filter((n) => !n.read).length
-  },
-  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-  setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
-  openCommandPalette: () => set({ commandPaletteOpen: true }),
-  closeCommandPalette: () => set({ commandPaletteOpen: false }),
   addNotification: (n) =>
     set((s) => ({
       notifications: [
         {
           ...n,
-          id: Math.random().toString(36).slice(2),
+          id: crypto.randomUUID(),
           read: false,
           createdAt: new Date(),
         },
@@ -56,7 +54,8 @@ export const useUIStore = create<UIState>((set, get) => ({
       ],
     })),
   markAllRead: () =>
-    set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
-  removeNotification: (id) =>
-    set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
+    set((s) => ({
+      notifications: s.notifications.map((n) => ({ ...n, read: true })),
+    })),
+  unreadCount: () => get().notifications.filter((n) => !n.read).length,
 }))
