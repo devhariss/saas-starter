@@ -1,129 +1,165 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import {
-  getConsent,
-  setConsent,
-  isConsentExpired,
-  isGPCEnabled,
-} from './ConsentManager'
+import { shouldShowBanner, setConsent, revokeConsent, isGPCEnabled } from './ConsentManager'
 
-const CookiePreferences = dynamic(() =>
-  import('./CookiePreferences').then((m) => m.CookiePreferences), { ssr: false }
-)
+const CookiePreferences = dynamic(() => import('./CookiePreferences'), {
+  ssr: false,
+})
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false)
-  const [gpcNotice, setGpcNotice] = useState(false)
-  const [prefsOpen, setPrefsOpen] = useState(false)
+  const [showPrefs, setShowPrefs] = useState(false)
+  const [gpcDetected, setGpcDetected] = useState(false)
 
   useEffect(() => {
-    if (isGPCEnabled()) {
-      setConsent({ analytics: false, marketing: false, functional: false })
-      setGpcNotice(true)
+    const gpc = isGPCEnabled()
+    if (gpc) {
+      revokeConsent()
+      setGpcDetected(true)
       return
     }
-    const consent = getConsent()
-    if (!consent || isConsentExpired()) setVisible(true)
+    if (shouldShowBanner()) setVisible(true)
   }, [])
 
-  const acceptAll = () => {
-    setConsent({ analytics: true, marketing: true, functional: true })
+  const acceptAll = useCallback(() => {
+    setConsent({ essential: true, analytics: true, marketing: true, functional: true })
     setVisible(false)
-  }
+  }, [])
 
-  const rejectAll = () => {
-    setConsent({ analytics: false, marketing: false, functional: false })
+  const rejectAll = useCallback(() => {
+    setConsent({ essential: true, analytics: false, marketing: false, functional: false })
     setVisible(false)
-  }
+  }, [])
 
-  if (!visible && !gpcNotice) return null
-
-  if (gpcNotice) {
+  if (gpcDetected) {
     return (
       <div
         role="status"
         aria-live="polite"
         style={{
-          position: 'fixed', bottom: 'var(--space-4)', left: 'var(--space-4)',
-          zIndex: 9998, maxWidth: '360px',
+          position: 'fixed',
+          bottom: 'var(--space-4)',
+          left: 'var(--space-4)',
+          zIndex: 9999,
+          maxWidth: '360px',
+          padding: 'var(--space-3) var(--space-4)',
           background: 'var(--color-surface)',
           border: '1px solid oklch(from var(--color-text) l c h / 0.10)',
           borderRadius: 'var(--radius-lg)',
-          padding: 'var(--space-4)',
           boxShadow: 'var(--shadow-md)',
+          fontSize: 'var(--text-xs)',
+          color: 'var(--color-text-muted)',
         }}
       >
-        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', margin: 0 }}>
-          🔒 Your privacy preferences have been honored (GPC detected).
-        </p>
-        <button
-          onClick={() => setGpcNotice(false)}
-          aria-label="Dismiss GPC notice"
-          style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-xs)', color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-        >Dismiss</button>
+        🔒 Your privacy preferences have been honored (GPC detected).
       </div>
     )
   }
+
+  if (!visible) return null
 
   return (
     <>
       <div
         role="dialog"
-        aria-modal="true"
+        aria-modal="false"
         aria-label="Cookie consent"
         style={{
-          position: 'fixed', bottom: 'var(--space-6)', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 9999, width: 'min(640px, calc(100vw - var(--space-8)))',
+          position: 'fixed',
+          bottom: 'var(--space-4)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'min(640px, calc(100vw - 2rem))',
+          zIndex: 9998,
+          padding: 'var(--space-6)',
           background: 'var(--color-surface)',
           border: '1px solid oklch(from var(--color-text) l c h / 0.10)',
           borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-6)',
           boxShadow: 'var(--shadow-lg)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-4)',
         }}
       >
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text)', marginBottom: 'var(--space-2)', fontWeight: 600 }}>We use cookies</p>
-        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)', lineHeight: 1.6 }}>
-          We use essential cookies to operate the site, and optional analytics/marketing cookies to improve your experience.
-          Read our <a href="/cookies" style={{ color: 'var(--color-primary)' }}>Cookie Policy</a>.
-        </p>
+        <div>
+          <p
+            style={{
+              fontSize: 'var(--text-sm)',
+              fontWeight: 600,
+              color: 'var(--color-text)',
+              marginBottom: 'var(--space-1)',
+            }}
+          >
+            We use cookies
+          </p>
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', maxWidth: 'none' }}>
+            We use essential cookies to make our site work. With your consent, we may also use analytics and
+            functional cookies to improve your experience.{' '}
+            <a href="/cookies" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>
+              Cookie Policy
+            </a>
+          </p>
+        </div>
         <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
           <button
             onClick={acceptAll}
             style={{
-              flex: 1, minWidth: '120px', padding: 'var(--space-2) var(--space-4)',
-              background: 'var(--color-primary)', color: '#fff',
-              border: 'none', borderRadius: 'var(--radius-md)',
-              fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer',
+              flex: 1,
+              minWidth: '120px',
+              padding: 'var(--space-2) var(--space-4)',
+              background: 'var(--color-primary)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 600,
+              cursor: 'pointer',
               minHeight: '44px',
             }}
-          >Accept all</button>
+          >
+            Accept all
+          </button>
           <button
             onClick={rejectAll}
             style={{
-              flex: 1, minWidth: '120px', padding: 'var(--space-2) var(--space-4)',
-              background: 'transparent', color: 'var(--color-text)',
+              flex: 1,
+              minWidth: '120px',
+              padding: 'var(--space-2) var(--space-4)',
+              background: 'transparent',
+              color: 'var(--color-text)',
               border: '1px solid oklch(from var(--color-text) l c h / 0.15)',
               borderRadius: 'var(--radius-md)',
-              fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 600,
+              cursor: 'pointer',
               minHeight: '44px',
             }}
-          >Reject all</button>
+          >
+            Reject all
+          </button>
           <button
-            onClick={() => setPrefsOpen(true)}
+            onClick={() => setShowPrefs(true)}
             style={{
-              padding: 'var(--space-2) var(--space-4)',
-              background: 'transparent', color: 'var(--color-text-muted)',
-              border: 'none', fontSize: 'var(--text-xs)', cursor: 'pointer',
+              padding: 'var(--space-2) var(--space-3)',
+              background: 'transparent',
+              color: 'var(--color-text-muted)',
+              border: 'none',
+              fontSize: 'var(--text-xs)',
+              cursor: 'pointer',
               minHeight: '44px',
+              textDecoration: 'underline',
             }}
-          >Manage preferences</button>
+          >
+            Manage preferences
+          </button>
         </div>
       </div>
-      {prefsOpen && (
+      {showPrefs && (
         <CookiePreferences
-          onClose={() => { setPrefsOpen(false); setVisible(false) }}
+          onClose={() => setShowPrefs(false)}
+          onSave={() => setVisible(false)}
         />
       )}
     </>
