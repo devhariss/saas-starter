@@ -3,15 +3,19 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import GitHub from 'next-auth/providers/github'
 import Resend from 'next-auth/providers/resend'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { resend } from '@/lib/resend'
-import MagicLinkEmail from '@/emails/MagicLinkEmail'
-import WelcomeEmail from '@/emails/WelcomeEmail'
+import { MagicLinkEmail } from '@/emails/MagicLinkEmail'
+import { WelcomeEmail } from '@/emails/WelcomeEmail'
 import { render } from '@react-email/render'
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(db),
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
   session: { strategy: 'database' },
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -25,7 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       apiKey: process.env.RESEND_API_KEY!,
       from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
       async sendVerificationRequest({ identifier, url }) {
-        const html = await render(<MagicLinkEmail magicLink={url} />)
+        const html = await render(MagicLinkEmail({ url, email: identifier }))
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
           to: identifier,
@@ -36,30 +40,40 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      if (!user.email) return false
+      const dbUser = await prisma.user.findUnique({ where: { email: user.email } })
+      if (dbUser?.role === 'BANNED') return false
+      return true
+    },
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id
-        const dbUser = await db.user.findUnique({
+        const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
-          include: { subscription: true },
+          select: { role: true },
         })
-        if (dbUser) {
-          session.user.role = dbUser.role
-          session.user.subscriptionStatus = dbUser.subscription?.status ?? null
-        }
+        ;(session.user as typeof session.user & { role: string }).role =
+          dbUser?.role ?? 'USER'
+        const subscription = await prisma.subscription.findFirst({
+          where: { userId: user.id },
+          orderBy: { createdAt: 'desc' },
+          select: { status: true },
+        })
+        ;(
+          session.user as typeof session.user & {
+            role: string
+            subscriptionStatus: string | null
+          }
+        ).subscriptionStatus = subscription?.status ?? null
       }
       return session
-    },
-    async signIn({ user }) {
-      const dbUser = await db.user.findUnique({ where: { email: user.email! } })
-      if (dbUser?.role === 'BANNED') return false
-      return true
     },
   },
   events: {
     async createUser({ user }) {
       if (user.email && user.name) {
-        const html = await render(<WelcomeEmail userName={user.name} />)
+        const html = await render(WelcomeEmail({ name: user.name, email: user.email }))
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
           to: user.email,
@@ -70,11 +84,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async signIn({ user }) {
       if (user.id) {
-        await db.auditLog.create({
+        await prisma.auditLog.create({
           data: {
             userId: user.id,
             action: 'USER_SIGN_IN',
-            resource: 'auth',
+            resource: 'User',
             resourceId: user.id,
             metadata: {},
             ipHash: 'unknown',
@@ -82,9 +96,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         })
       }
     },
-  },
-  pages: {
-    signIn: '/login',
-    error: '/login',
   },
 })

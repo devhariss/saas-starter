@@ -18,40 +18,41 @@ export function formatCurrency(
   }).format(amount)
 }
 
-export function formatDate(date: Date | string, locale = 'en-US'): string {
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(date))
+export function formatDate(
+  date: Date | string,
+  options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' }
+): string {
+  return new Intl.DateTimeFormat('en-US', options).format(new Date(date))
 }
 
 export function formatRelativeTime(date: Date | string): string {
   const now = new Date()
-  const d = new Date(date)
-  const diffMs = now.getTime() - d.getTime()
-  const diffSecs = Math.floor(diffMs / 1000)
-  const diffMins = Math.floor(diffSecs / 60)
-  const diffHours = Math.floor(diffMins / 60)
+  const then = new Date(date)
+  const diffMs = now.getTime() - then.getTime()
+  const diffSeconds = Math.floor(diffMs / 1000)
+  const diffMinutes = Math.floor(diffSeconds / 60)
+  const diffHours = Math.floor(diffMinutes / 60)
   const diffDays = Math.floor(diffHours / 24)
 
-  if (diffSecs < 60) return 'just now'
-  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffSeconds < 60) return 'just now'
+  if (diffMinutes < 60) return `${diffMinutes}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
   return formatDate(date)
 }
 
-export function slugify(text: string): string {
-  return text
+export function slugify(str: string): string {
+  return str
     .toLowerCase()
+    .trim()
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
 
 export function truncate(str: string, length: number): string {
-  return str.length > length ? str.slice(0, length) + '...' : str
+  if (str.length <= length) return str
+  return `${str.slice(0, length)}...`
 }
 
 export function getInitials(name: string): string {
@@ -61,4 +62,8 @@ export function getInitials(name: string): string {
     .join('')
     .toUpperCase()
     .slice(0, 2)
+}
+
+export function absoluteUrl(path: string): string {
+  return `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}${path}`
 }

@@ -4,9 +4,8 @@ export const checkoutSchema = z.object({
   priceId: z.string().min(1, 'Price ID is required'),
 })
 
-export const billingPortalSchema = z.object({
-  returnUrl: z.string().url('Invalid return URL'),
+export const cancelSubscriptionSchema = z.object({
+  confirm: z.literal(true),
 })
 
-export type CheckoutInput = z.infer<typeof checkoutSchema>
-export type BillingPortalInput = z.infer<typeof billingPortalSchema>
+export type CheckoutFormData = z.infer<typeof checkoutSchema>
