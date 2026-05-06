@@ -1,38 +1,17 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
 
-interface SubscriptionData {
-  status: string | null
-  stripePriceId: string | null
-  currentPeriodEnd: string | null
-  cancelAtPeriodEnd: boolean
-}
+type SubscriptionStatus = 'active' | 'trialing' | 'canceled' | 'past_due' | 'incomplete' | null
 
 export function useSubscription() {
-  const { data, isLoading, error } = useQuery<SubscriptionData>({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      const res = await fetch('/api/user/subscription')
-      if (!res.ok) throw new Error('Failed to fetch subscription')
-      return res.json() as Promise<SubscriptionData>
-    },
-  })
-
-  const isPro =
-    data?.status === 'active' &&
-    data.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
-
-  const isTeam =
-    data?.status === 'active' &&
-    data.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_TEAM_PRICE_ID
+  const { data: session } = useSession()
+  const status = (session?.user as { subscriptionStatus?: SubscriptionStatus })?.subscriptionStatus ?? null
 
   return {
-    subscription: data ?? null,
-    isLoading,
-    error,
-    isPro,
-    isTeam,
-    isActive: data?.status === 'active' || data?.status === 'trialing',
+    status,
+    isActive: status === 'active' || status === 'trialing',
+    isPro: status === 'active',
+    isFree: !status || status === 'canceled' || status === 'incomplete',
   }
 }

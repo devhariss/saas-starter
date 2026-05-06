@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum UserRole {
   USER
   ADMIN
   BANNED
@@ -43,7 +43,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  role          Role      @default(USER)
+  role          UserRole  @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -62,12 +62,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -94,9 +94,9 @@ model VerificationToken {
 model Subscription {
   id                   String             @id @default(cuid())
   userId               String             @unique
-  stripeCustomerId     String?            @unique
+  stripeCustomerId     String?
   stripePriceId        String?
-  stripeSubscriptionId String?            @unique
+  stripeSubscriptionId String?
   status               SubscriptionStatus @default(incomplete)
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
@@ -119,7 +119,7 @@ model Project {
   updatedAt   DateTime      @updatedAt
 
   user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team Team? @relation(fields: [teamId], references: [id])
+  team Team? @relation(fields: [teamId], references: [id], onDelete: SetNull)
 }
 
 model Team {
@@ -130,10 +130,10 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner   User         @relation("TeamOwner", fields: [ownerId], references: [id])
-  members TeamMember[]
-  invites TeamInvite[]
-  Project Project[]
+  owner    User         @relation("TeamOwner", fields: [ownerId], references: [id])
+  members  TeamMember[]
+  invites  TeamInvite[]
+  projects Project[]
 }
 
 model TeamMember {
@@ -154,7 +154,7 @@ model TeamInvite {
   teamId    String
   email     String
   role      TeamMemberRole @default(MEMBER)
-  token     String         @unique @default(cuid())
+  token     String         @unique
   expiresAt DateTime
   createdAt DateTime       @default(now())
 

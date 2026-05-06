@@ -4,62 +4,55 @@ interface Notification {
   id: string
   title: string
   message: string
-  type: 'success' | 'error' | 'info' | 'warning'
+  type: 'success' | 'error' | 'warning' | 'info'
   read: boolean
   createdAt: Date
 }
 
-interface UIState {
+interface UIStore {
   sidebarCollapsed: boolean
+  setSidebarCollapsed: (collapsed: boolean) => void
   toggleSidebar: () => void
-  setSidebarCollapsed: (v: boolean) => void
 
   searchOpen: boolean
-  openSearch: () => void
-  closeSearch: () => void
+  setSearchOpen: (open: boolean) => void
 
   notifications: Notification[]
-  unreadCount: number
   addNotification: (n: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void
   markAllRead: () => void
-  clearNotifications: () => void
-
-  deleteAccountModalOpen: boolean
-  openDeleteAccountModal: () => void
-  closeDeleteAccountModal: () => void
+  unreadCount: () => number
 }
 
-export const useUIStore = create<UIState>((set) => ({
+export const useUIStore = create<UIStore>((set, get) => ({
   sidebarCollapsed: false,
+  setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-  setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
 
   searchOpen: false,
-  openSearch: () => set({ searchOpen: true }),
-  closeSearch: () => set({ searchOpen: false }),
+  setSearchOpen: (open) => set({ searchOpen: open }),
 
   notifications: [
     {
       id: '1',
-      title: 'Welcome to SaasStarter',
-      message: 'Your account is ready. Start by creating your first project.',
+      title: 'Welcome!',
+      message: 'Your account is ready.',
+      type: 'success',
+      read: false,
+      createdAt: new Date(),
+    },
+    {
+      id: '2',
+      title: 'New feature',
+      message: 'Analytics dashboard is live.',
       type: 'info',
       read: false,
-      createdAt: new Date(Date.now() - 1000 * 60 * 5),
+      createdAt: new Date(Date.now() - 3600000),
     },
   ],
-  get unreadCount() {
-    return this.notifications.filter((n) => !n.read).length
-  },
   addNotification: (n) =>
     set((s) => ({
       notifications: [
-        {
-          ...n,
-          id: crypto.randomUUID(),
-          read: false,
-          createdAt: new Date(),
-        },
+        { ...n, id: crypto.randomUUID(), read: false, createdAt: new Date() },
         ...s.notifications,
       ],
     })),
@@ -67,9 +60,5 @@ export const useUIStore = create<UIState>((set) => ({
     set((s) => ({
       notifications: s.notifications.map((n) => ({ ...n, read: true })),
     })),
-  clearNotifications: () => set({ notifications: [] }),
-
-  deleteAccountModalOpen: false,
-  openDeleteAccountModal: () => set({ deleteAccountModalOpen: true }),
-  closeDeleteAccountModal: () => set({ deleteAccountModalOpen: false }),
+  unreadCount: () => get().notifications.filter((n) => !n.read).length,
 }))
