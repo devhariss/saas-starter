@@ -1,53 +1,43 @@
 import {
-  Body, Container, Head, Heading, Html, Link, Preview, Section, Text, Hr,
+  Html, Head, Body, Container, Section, Text, Button, Hr, Img
 } from '@react-email/components'
 
 interface WelcomeEmailProps {
-  name: string
-  email: string
+  userName: string
 }
 
-export function WelcomeEmail({ name, email }: WelcomeEmailProps) {
+export default function WelcomeEmail({ userName }: WelcomeEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Welcome to SaasStarter, {name}!</Preview>
-      <Body style={{ backgroundColor: '#0d0d10', fontFamily: 'Inter, system-ui, sans-serif' }}>
-        <Container style={{ maxWidth: '560px', margin: '40px auto', padding: '40px', backgroundColor: '#161618', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <Body style={{ backgroundColor: '#f6f9fc', fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <Container style={{ maxWidth: '560px', margin: '40px auto', backgroundColor: '#ffffff', borderRadius: '8px', padding: '40px', border: '1px solid #e6ebf1' }}>
           <Section>
-            <Heading style={{ color: '#f5f5f5', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>
-              Welcome to SaasStarter 👋
-            </Heading>
-            <Text style={{ color: '#a1a1aa', fontSize: '16px', lineHeight: '1.6', marginTop: '0' }}>
-              Hi {name}, your account for <strong style={{ color: '#f5f5f5' }}>{email}</strong> is ready.
+            <Text style={{ fontSize: '24px', fontWeight: '700', color: '#0d0d12', margin: '0 0 8px' }}>
+              Welcome to SaasStarter, {userName}!
             </Text>
-            <Text style={{ color: '#a1a1aa', fontSize: '15px', lineHeight: '1.6' }}>
-              You now have access to:
+            <Text style={{ fontSize: '16px', color: '#4a5568', lineHeight: '1.6', margin: '0 0 24px' }}>
+              You&apos;re now part of a community of builders shipping faster. Your account is ready — here&apos;s what to do next.
             </Text>
-            <ul style={{ color: '#a1a1aa', fontSize: '15px', lineHeight: '2' }}>
-              <li>Unlimited projects on the Free plan</li>
-              <li>Auth, analytics, and team management</li>
-              <li>Stripe billing — upgrade anytime</li>
-            </ul>
           </Section>
-          <Hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
-          <Section>
-            <Link
-              href={`${process.env.NEXT_PUBLIC_APP_URL ?? 'https://yourapp.com'}/dashboard`}
-              style={{ display: 'inline-block', backgroundColor: '#6366f1', color: '#fff', padding: '12px 24px', borderRadius: '8px', fontWeight: 600, textDecoration: 'none', fontSize: '15px' }}
-            >
-              Go to Dashboard
-            </Link>
+          <Section style={{ backgroundColor: '#f8f9fa', borderRadius: '6px', padding: '20px', marginBottom: '24px' }}>
+            <Text style={{ fontSize: '14px', fontWeight: '600', color: '#0d0d12', margin: '0 0 12px' }}>Get started in 3 steps:</Text>
+            <Text style={{ fontSize: '14px', color: '#4a5568', margin: '0 0 8px' }}>1. Set up your first project</Text>
+            <Text style={{ fontSize: '14px', color: '#4a5568', margin: '0 0 8px' }}>2. Invite your team members</Text>
+            <Text style={{ fontSize: '14px', color: '#4a5568', margin: '0' }}>3. Connect your domain and go live</Text>
           </Section>
-          <Hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
-          <Text style={{ color: '#71717a', fontSize: '13px' }}>
-            SaasStarter · If you didn't sign up, ignore this email.{' '}
-            <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/privacy`} style={{ color: '#6366f1' }}>Privacy Policy</Link>
+          <Button
+            href={`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`}
+            style={{ backgroundColor: '#5b4cf5', color: '#ffffff', padding: '12px 24px', borderRadius: '6px', fontSize: '14px', fontWeight: '600', textDecoration: 'none', display: 'inline-block' }}
+          >
+            Go to your dashboard
+          </Button>
+          <Hr style={{ borderColor: '#e6ebf1', margin: '32px 0 24px' }} />
+          <Text style={{ fontSize: '12px', color: '#8898aa', margin: '0' }}>
+            You received this email because you signed up at SaasStarter. If you didn&apos;t create an account, you can safely ignore this email.
           </Text>
         </Container>
       </Body>
     </Html>
   )
 }
-
-export default WelcomeEmail
