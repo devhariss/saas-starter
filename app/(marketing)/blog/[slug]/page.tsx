@@ -1,81 +1,115 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
 export const revalidate = 86400;
 
-const posts: Record<string, { title: string; content: string; date: string }> = {
-  "nextjs-15-app-router-patterns": {
-    title: "Next.js 15 App Router patterns every SaaS developer should know",
-    date: "May 1, 2026",
-    content: `Next.js 15 introduced significant improvements to the App Router that make building SaaS products more ergonomic. Here are the patterns you should understand before starting your next project.
+const posts: Record<string, { title: string; content: string; date: string; readingTime: string; category: string }> = {
+  'ship-saas-in-days': {
+    title: 'Ship your SaaS in days with Next.js 15',
+    date: '2026-04-15',
+    readingTime: '8 min read',
+    category: 'Engineering',
+    content: `
+      Next.js 15 with the App Router gives you everything you need to ship a production-ready SaaS application quickly.
+      The combination of React Server Components, the new metadata API, and first-class TypeScript support means less boilerplate
+      and more time spent on your product.
 
-## Server Components by default
+      Start by scaffolding your auth with NextAuth.js v5. The new Auth.js API is cleaner and works seamlessly with the App Router.
+      Configure your OAuth providers (Google, GitHub) and add a Resend magic-link provider for passwordless sign-in.
 
-Every component in the App Router is a Server Component by default. This means zero client-side JavaScript unless you explicitly opt in with \"use client\". For most SaaS pages — dashboards, analytics, billing — the majority of the component tree should be server-rendered.
+      Next, wire up Stripe. The key insight is that you want to listen to webhook events to keep your local subscription state
+      in sync with Stripe\'s source of truth. Set up your webhook handler early and handle: checkout.session.completed,
+      customer.subscription.updated, and customer.subscription.deleted.
 
-## Parallel Routes for dashboard layouts
+      For performance, embrace Server Components as the default. Push \'use client\' to the leaves of your component tree.
+      Use dynamic imports for heavy client-side libraries like charts.
 
-Parallel routes let you render multiple pages simultaneously in the same layout. This is perfect for dashboard sidebars, modals that need their own URL, or split-panel views.`,
-  },
-  "stripe-webhooks-nextjs": {
-    title: "Stripe webhooks in Next.js: the complete guide",
-    date: "April 20, 2026",
-    content: `Stripe webhooks are the backbone of any subscription billing system. Here’s how to implement them correctly in a Next.js 15 App Router project.
-
-## The webhook handler
-
-Your webhook handler lives at \`/api/stripe/webhook\`. The most critical step is verifying the Stripe signature before processing any event.`,
-  },
-  "gdpr-saas-checklist-2026": {
-    title: "The 2026 GDPR + CCPA compliance checklist for SaaS founders",
-    date: "April 10, 2026",
-    content: `Compliance doesn’t have to be overwhelming. Here’s the practical checklist for what you actually need to implement.
-
-## Cookie consent
-
-You need a cookie banner that blocks non-essential scripts before consent. The \"Accept All\" and \"Reject All\" buttons must be equally prominent — this is the dark pattern test regulators look for first.`,
+      The result? A full SaaS with auth, billing, and analytics that scores 100 on Lighthouse out of the box.
+    `,
   },
 };
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = posts[params.slug];
-  if (!post) return { title: "Not Found" };
-  return { title: post.title };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = posts[slug];
+  if (!post) return {};
+  return {
+    title: post.title,
+    description: post.content.slice(0, 150).trim(),
+  };
 }
 
-export async function generateStaticParams() {
-  return Object.keys(posts).map((slug) => ({ slug }));
-}
-
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = posts[params.slug];
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const post = posts[slug];
   if (!post) notFound();
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-24">
-      <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-faint)", marginBottom: "var(--space-4)" }}>
-        {post.date}
-      </p>
-      <h1
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-xl)",
-          fontWeight: 700,
-          marginBottom: "var(--space-8)",
-          lineHeight: 1.2,
-        }}
-      >
-        {post.title}
-      </h1>
+    <article
+      style={{
+        maxWidth: 'var(--content-narrow)',
+        marginInline: 'auto',
+        paddingInline: 'var(--space-6)',
+        paddingBlock: 'var(--space-24)',
+      }}
+    >
+      <header style={{ marginBottom: 'var(--space-10)' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-3)',
+            marginBottom: 'var(--space-4)',
+          }}
+        >
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-primary)', fontWeight: 500 }}>
+            {post.category}
+          </span>
+          <span style={{ color: 'var(--color-text-faint)' }}>·</span>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+            {post.readingTime}
+          </span>
+        </div>
+        <h1
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-xl)',
+            fontWeight: 700,
+            color: 'var(--color-text)',
+            marginBottom: 'var(--space-4)',
+          }}
+        >
+          {post.title}
+        </h1>
+        <time
+          dateTime={post.date}
+          style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}
+        >
+          {new Date(post.date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
+      </header>
       <div
         style={{
-          color: "var(--color-text-muted)",
+          color: 'var(--color-text)',
+          fontSize: 'var(--text-base)',
           lineHeight: 1.8,
-          whiteSpace: "pre-line",
+          whiteSpace: 'pre-line',
         }}
       >
         {post.content}
       </div>
-    </main>
+    </article>
   );
 }

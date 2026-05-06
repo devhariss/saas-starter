@@ -1,29 +1,52 @@
-import type { Metadata } from "next";
-import { Pricing } from "@/components/marketing/Pricing";
-import { FAQ } from "@/components/marketing/FAQ";
+import type { Metadata } from 'next';
+import { Pricing } from '@/components/marketing/Pricing';
 
 export const metadata: Metadata = {
-  title: "Pricing",
+  title: 'Pricing',
   description:
-    "Simple, transparent pricing. Start free, upgrade when you need more.",
+    'Simple, transparent pricing. Start for free. Upgrade when you need more.',
 };
 
 export default function PricingPage() {
   return (
-    <main className="py-24">
-      <div className="mx-auto max-w-3xl px-4 text-center mb-16">
+    <section
+      style={{
+        paddingTop: 'var(--space-24)',
+        paddingBottom: 'var(--space-24)',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: '1200px',
+          marginInline: 'auto',
+          paddingInline: 'var(--space-6)',
+          textAlign: 'center',
+          marginBottom: 'var(--space-16)',
+        }}
+      >
         <h1
-          className="font-display text-4xl font-bold tracking-tight"
-          style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)" }}
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 700,
+            color: 'var(--color-text)',
+            marginBottom: 'var(--space-4)',
+          }}
         >
-          Simple, honest pricing
+          Simple, transparent pricing
         </h1>
-        <p className="mt-4" style={{ color: "var(--color-text-muted)" }}>
-          No hidden fees. No surprises. Cancel anytime.
+        <p
+          style={{
+            fontSize: 'var(--text-base)',
+            color: 'var(--color-text-muted)',
+            maxWidth: '520px',
+            marginInline: 'auto',
+          }}
+        >
+          Start for free. Upgrade when you need more power. Cancel any time, no questions asked.
         </p>
       </div>
       <Pricing />
-      <FAQ />
-    </main>
+    </section>
   );
 }
