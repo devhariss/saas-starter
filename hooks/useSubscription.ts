@@ -1,17 +1,24 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useQuery } from '@tanstack/react-query'
 
-type SubscriptionStatus = 'active' | 'trialing' | 'canceled' | 'past_due' | 'incomplete' | null
+interface SubscriptionData {
+  status: string | null
+  stripePriceId: string | null
+  currentPeriodEnd: string | null
+  cancelAtPeriodEnd: boolean
+}
+
+async function fetchSubscription(): Promise<SubscriptionData> {
+  const res = await fetch('/api/user/subscription')
+  if (!res.ok) throw new Error('Failed to fetch subscription')
+  return res.json()
+}
 
 export function useSubscription() {
-  const { data: session } = useSession()
-  const status = (session?.user as { subscriptionStatus?: SubscriptionStatus })?.subscriptionStatus ?? null
-
-  return {
-    status,
-    isActive: status === 'active' || status === 'trialing',
-    isPro: status === 'active',
-    isFree: !status || status === 'canceled' || status === 'incomplete',
-  }
+  return useQuery({
+    queryKey: ['subscription'],
+    queryFn: fetchSubscription,
+    staleTime: 60 * 1000,
+  })
 }

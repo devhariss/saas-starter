@@ -4,7 +4,7 @@ interface Notification {
   id: string
   title: string
   message: string
-  type: 'success' | 'error' | 'warning' | 'info'
+  type: 'info' | 'success' | 'error' | 'warning'
   read: boolean
   createdAt: Date
 }
@@ -32,22 +32,9 @@ export const useUIStore = create<UIStore>((set, get) => ({
   setSearchOpen: (open) => set({ searchOpen: open }),
 
   notifications: [
-    {
-      id: '1',
-      title: 'Welcome!',
-      message: 'Your account is ready.',
-      type: 'success',
-      read: false,
-      createdAt: new Date(),
-    },
-    {
-      id: '2',
-      title: 'New feature',
-      message: 'Analytics dashboard is live.',
-      type: 'info',
-      read: false,
-      createdAt: new Date(Date.now() - 3600000),
-    },
+    { id: '1', title: 'New signup', message: 'alice@example.com joined', type: 'info', read: false, createdAt: new Date() },
+    { id: '2', title: 'Invoice paid', message: 'Invoice #INV-042 paid — $29.00', type: 'success', read: false, createdAt: new Date() },
+    { id: '3', title: 'Subscription upgraded', message: 'bob@example.com → Pro plan', type: 'success', read: true, createdAt: new Date() },
   ],
   addNotification: (n) =>
     set((s) => ({
@@ -57,8 +44,6 @@ export const useUIStore = create<UIStore>((set, get) => ({
       ],
     })),
   markAllRead: () =>
-    set((s) => ({
-      notifications: s.notifications.map((n) => ({ ...n, read: true })),
-    })),
+    set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
   unreadCount: () => get().notifications.filter((n) => !n.read).length,
 }))

@@ -1,13 +1,5 @@
 import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Heading,
-  Text,
-  Button,
-  Hr,
-  Preview,
+  Body, Container, Head, Heading, Html, Link, Preview, Section, Text, Hr,
 } from '@react-email/components'
 
 interface MagicLinkEmailProps {
@@ -17,38 +9,29 @@ interface MagicLinkEmailProps {
 
 export function MagicLinkEmail({ url, email }: MagicLinkEmailProps) {
   return (
-    <Html lang="en">
+    <Html>
       <Head />
       <Preview>Your sign-in link for SaasStarter</Preview>
-      <Body style={{ backgroundColor: '#0d0d12', fontFamily: 'Inter, system-ui, sans-serif' }}>
-        <Container style={{ maxWidth: '560px', margin: '40px auto', padding: '40px', backgroundColor: '#161620', borderRadius: '12px' }}>
-          <Heading style={{ color: '#e8e8f0', fontSize: '22px', fontWeight: 600, marginBottom: '12px' }}>
+      <Body style={{ backgroundColor: '#0d0d10', fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <Container style={{ maxWidth: '560px', margin: '40px auto', padding: '40px', backgroundColor: '#161618', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <Heading style={{ color: '#f5f5f5', fontSize: '22px', fontWeight: 700 }}>
             Sign in to SaasStarter
           </Heading>
-          <Text style={{ color: '#8888a8', fontSize: '16px', lineHeight: '1.6', marginBottom: '8px' }}>
-            Click the button below to sign in as <strong style={{ color: '#e8e8f0' }}>{email}</strong>.
-            This link expires in 10 minutes and can only be used once.
+          <Text style={{ color: '#a1a1aa', fontSize: '15px', lineHeight: '1.6' }}>
+            Click the button below to sign in as <strong style={{ color: '#f5f5f5' }}>{email}</strong>.
+            This link expires in 15 minutes and can only be used once.
           </Text>
-          <Button
-            href={url}
-            style={{
-              backgroundColor: '#7c6ff7',
-              color: '#fff',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: 600,
-              textDecoration: 'none',
-              display: 'inline-block',
-              marginTop: '16px',
-            }}
-          >
-            Sign in now
-          </Button>
-          <Hr style={{ borderColor: '#2a2a3a', margin: '32px 0' }} />
-          <Text style={{ color: '#55556a', fontSize: '12px' }}>
-            If you did not request this email, you can safely ignore it.
-            This link will expire automatically.
+          <Section style={{ margin: '24px 0' }}>
+            <Link
+              href={url}
+              style={{ display: 'inline-block', backgroundColor: '#6366f1', color: '#fff', padding: '12px 24px', borderRadius: '8px', fontWeight: 600, textDecoration: 'none', fontSize: '15px' }}
+            >
+              Sign in
+            </Link>
+          </Section>
+          <Hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
+          <Text style={{ color: '#71717a', fontSize: '13px' }}>
+            If you didn't request this, you can safely ignore this email. This link will expire automatically.
           </Text>
         </Container>
       </Body>

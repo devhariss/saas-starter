@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, TeamMemberRole, ProjectStatus } from '@prisma/client'
+import { PrismaClient, Role, TeamRole } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -10,7 +10,7 @@ async function main() {
     create: {
       name: 'Alex Admin',
       email: 'admin@saas-starter.dev',
-      role: UserRole.ADMIN,
+      role: Role.ADMIN,
       emailVerified: new Date(),
     },
   })
@@ -22,7 +22,7 @@ async function main() {
     create: {
       name: 'Alice Chen',
       email: 'alice@example.com',
-      role: UserRole.USER,
+      role: Role.USER,
       emailVerified: new Date(),
     },
   })
@@ -31,10 +31,26 @@ async function main() {
     where: { email: 'bob@example.com' },
     update: {},
     create: {
-      name: 'Bob Kumar',
+      name: 'Bob Nakamura',
       email: 'bob@example.com',
-      role: UserRole.USER,
+      role: Role.USER,
       emailVerified: new Date(),
+    },
+  })
+
+  // Subscription for alice
+  await prisma.subscription.upsert({
+    where: { userId: alice.id },
+    update: {},
+    create: {
+      userId: alice.id,
+      stripeCustomerId: 'cus_seed_alice',
+      stripePriceId: process.env.STRIPE_PRO_PRICE_ID ?? 'price_seed_pro',
+      stripeSubscriptionId: 'sub_seed_alice',
+      status: 'active',
+      currentPeriodStart: new Date('2026-04-01'),
+      currentPeriodEnd: new Date('2026-05-01'),
+      cancelAtPeriodEnd: false,
     },
   })
 
@@ -48,89 +64,60 @@ async function main() {
       ownerId: alice.id,
       members: {
         create: [
-          { userId: alice.id, role: TeamMemberRole.OWNER },
-          { userId: bob.id, role: TeamMemberRole.MEMBER },
+          { userId: alice.id, role: TeamRole.OWNER },
+          { userId: bob.id, role: TeamRole.MEMBER },
         ],
       },
     },
   })
 
-  // Subscription for Alice
-  await prisma.subscription.upsert({
-    where: { userId: alice.id },
-    update: {},
-    create: {
-      userId: alice.id,
-      stripeCustomerId: 'cus_demo_alice',
-      stripePriceId: 'price_demo_pro',
-      stripeSubscriptionId: 'sub_demo_alice',
-      status: 'active',
-      currentPeriodStart: new Date('2026-05-01'),
-      currentPeriodEnd: new Date('2026-06-01'),
-      cancelAtPeriodEnd: false,
-    },
-  })
-
   // Projects
   const projectData = [
-    { name: 'Customer Portal', slug: 'customer-portal', description: 'Self-service portal for enterprise clients', status: ProjectStatus.active },
-    { name: 'Analytics Dashboard', slug: 'analytics-dashboard', description: 'Real-time metrics and reporting', status: ProjectStatus.active },
-    { name: 'Legacy API', slug: 'legacy-api', description: 'V1 REST API — migration in progress', status: ProjectStatus.archived },
+    { name: 'API Gateway', slug: 'api-gateway', description: 'Central API routing layer', userId: alice.id, teamId: team.id },
+    { name: 'Analytics Dashboard', slug: 'analytics-dashboard', description: 'Real-time usage analytics', userId: alice.id, teamId: team.id },
+    { name: 'Auth Service', slug: 'auth-service', description: 'OAuth + magic link authentication', userId: bob.id, teamId: team.id },
   ]
 
   for (const p of projectData) {
-    await prisma.project.upsert({
-      where: { slug: p.slug },
-      update: {},
-      create: { ...p, userId: alice.id, teamId: team.id },
-    })
+    await prisma.project.upsert({ where: { slug: p.slug }, update: {}, create: { ...p, status: 'active' } })
   }
 
   // Audit logs
-  const auditActions = [
-    { action: 'SIGN_IN', resource: 'auth', resourceId: alice.id },
-    { action: 'PROJECT_CREATED', resource: 'project', resourceId: 'customer-portal' },
-    { action: 'SUBSCRIPTION_UPGRADED', resource: 'subscription', resourceId: 'sub_demo_alice' },
-    { action: 'TEAM_MEMBER_INVITED', resource: 'team', resourceId: team.id },
-    { action: 'INVOICE_PAID', resource: 'billing', resourceId: 'inv_demo_001' },
-    { action: 'SETTINGS_UPDATED', resource: 'user', resourceId: alice.id },
-    { action: 'SIGN_IN', resource: 'auth', resourceId: bob.id },
+  const auditEvents = [
+    { action: 'USER_SIGN_IN', resource: 'auth', resourceId: alice.id },
+    { action: 'SUBSCRIPTION_CREATED', resource: 'subscription', resourceId: 'sub_seed_alice' },
+    { action: 'PROJECT_CREATED', resource: 'project', resourceId: 'api-gateway' },
+    { action: 'USER_SIGN_IN', resource: 'auth', resourceId: bob.id },
+    { action: 'TEAM_MEMBER_ADDED', resource: 'team', resourceId: team.id },
     { action: 'PROJECT_CREATED', resource: 'project', resourceId: 'analytics-dashboard' },
-    { action: 'PASSWORD_CHANGED', resource: 'auth', resourceId: bob.id },
-    { action: 'SIGN_IN', resource: 'auth', resourceId: admin.id },
+    { action: 'INVOICE_PAID', resource: 'billing', resourceId: 'inv_seed_001' },
+    { action: 'PROJECT_CREATED', resource: 'project', resourceId: 'auth-service' },
+    { action: 'SETTINGS_UPDATED', resource: 'user', resourceId: alice.id },
+    { action: 'USER_SIGN_IN', resource: 'auth', resourceId: alice.id },
   ]
 
-  for (let i = 0; i < auditActions.length; i++) {
-    const log = auditActions[i]
+  for (const event of auditEvents) {
     await prisma.auditLog.create({
-      data: {
-        userId: i % 2 === 0 ? alice.id : bob.id,
-        action: log.action,
-        resource: log.resource,
-        resourceId: log.resourceId,
-        metadata: {},
-        ipHash: 'hash_demo_' + i,
-        createdAt: new Date(Date.now() - i * 3600000),
-      },
+      data: { ...event, userId: alice.id, metadata: {}, ipHash: 'seed_hash_placeholder' },
     })
   }
 
   // Consent logs
-  const ipHashes = ['hash_ip_001', 'hash_ip_002', 'hash_ip_003', 'hash_ip_004', 'hash_ip_005']
-  for (let i = 0; i < ipHashes.length; i++) {
-    await prisma.consentLog.create({
-      data: {
-        ipHash: ipHashes[i],
-        categories: { essential: true, analytics: i % 2 === 0, marketing: false, functional: i % 3 === 0 },
-        action: 'granted',
-        createdAt: new Date(Date.now() - i * 86400000),
-      },
-    })
+  const consentEntries = [
+    { ipHash: 'hash_001', categories: { essential: true, analytics: true, marketing: false, functional: true }, action: 'granted' as const },
+    { ipHash: 'hash_002', categories: { essential: true, analytics: false, marketing: false, functional: false }, action: 'granted' as const },
+    { ipHash: 'hash_003', categories: { essential: true, analytics: true, marketing: true, functional: true }, action: 'granted' as const },
+    { ipHash: 'hash_001', categories: { essential: true, analytics: false, marketing: false, functional: false }, action: 'revoked' as const },
+    { ipHash: 'hash_004', categories: { essential: true, analytics: true, marketing: false, functional: false }, action: 'granted' as const },
+  ]
+
+  for (const entry of consentEntries) {
+    await prisma.consentLog.create({ data: entry })
   }
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('Seed complete — admin, alice, bob, 1 team, 3 projects, 1 subscription')
-  }
+  console.log('Seed complete ✓')
+  console.log(`Admin: ${admin.email}`)
+  console.log(`Users: ${alice.email}, ${bob.email}`)
 }
 
 main()
