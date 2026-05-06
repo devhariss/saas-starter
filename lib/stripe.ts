@@ -7,12 +7,14 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 export async function getOrCreateStripeCustomer(userId: string): Promise<string> {
-  const subscription = await prisma.subscription.findFirst({
+  const subscription = await prisma.subscription.findUnique({
     where: { userId },
     select: { stripeCustomerId: true },
   })
 
-  if (subscription?.stripeCustomerId) return subscription.stripeCustomerId
+  if (subscription?.stripeCustomerId) {
+    return subscription.stripeCustomerId
+  }
 
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
@@ -20,7 +22,7 @@ export async function getOrCreateStripeCustomer(userId: string): Promise<string>
   })
 
   const customer = await stripe.customers.create({
-    email: user.email!,
+    email: user.email ?? undefined,
     name: user.name ?? undefined,
     metadata: { userId },
   })
@@ -32,9 +34,6 @@ export async function getOrCreateStripeCustomer(userId: string): Promise<string>
       userId,
       stripeCustomerId: customer.id,
       status: 'incomplete',
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: new Date(),
-      cancelAtPeriodEnd: false,
     },
   })
 
@@ -55,13 +54,12 @@ export async function createCheckoutSession(
 
   return stripe.checkout.sessions.create({
     customer: customerId,
-    customer_email: customerId ? undefined : user.email!,
+    customer_email: !customerId ? (user.email ?? undefined) : undefined,
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
     allow_promotion_codes: true,
     automatic_tax: { enabled: true },
-    subscription_data: { metadata: { userId } },
     success_url: successUrl,
     cancel_url: cancelUrl,
     metadata: { userId },

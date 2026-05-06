@@ -19,8 +19,12 @@ export function formatCurrency(
 }
 
 export function formatDate(
-  date: Date | string,
-  options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' }
+  date: Date | string | number,
+  options: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }
 ): string {
   return new Intl.DateTimeFormat('en-US', options).format(new Date(date))
 }
@@ -28,42 +32,42 @@ export function formatDate(
 export function formatRelativeTime(date: Date | string): string {
   const now = new Date()
   const then = new Date(date)
-  const diffMs = now.getTime() - then.getTime()
-  const diffSeconds = Math.floor(diffMs / 1000)
-  const diffMinutes = Math.floor(diffSeconds / 60)
-  const diffHours = Math.floor(diffMinutes / 60)
-  const diffDays = Math.floor(diffHours / 24)
+  const diff = now.getTime() - then.getTime()
+  const seconds = Math.floor(diff / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
 
-  if (diffSeconds < 60) return 'just now'
-  if (diffMinutes < 60) return `${diffMinutes}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-  return formatDate(date)
+  if (days > 7) return formatDate(then)
+  if (days > 0) return `${days}d ago`
+  if (hours > 0) return `${hours}h ago`
+  if (minutes > 0) return `${minutes}m ago`
+  return 'just now'
 }
 
-export function slugify(str: string): string {
-  return str
+export function slugify(text: string): string {
+  return text
     .toLowerCase()
-    .trim()
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
 
-export function truncate(str: string, length: number): string {
-  if (str.length <= length) return str
-  return `${str.slice(0, length)}...`
+export function truncate(text: string, length: number): string {
+  if (text.length <= length) return text
+  return text.slice(0, length).trimEnd() + '…'
 }
 
 export function getInitials(name: string): string {
   return name
     .split(' ')
-    .map((n) => n[0])
+    .map((part) => part[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
 }
 
 export function absoluteUrl(path: string): string {
-  return `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}${path}`
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  return `${base}${path}`
 }

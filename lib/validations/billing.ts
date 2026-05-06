@@ -1,11 +1,12 @@
 import { z } from 'zod'
 
 export const checkoutSchema = z.object({
-  priceId: z.string().min(1, 'Price ID is required'),
+  priceId: z.string().startsWith('price_', 'Invalid price ID'),
 })
 
-export const cancelSubscriptionSchema = z.object({
-  confirm: z.literal(true),
+export const portalSchema = z.object({
+  returnUrl: z.string().url('Invalid return URL'),
 })
 
-export type CheckoutFormData = z.infer<typeof checkoutSchema>
+export type CheckoutInput = z.infer<typeof checkoutSchema>
+export type PortalInput = z.infer<typeof portalSchema>

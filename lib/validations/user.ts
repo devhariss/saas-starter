@@ -1,13 +1,16 @@
 import { z } from 'zod'
 
 export const updateProfileSchema = z.object({
-  name: z.string().min(2).max(64),
+  name: z.string().min(2).max(100),
   email: z.string().email(),
+  image: z.string().url().optional().nullable(),
 })
 
 export const deleteAccountSchema = z.object({
-  confirmation: z.literal('delete my account'),
+  confirmation: z.literal('DELETE', {
+    errorMap: () => ({ message: 'Please type DELETE to confirm' }),
+  }),
 })
 
-export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>
-export type DeleteAccountFormData = z.infer<typeof deleteAccountSchema>
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>
