@@ -19,30 +19,27 @@ export function formatCurrency(
 }
 
 export function formatDate(
-  date: Date | string | number,
-  options: Intl.DateTimeFormatOptions = {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }
+  date: Date | string,
+  options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
 ): string {
-  return new Intl.DateTimeFormat('en-US', options).format(new Date(date))
+  const d = typeof date === 'string' ? new Date(date) : date
+  return new Intl.DateTimeFormat('en-US', options).format(d)
 }
 
 export function formatRelativeTime(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date
   const now = new Date()
-  const then = new Date(date)
-  const diff = now.getTime() - then.getTime()
+  const diff = now.getTime() - d.getTime()
   const seconds = Math.floor(diff / 1000)
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
 
-  if (days > 7) return formatDate(then)
-  if (days > 0) return `${days}d ago`
-  if (hours > 0) return `${hours}h ago`
-  if (minutes > 0) return `${minutes}m ago`
-  return 'just now'
+  if (seconds < 60) return 'just now'
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days < 7) return `${days}d ago`
+  return formatDate(d)
 }
 
 export function slugify(text: string): string {
@@ -53,21 +50,16 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-export function truncate(text: string, length: number): string {
-  if (text.length <= length) return text
-  return text.slice(0, length).trimEnd() + '…'
-}
-
-export function getInitials(name: string): string {
+export function generateInitials(name: string): string {
   return name
     .split(' ')
-    .map((part) => part[0])
+    .slice(0, 2)
+    .map((n) => n[0])
     .join('')
     .toUpperCase()
-    .slice(0, 2)
 }
 
-export function absoluteUrl(path: string): string {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  return `${base}${path}`
+export function truncate(str: string, maxLength: number): string {
+  if (str.length <= maxLength) return str
+  return str.slice(0, maxLength - 3) + '...'
 }

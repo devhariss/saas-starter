@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getConsent, type ConsentState } from '@/components/compliance/ConsentManager'
 
 export function useConsentState() {

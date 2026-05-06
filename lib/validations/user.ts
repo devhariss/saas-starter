@@ -1,14 +1,16 @@
 import { z } from 'zod'
 
 export const updateProfileSchema = z.object({
-  name: z.string().min(2).max(100),
-  email: z.string().email(),
-  image: z.string().url().optional().nullable(),
+  name: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(64, 'Name must be less than 64 characters'),
+  email: z.string().email('Please enter a valid email address'),
 })
 
 export const deleteAccountSchema = z.object({
   confirmation: z.literal('DELETE', {
-    errorMap: () => ({ message: 'Please type DELETE to confirm' }),
+    errorMap: () => ({ message: 'Type DELETE to confirm' }),
   }),
 })
 

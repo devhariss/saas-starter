@@ -6,7 +6,9 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
 })
 
-export async function getOrCreateStripeCustomer(userId: string): Promise<string> {
+export async function getOrCreateStripeCustomer(
+  userId: string
+): Promise<string> {
   const subscription = await prisma.subscription.findUnique({
     where: { userId },
     select: { stripeCustomerId: true },
@@ -29,12 +31,12 @@ export async function getOrCreateStripeCustomer(userId: string): Promise<string>
 
   await prisma.subscription.upsert({
     where: { userId },
-    update: { stripeCustomerId: customer.id },
     create: {
       userId,
       stripeCustomerId: customer.id,
       status: 'incomplete',
     },
+    update: { stripeCustomerId: customer.id },
   })
 
   return customer.id
@@ -47,6 +49,7 @@ export async function createCheckoutSession(
   cancelUrl: string
 ): Promise<Stripe.Checkout.Session> {
   const customerId = await getOrCreateStripeCustomer(userId)
+
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { email: true },
@@ -54,7 +57,7 @@ export async function createCheckoutSession(
 
   return stripe.checkout.sessions.create({
     customer: customerId,
-    customer_email: !customerId ? (user.email ?? undefined) : undefined,
+    customer_email: user.email ?? undefined,
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
@@ -62,7 +65,7 @@ export async function createCheckoutSession(
     automatic_tax: { enabled: true },
     success_url: successUrl,
     cancel_url: cancelUrl,
-    metadata: { userId },
+    subscription_data: { metadata: { userId } },
   })
 }
 
