@@ -1,44 +1,42 @@
-import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import { Toaster } from "@/components/ui/sonner";
-import { CookieBanner } from "@/components/compliance/CookieBanner";
-import { SkipLink } from "@/components/shared/SkipLink";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
+import { SessionProvider } from 'next-auth/react';
+import { auth } from '@/lib/auth';
+import { CookieBanner } from '@/components/compliance/CookieBanner';
+import { SkipLink } from '@/components/shared/SkipLink';
+import './globals.css';
 
 const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-body-loaded',
+  display: 'swap',
   preload: true,
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "SaasStarter — Ship faster",
-    template: "%s | SaasStarter",
-  },
+  title: { default: 'SaasStarter — Ship faster', template: '%s | SaasStarter' },
   description:
-    "Production-ready Next.js 15 SaaS starter with auth, billing, and analytics. Ship in days, not months.",
-  keywords: ["saas", "nextjs", "typescript", "tailwind", "starter"],
-  authors: [{ name: "SaasStarter" }],
+    'Production-ready Next.js 15 SaaS starter with auth, billing, and analytics. Ship in days, not months.',
+  keywords: ['saas', 'nextjs', 'typescript', 'tailwind', 'starter'],
+  authors: [{ name: 'SaasStarter' }],
   openGraph: {
-    type: "website",
-    locale: "en_US",
+    type: 'website',
+    locale: 'en_US',
     url: process.env.NEXT_PUBLIC_APP_URL,
-    siteName: "SaasStarter",
+    siteName: 'SaasStarter',
     images: [
       {
-        url: "/og-image.png",
+        url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: "SaasStarter dashboard preview",
+        alt: 'SaasStarter dashboard preview',
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    creator: "@saas_starter",
+    card: 'summary_large_image',
+    creator: '@saastarter',
   },
   robots: {
     index: true,
@@ -46,49 +44,49 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+    process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   ),
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f9f8f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0f" },
+    { media: '(prefers-color-scheme: light)', color: '#f8f8fc' },
+    { media: '(prefers-color-scheme: dark)', color: '#0d0d12' },
   ],
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://api.fontshare.com" />
         <link
-          rel="preload"
-          href="https://api.fontshare.com/v2/css?f[]=cal-sans@1&display=swap"
-          as="style"
-        />
-        <link
+          href="https://api.fontshare.com/v2/css?f[]=cal-sans@400&display=swap"
           rel="stylesheet"
-          href="https://api.fontshare.com/v2/css?f[]=cal-sans@1&display=swap"
         />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className={inter.variable}>
-        <ThemeProvider
-          attribute="data-theme"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SkipLink />
-          {children}
-          <CookieBanner />
-          <Toaster position="bottom-right" richColors />
-        </ThemeProvider>
+        <SessionProvider session={session}>
+          <ThemeProvider
+            attribute="data-theme"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SkipLink />
+            {children}
+            <CookieBanner />
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

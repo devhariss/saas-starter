@@ -1,24 +1,24 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SaasStarter",
-    short_name: "SaasStarter",
-    description: "Production-ready Next.js 15 SaaS starter",
-    start_url: "/",
-    display: "standalone",
-    background_color: "#0a0a0f",
-    theme_color: "#0a0a0f",
+    name: 'SaasStarter',
+    short_name: 'SaasStarter',
+    description: 'Production-ready Next.js 15 SaaS starter',
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#0d0d12',
+    theme_color: '#0d0d12',
     icons: [
       {
-        src: "/icons/icon-192.png",
-        sizes: "192x192",
-        type: "image/png",
+        src: '/icons/icon-192.png',
+        sizes: '192x192',
+        type: 'image/png',
       },
       {
-        src: "/icons/icon-512.png",
-        sizes: "512x512",
-        type: "image/png",
+        src: '/icons/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
       },
     ],
   };
