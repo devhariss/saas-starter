@@ -8,13 +8,13 @@ export function cn(...inputs: ClassValue[]) {
 export function formatCurrency(
   amount: number,
   currency = 'USD',
-  locale = 'en-US',
+  locale = 'en-US'
 ): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(amount)
 }
 
@@ -27,18 +27,19 @@ export function formatDate(date: Date | string, locale = 'en-US'): string {
 }
 
 export function formatRelativeTime(date: Date | string): string {
-  const now = Date.now()
-  const target = new Date(date).getTime()
-  const diff = now - target
-  const seconds = Math.floor(diff / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
+  const now = new Date()
+  const d = new Date(date)
+  const diffMs = now.getTime() - d.getTime()
+  const diffSecs = Math.floor(diffMs / 1000)
+  const diffMins = Math.floor(diffSecs / 60)
+  const diffHours = Math.floor(diffMins / 60)
+  const diffDays = Math.floor(diffHours / 24)
 
-  if (days > 0) return `${days}d ago`
-  if (hours > 0) return `${hours}h ago`
-  if (minutes > 0) return `${minutes}m ago`
-  return 'just now'
+  if (diffSecs < 60) return 'just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays < 7) return `${diffDays}d ago`
+  return formatDate(date)
 }
 
 export function slugify(text: string): string {
@@ -47,6 +48,10 @@ export function slugify(text: string): string {
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '')
+}
+
+export function truncate(str: string, length: number): string {
+  return str.length > length ? str.slice(0, length) + '...' : str
 }
 
 export function getInitials(name: string): string {

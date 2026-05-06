@@ -7,7 +7,7 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
-    name: z.string().min(2, 'Name must be at least 2 characters').max(64),
+    name: z.string().min(2, 'Name must be at least 2 characters').max(100),
     email: z.string().email('Please enter a valid email address'),
     password: z
       .string()
@@ -15,8 +15,8 @@ export const registerSchema = z
       .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
       .regex(/[0-9]/, 'Must contain at least one number'),
     confirmPassword: z.string(),
-    acceptTerms: z.literal(true, {
-      errorMap: () => ({ message: 'You must accept the Terms of Service' }),
+    acceptTerms: z.boolean().refine((v) => v === true, {
+      message: 'You must accept the Terms of Service and Privacy Policy',
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

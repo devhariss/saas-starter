@@ -1,34 +1,27 @@
 import Stripe from 'stripe'
-import { prisma } from '@/lib/db'
+import { db } from '@/lib/db'
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27.acacia',
+  apiVersion: '2024-12-18.acacia',
   typescript: true,
 })
 
 export async function getOrCreateStripeCustomer(userId: string): Promise<string> {
-  const user = await prisma.user.findUniqueOrThrow({
+  const user = await db.user.findUnique({
     where: { id: userId },
-    select: { email: true, name: true },
+    include: { subscription: true },
   })
 
-  const existing = await prisma.subscription.findUnique({
-    where: { userId },
-    select: { stripeCustomerId: true },
-  })
+  if (!user) throw new Error('User not found')
 
-  if (existing?.stripeCustomerId) return existing.stripeCustomerId
+  if (user.subscription?.stripeCustomerId) {
+    return user.subscription.stripeCustomerId
+  }
 
   const customer = await stripe.customers.create({
-    email: user.email!,
+    email: user.email,
     name: user.name ?? undefined,
     metadata: { userId },
-  })
-
-  await prisma.subscription.upsert({
-    where: { userId },
-    create: { userId, stripeCustomerId: customer.id, status: 'incomplete' },
-    update: { stripeCustomerId: customer.id },
   })
 
   return customer.id
@@ -38,25 +31,22 @@ export async function createCheckoutSession(
   userId: string,
   priceId: string,
   successUrl: string,
-  cancelUrl: string,
+  cancelUrl: string
 ) {
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { id: userId },
-    select: { email: true },
-  })
   const customerId = await getOrCreateStripeCustomer(userId)
+  const user = await db.user.findUnique({ where: { id: userId } })
 
   return stripe.checkout.sessions.create({
     customer: customerId,
-    customer_email: user.email ?? undefined,
+    customer_email: user?.subscription?.stripeCustomerId ? undefined : user?.email ?? undefined,
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
-    allow_promotion_codes: true,
-    automatic_tax: { enabled: true },
     success_url: successUrl,
     cancel_url: cancelUrl,
-    metadata: { userId },
+    allow_promotion_codes: true,
+    automatic_tax: { enabled: true },
+    subscription_data: { metadata: { userId } },
   })
 }
 

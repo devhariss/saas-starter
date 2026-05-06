@@ -4,46 +4,59 @@ interface Notification {
   id: string
   title: string
   message: string
-  type: 'info' | 'success' | 'error' | 'warning'
+  type: 'info' | 'success' | 'warning' | 'error'
   read: boolean
   createdAt: Date
 }
 
-interface UIStore {
+interface UIState {
   sidebarCollapsed: boolean
-  setSidebarCollapsed: (collapsed: boolean) => void
-  toggleSidebar: () => void
-
-  searchOpen: boolean
-  setSearchOpen: (open: boolean) => void
-
+  commandPaletteOpen: boolean
   notifications: Notification[]
+  unreadCount: number
+  toggleSidebar: () => void
+  setSidebarCollapsed: (collapsed: boolean) => void
+  openCommandPalette: () => void
+  closeCommandPalette: () => void
   addNotification: (n: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void
   markAllRead: () => void
-  unreadCount: () => number
+  dismissNotification: (id: string) => void
 }
 
-export const useUIStore = create<UIStore>((set, get) => ({
+export const useUIStore = create<UIState>((set) => ({
   sidebarCollapsed: false,
-  setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
-  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-
-  searchOpen: false,
-  setSearchOpen: (open) => set({ searchOpen: open }),
-
+  commandPaletteOpen: false,
   notifications: [
-    { id: '1', title: 'New signup', message: 'alice@example.com joined', type: 'info', read: false, createdAt: new Date() },
-    { id: '2', title: 'Invoice paid', message: 'Invoice #INV-042 paid — $29.00', type: 'success', read: false, createdAt: new Date() },
-    { id: '3', title: 'Subscription upgraded', message: 'bob@example.com → Pro plan', type: 'success', read: true, createdAt: new Date() },
+    {
+      id: '1',
+      title: 'Welcome to SaasStarter',
+      message: 'Your account has been set up successfully.',
+      type: 'success',
+      read: false,
+      createdAt: new Date(),
+    },
   ],
+  unreadCount: 1,
+  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+  setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+  openCommandPalette: () => set({ commandPaletteOpen: true }),
+  closeCommandPalette: () => set({ commandPaletteOpen: false }),
   addNotification: (n) =>
     set((s) => ({
       notifications: [
         { ...n, id: crypto.randomUUID(), read: false, createdAt: new Date() },
         ...s.notifications,
       ],
+      unreadCount: s.unreadCount + 1,
     })),
   markAllRead: () =>
-    set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
-  unreadCount: () => get().notifications.filter((n) => !n.read).length,
+    set((s) => ({
+      notifications: s.notifications.map((n) => ({ ...n, read: true })),
+      unreadCount: 0,
+    })),
+  dismissNotification: (id) =>
+    set((s) => ({
+      notifications: s.notifications.filter((n) => n.id !== id),
+      unreadCount: s.notifications.filter((n) => n.id !== id && !n.read).length,
+    })),
 }))

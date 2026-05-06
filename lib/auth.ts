@@ -3,14 +3,14 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import GitHub from 'next-auth/providers/github'
 import Resend from 'next-auth/providers/resend'
-import { prisma } from '@/lib/db'
+import { db } from '@/lib/db'
 import { resend } from '@/lib/resend'
-import { MagicLinkEmail } from '@/emails/MagicLinkEmail'
-import { WelcomeEmail } from '@/emails/WelcomeEmail'
+import MagicLinkEmail from '@/emails/MagicLinkEmail'
+import WelcomeEmail from '@/emails/WelcomeEmail'
 import { render } from '@react-email/render'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(db),
   session: { strategy: 'database' },
   providers: [
     Google({
@@ -24,11 +24,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Resend({
       apiKey: process.env.RESEND_API_KEY!,
       from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
-      async sendVerificationRequest({ identifier: email, url }) {
-        const html = await render(MagicLinkEmail({ url, email }))
+      async sendVerificationRequest({ identifier, url }) {
+        const html = await render(<MagicLinkEmail magicLink={url} />)
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
-          to: email,
+          to: identifier,
           subject: 'Sign in to SaasStarter',
           html,
         })
@@ -37,52 +37,50 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async session({ session, user }) {
-      const subscription = await prisma.subscription.findUnique({
-        where: { userId: user.id },
-        select: { status: true, stripePriceId: true },
-      })
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: user.id,
-          role: (user as { role?: string }).role ?? 'USER',
-          subscriptionStatus: subscription?.status ?? null,
-        },
+      if (session.user) {
+        session.user.id = user.id
+        const dbUser = await db.user.findUnique({
+          where: { id: user.id },
+          include: { subscription: true },
+        })
+        if (dbUser) {
+          session.user.role = dbUser.role
+          session.user.subscriptionStatus = dbUser.subscription?.status ?? null
+        }
       }
+      return session
     },
     async signIn({ user }) {
-      const dbUser = await prisma.user.findUnique({
-        where: { email: user.email! },
-        select: { role: true },
-      })
+      const dbUser = await db.user.findUnique({ where: { email: user.email! } })
       if (dbUser?.role === 'BANNED') return false
       return true
     },
   },
   events: {
     async createUser({ user }) {
-      if (!user.email) return
-      const html = await render(WelcomeEmail({ name: user.name ?? 'there', email: user.email }))
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
-        to: user.email,
-        subject: 'Welcome to SaasStarter!',
-        html,
-      }).catch(() => {})
+      if (user.email && user.name) {
+        const html = await render(<WelcomeEmail userName={user.name} />)
+        await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
+          to: user.email,
+          subject: 'Welcome to SaasStarter!',
+          html,
+        })
+      }
     },
     async signIn({ user }) {
-      if (!user.id) return
-      await prisma.auditLog.create({
-        data: {
-          userId: user.id,
-          action: 'USER_SIGN_IN',
-          resource: 'auth',
-          resourceId: user.id,
-          metadata: {},
-          ipHash: 'server-event',
-        },
-      }).catch(() => {})
+      if (user.id) {
+        await db.auditLog.create({
+          data: {
+            userId: user.id,
+            action: 'USER_SIGN_IN',
+            resource: 'auth',
+            resourceId: user.id,
+            metadata: {},
+            ipHash: 'unknown',
+          },
+        })
+      }
     },
   },
   pages: {
