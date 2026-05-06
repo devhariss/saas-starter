@@ -6,40 +6,70 @@ interface Notification {
   message: string
   type: 'success' | 'error' | 'info' | 'warning'
   read: boolean
+  createdAt: Date
 }
 
 interface UIState {
   sidebarCollapsed: boolean
   toggleSidebar: () => void
   setSidebarCollapsed: (v: boolean) => void
-  commandOpen: boolean
-  setCommandOpen: (v: boolean) => void
+
+  searchOpen: boolean
+  openSearch: () => void
+  closeSearch: () => void
+
   notifications: Notification[]
   unreadCount: number
-  addNotification: (n: Omit<Notification, 'id' | 'read'>) => void
+  addNotification: (n: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void
   markAllRead: () => void
+  clearNotifications: () => void
+
+  deleteAccountModalOpen: boolean
+  openDeleteAccountModal: () => void
+  closeDeleteAccountModal: () => void
 }
 
 export const useUIStore = create<UIState>((set) => ({
   sidebarCollapsed: false,
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
-  commandOpen: false,
-  setCommandOpen: (v) => set({ commandOpen: v }),
+
+  searchOpen: false,
+  openSearch: () => set({ searchOpen: true }),
+  closeSearch: () => set({ searchOpen: false }),
+
   notifications: [
-    { id: '1', title: 'New user signed up', message: 'Alex Johnson just created an account.', type: 'info', read: false },
-    { id: '2', title: 'Subscription upgraded', message: 'Maria Garcia upgraded to Pro.', type: 'success', read: false },
-    { id: '3', title: 'Invoice paid', message: '$29 received from NexaFlow Inc.', type: 'success', read: true },
+    {
+      id: '1',
+      title: 'Welcome to SaasStarter',
+      message: 'Your account is ready. Start by creating your first project.',
+      type: 'info',
+      read: false,
+      createdAt: new Date(Date.now() - 1000 * 60 * 5),
+    },
   ],
   get unreadCount() {
     return this.notifications.filter((n) => !n.read).length
   },
   addNotification: (n) =>
     set((s) => ({
-      notifications: [{ ...n, id: crypto.randomUUID(), read: false }, ...s.notifications],
+      notifications: [
+        {
+          ...n,
+          id: crypto.randomUUID(),
+          read: false,
+          createdAt: new Date(),
+        },
+        ...s.notifications,
+      ],
     })),
   markAllRead: () =>
     set((s) => ({
       notifications: s.notifications.map((n) => ({ ...n, read: true })),
     })),
+  clearNotifications: () => set({ notifications: [] }),
+
+  deleteAccountModalOpen: false,
+  openDeleteAccountModal: () => set({ deleteAccountModalOpen: true }),
+  closeDeleteAccountModal: () => set({ deleteAccountModalOpen: false }),
 }))

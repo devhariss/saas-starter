@@ -1,27 +1,34 @@
 import { z } from 'zod'
 
 export const loginSchema = z.object({
-  email: z.string().email('Enter a valid email address'),
+  email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
-export const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(60),
-  email: z.string().email('Enter a valid email address'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Must contain an uppercase letter')
-    .regex(/[0-9]/, 'Must contain a number'),
-  confirmPassword: z.string(),
-  acceptTerms: z.literal(true, { errorMap: () => ({ message: 'You must accept the terms' }) }),
-}).refine((d) => d.password === d.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-})
+export const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .min(2, 'Name must be at least 2 characters')
+      .max(64, 'Name must be at most 64 characters'),
+    email: z.string().email('Please enter a valid email address'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/[0-9]/, 'Password must contain at least one number'),
+    confirmPassword: z.string(),
+    agreeToTerms: z.literal(true, {
+      errorMap: () => ({ message: 'You must agree to the Terms of Service' }),
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email('Enter a valid email address'),
+  email: z.string().email('Please enter a valid email address'),
 })
 
 export type LoginInput = z.infer<typeof loginSchema>

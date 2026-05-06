@@ -3,15 +3,19 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import GitHub from 'next-auth/providers/github'
 import Resend from 'next-auth/providers/resend'
-import { prisma } from './db'
-import { resend, FROM_EMAIL } from './resend'
+import { prisma } from '@/lib/db'
+import { resend } from '@/lib/resend'
+import { MagicLinkEmail } from '@/emails/MagicLinkEmail'
 import { WelcomeEmail } from '@/emails/WelcomeEmail'
-import React from 'react'
+import { render } from '@react-email/render'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'database' },
-  pages: { signIn: '/login', error: '/login' },
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -23,53 +27,67 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
     Resend({
       apiKey: process.env.RESEND_API_KEY!,
-      from: FROM_EMAIL,
+      from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
+      async sendVerificationRequest({ identifier: email, url }) {
+        const html = await render(MagicLinkEmail({ url, email }))
+        await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
+          to: email,
+          subject: 'Sign in to SaasStarter',
+          html,
+        })
+      },
     }),
   ],
   callbacks: {
-    session({ session, user }) {
+    async signIn({ user }) {
+      if (!user.email) return false
+      const dbUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { role: true },
+      })
+      if (dbUser?.role === 'BANNED') return false
+      return true
+    },
+    async session({ session, user }) {
+      const subscription = await prisma.subscription.findFirst({
+        where: { userId: user.id },
+        select: { status: true, stripePriceId: true },
+      })
       return {
         ...session,
         user: {
           ...session.user,
           id: user.id,
           role: (user as { role?: string }).role ?? 'USER',
+          subscriptionStatus: subscription?.status ?? null,
         },
       }
-    },
-    signIn({ user }) {
-      if ((user as { role?: string }).role === 'BANNED') return false
-      return true
     },
   },
   events: {
     async createUser({ user }) {
-      if (user.email && user.name) {
+      if (!user.email || !user.name) return
+      try {
+        const html = await render(WelcomeEmail({ name: user.name, email: user.email }))
         await resend.emails.send({
-          from: FROM_EMAIL,
+          from: process.env.RESEND_FROM_EMAIL ?? 'noreply@yourcompany.com',
           to: user.email,
           subject: 'Welcome to SaasStarter',
-          react: React.createElement(WelcomeEmail, { name: user.name }),
+          html,
         })
+      } catch (err) {
+        if (process.env.NODE_ENV !== 'production') console.error(err)
       }
-      await prisma.auditLog.create({
-        data: {
-          userId: user.id!,
-          action: 'USER_CREATED',
-          resource: 'user',
-          resourceId: user.id!,
-          metadata: {},
-          ipHash: '',
-        },
-      })
     },
     async signIn({ user }) {
+      if (!user.id) return
       await prisma.auditLog.create({
         data: {
-          userId: user.id!,
+          userId: user.id,
           action: 'SIGN_IN',
-          resource: 'user',
-          resourceId: user.id!,
+          resource: 'auth',
+          resourceId: user.id,
           metadata: {},
           ipHash: '',
         },

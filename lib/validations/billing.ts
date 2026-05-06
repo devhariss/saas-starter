@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const checkoutSchema = z.object({
-  priceId: z.string().min(1, 'Price ID is required'),
+  priceId: z.string().min(1),
 })
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>
