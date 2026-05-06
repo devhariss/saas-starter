@@ -1,14 +1,14 @@
-import { clsx, type ClassValue } from 'clsx'
+import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-export function cn(...inputs: ClassValue[]): string {
+export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
 export function formatCurrency(
   amount: number,
   currency = 'USD',
-  locale = 'en-US'
+  locale = 'en-US',
 ): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -18,41 +18,35 @@ export function formatCurrency(
   }).format(amount)
 }
 
-export function formatDate(
-  date: Date | string,
-  options: Intl.DateTimeFormatOptions = { dateStyle: 'medium' },
-  locale = 'en-US'
-): string {
-  return new Intl.DateTimeFormat(locale, options).format(
-    typeof date === 'string' ? new Date(date) : date
-  )
+export function formatDate(date: Date | string, locale = 'en-US'): string {
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(date))
 }
 
 export function formatRelativeTime(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date
-  const now = new Date()
-  const diff = now.getTime() - d.getTime()
+  const now = Date.now()
+  const target = new Date(date).getTime()
+  const diff = now - target
   const seconds = Math.floor(diff / 1000)
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
 
-  if (seconds < 60) return 'just now'
-  if (minutes < 60) return `${minutes}m ago`
-  if (hours < 24) return `${hours}h ago`
-  if (days < 7) return `${days}d ago`
-  return formatDate(d)
+  if (days > 0) return `${days}d ago`
+  if (hours > 0) return `${hours}h ago`
+  if (minutes > 0) return `${minutes}m ago`
+  return 'just now'
 }
 
-export function truncate(str: string, length: number): string {
-  return str.length > length ? str.slice(0, length) + '...' : str
-}
-
-export function slugify(str: string): string {
-  return str
+export function slugify(text: string): string {
+  return text
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
 export function getInitials(name: string): string {
