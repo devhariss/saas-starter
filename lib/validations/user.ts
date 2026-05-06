@@ -1,16 +1,18 @@
-import { z } from "zod";
+import { z } from 'zod'
 
 export const updateProfileSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(50),
-  email: z.string().email("Please enter a valid email address"),
-  image: z.string().url().optional().or(z.literal("")),
-});
+  name: z.string().min(2).max(60),
+  email: z.string().email(),
+})
 
-export const deleteAccountSchema = z.object({
-  confirm: z.literal("DELETE", {
-    errorMap: () => ({ message: 'Please type DELETE to confirm' }),
-  }),
-});
+export const updatePasswordSchema = z.object({
+  currentPassword: z.string().min(8),
+  newPassword: z.string().min(8).regex(/[A-Z]/).regex(/[0-9]/),
+  confirmPassword: z.string(),
+}).refine((d) => d.newPassword === d.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+})
 
-export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
-export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>
+export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>
