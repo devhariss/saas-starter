@@ -1,46 +1,40 @@
-interface SkeletonCardProps {
-  lines?: number;
-  showAvatar?: boolean;
+import { cn } from '@/lib/utils'
+
+interface SkeletonProps {
+  className?: string
 }
 
-export function SkeletonCard({ lines = 3, showAvatar = false }: SkeletonCardProps) {
+export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
-      role="status"
-      aria-label="Loading content"
-      style={{
-        padding: "var(--space-4)",
-        background: "var(--color-surface)",
-        borderRadius: "var(--radius-lg)",
-        border: "1px solid var(--color-border)",
-      }}
-    >
-      {showAvatar && (
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-4)" }}>
-          <div
-            className="skeleton skeleton-avatar"
-            style={{ width: 40, height: 40, borderRadius: "var(--radius-full)", background: "var(--color-surface-offset)" }}
-          />
-          <div style={{ flex: 1 }}>
-            <div className="skeleton" style={{ height: "0.875rem", width: "40%", marginBottom: "var(--space-1)", borderRadius: "var(--radius-sm)" }} />
-            <div className="skeleton" style={{ height: "0.75rem", width: "25%", borderRadius: "var(--radius-sm)" }} />
-          </div>
-        </div>
+      className={cn(
+        'animate-pulse rounded-[var(--radius-sm)] bg-[var(--color-surface-offset)]',
+        className
       )}
-      {Array.from({ length: lines }).map((_, i) => (
-        <div
-          key={i}
-          className="skeleton"
-          style={{
-            height: "0.875rem",
-            width: i === lines - 1 ? "60%" : "100%",
-            marginBottom: i < lines - 1 ? "var(--space-2)" : 0,
-            borderRadius: "var(--radius-sm)",
-            background: "var(--color-surface-offset)",
-          }}
-        />
-      ))}
-      <span className="sr-only">Loading...</span>
+      aria-hidden="true"
+    />
+  )
+}
+
+export function SkeletonCard() {
+  return (
+    <div
+      style={{
+        padding: 'var(--space-6)',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid oklch(from var(--color-text) l c h / 0.08)',
+        background: 'var(--color-surface)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-3)',
+      }}
+      aria-label="Loading..."
+      role="status"
+    >
+      <Skeleton className="h-4 w-2/5" />
+      <Skeleton className="h-3 w-full" />
+      <Skeleton className="h-3 w-4/5" />
+      <Skeleton className="h-3 w-3/5" />
     </div>
-  );
+  )
 }

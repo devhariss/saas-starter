@@ -1,47 +1,45 @@
-import Link from "next/link";
+import { cn } from '@/lib/utils'
 
 interface LogoProps {
-  className?: string;
-  size?: number;
+  className?: string
+  size?: number
 }
 
-export function Logo({ className = "", size = 32 }: LogoProps) {
+export function Logo({ className, size = 32 }: LogoProps) {
   return (
-    <Link
-      href="/"
-      aria-label="SaasStarter home"
-      style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)", textDecoration: "none" }}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="SaasStarter logo"
+      role="img"
+      className={cn('text-[var(--color-primary)]', className)}
     >
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 32 32"
-        fill="none"
-        aria-hidden="true"
-        className={className}
-      >
-        <rect width="32" height="32" rx="8" fill="currentColor" fillOpacity="0.1" />
-        <path
-          d="M8 22L14 10L20 18L23 14L26 22"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="14" cy="10" r="2" fill="currentColor" />
-        <circle cx="20" cy="18" r="1.5" fill="currentColor" />
-      </svg>
+      <rect x="2" y="2" width="12" height="12" rx="3" fill="currentColor" />
+      <rect x="18" y="2" width="12" height="12" rx="3" fill="currentColor" opacity="0.6" />
+      <rect x="2" y="18" width="12" height="12" rx="3" fill="currentColor" opacity="0.6" />
+      <rect x="18" y="18" width="12" height="12" rx="3" fill="currentColor" opacity="0.3" />
+    </svg>
+  )
+}
+
+export function LogoWithText({ className }: { className?: string }) {
+  return (
+    <span className={cn('inline-flex items-center gap-2', className)}>
+      <Logo size={28} />
       <span
         style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          fontSize: "var(--text-sm)",
-          color: "var(--color-text)",
-          letterSpacing: "-0.01em",
+          fontFamily: 'var(--font-display)',
+          fontSize: 'var(--text-sm)',
+          fontWeight: 600,
+          color: 'var(--color-text)',
+          letterSpacing: '-0.01em',
         }}
       >
         SaasStarter
       </span>
-    </Link>
-  );
+    </span>
+  )
 }
