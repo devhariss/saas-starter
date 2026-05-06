@@ -3,12 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-enum UserRole {
+enum Role {
   USER
   ADMIN
   BANNED
@@ -22,15 +21,15 @@ enum SubscriptionStatus {
   incomplete
 }
 
-enum ProjectStatus {
-  active
-  archived
-}
-
 enum TeamMemberRole {
   OWNER
   ADMIN
   MEMBER
+}
+
+enum ProjectStatus {
+  active
+  archived
 }
 
 enum ConsentAction {
@@ -44,7 +43,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  role          UserRole  @default(USER)
+  role          Role      @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -53,7 +52,7 @@ model User {
   subscription Subscription?
   projects     Project[]
   teamMembers  TeamMember[]
-  ownedTeams   Team[]
+  ownedTeams   Team[]        @relation("TeamOwner")
   auditLogs    AuditLog[]
 }
 
@@ -81,8 +80,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -96,10 +94,10 @@ model VerificationToken {
 model Subscription {
   id                   String             @id @default(cuid())
   userId               String             @unique
-  stripeCustomerId     String             @unique
+  stripeCustomerId     String?            @unique
   stripePriceId        String?
   stripeSubscriptionId String?            @unique
-  status               SubscriptionStatus @default(trialing)
+  status               SubscriptionStatus @default(incomplete)
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean            @default(false)
@@ -132,10 +130,10 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner    User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  members  TeamMember[]
-  invites  TeamInvite[]
-  projects Project[]
+  owner   User         @relation("TeamOwner", fields: [ownerId], references: [id])
+  members TeamMember[]
+  invites TeamInvite[]
+  Project Project[]
 }
 
 model TeamMember {
@@ -165,15 +163,15 @@ model TeamInvite {
 
 model AuditLog {
   id         String   @id @default(cuid())
-  userId     String?
+  userId     String
   action     String
   resource   String
-  resourceId String?
-  metadata   Json?
-  ipHash     String?
+  resourceId String
+  metadata   Json     @default("{}")
+  ipHash     String
   createdAt  DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ConsentLog {
