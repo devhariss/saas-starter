@@ -1,46 +1,30 @@
-import { Shield, CreditCard, Mail, Globe, BarChart3, Zap, Check } from "lucide-react";
+"use client";
+
+import { Shield, CreditCard, Mail, Globe, BarChart3, Zap, Check, ArrowRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useState } from "react";
 
-/* ─── Types ─────────────────────────────────────────── */
+/* ─── Types ──────────────────────────── */
 
-interface BaseFeature {
+interface Feature {
   icon: LucideIcon;
   label: string;
-  color: string;
-  colorBg: string;
-  glowColor: string;
+  accent: string;          /* oklch color string */
   title: string;
   description: string;
-  wide?: boolean;
-  tall?: boolean;
+  code?: string;
+  items?: string[];
+  colSpan?: 1 | 2;
+  rowSpan?: 1 | 2;
 }
 
-interface CodeFeature extends BaseFeature {
-  code: string;
-  items?: never;
-}
-
-interface ListFeature extends BaseFeature {
-  items: string[];
-  code?: never;
-}
-
-interface PlainFeature extends BaseFeature {
-  code?: never;
-  items?: never;
-}
-
-type Feature = CodeFeature | ListFeature | PlainFeature;
-
-/* ─── Data ───────────────────────────────────────────── */
+/* ─── Data ───────────────────────────── */
 
 const features: Feature[] = [
   {
     icon: Shield,
     label: "Authentication",
-    color: "oklch(0.68 0.22 285)",
-    colorBg: "oklch(0.52 0.22 285 / 0.10)",
-    glowColor: "oklch(0.52 0.22 285 / 0.20)",
+    accent: "oklch(0.62 0.20 285)",
     title: "Auth in 5 minutes",
     description:
       "NextAuth v5 with Google, GitHub, and magic links. Prisma-backed sessions. Zero JWT juggling.",
@@ -50,16 +34,14 @@ const features: Feature[] = [
     providers: [Google, GitHub, Resend],
     session: { strategy: "database" },
   });`,
-    wide: true,
+    colSpan: 2,
   },
   {
     icon: CreditCard,
     label: "Billing",
-    color: "oklch(0.72 0.15 192)",
-    colorBg: "oklch(0.60 0.15 192 / 0.10)",
-    glowColor: "oklch(0.60 0.15 192 / 0.20)",
+    accent: "oklch(0.62 0.18 192)",
     title: "Stripe, done.",
-    description: "Subscriptions, webhooks, billing portal, and Stripe Tax \u2014 all hooked up.",
+    description: "Subscriptions, webhooks, billing portal, and Stripe Tax — all hooked up.",
     items: [
       "Checkout sessions with tax",
       "Webhook sync to Prisma",
@@ -67,14 +49,12 @@ const features: Feature[] = [
       "Invoice emails via Resend",
       "Subscription status in session",
     ],
-    tall: true,
+    rowSpan: 2,
   },
   {
     icon: Mail,
     label: "Email",
-    color: "oklch(0.75 0.18 75)",
-    colorBg: "oklch(0.65 0.18 75 / 0.10)",
-    glowColor: "oklch(0.65 0.18 75 / 0.18)",
+    accent: "oklch(0.72 0.18 75)",
     title: "Transactional email",
     description:
       "React Email + Resend. Beautiful, type-safe email templates that just work.",
@@ -82,213 +62,307 @@ const features: Feature[] = [
   {
     icon: Globe,
     label: "Compliance",
-    color: "oklch(0.68 0.15 145)",
-    colorBg: "oklch(0.55 0.15 145 / 0.10)",
-    glowColor: "oklch(0.55 0.15 145 / 0.18)",
+    accent: "oklch(0.60 0.16 145)",
     title: "GDPR & CCPA ready",
     description:
-      "Cookie consent with GPC detection, data export, and deletion \u2014 out of the box.",
+      "Cookie consent with GPC detection, data export, and deletion — out of the box.",
   },
   {
     icon: BarChart3,
     label: "Analytics",
-    color: "oklch(0.72 0.18 25)",
-    colorBg: "oklch(0.65 0.15 25 / 0.10)",
-    glowColor: "oklch(0.65 0.15 25 / 0.18)",
+    accent: "oklch(0.68 0.18 25)",
     title: "Built-in analytics",
     description:
       "Recharts dashboards, KPI tracking, and real-time Prisma Pulse sync.",
-    wide: true,
+    colSpan: 2,
   },
 ];
 
-/* ─── Section ────────────────────────────────────────── */
+/* ─── Section ────────────────────────── */
 
 export function Features() {
   return (
     <section
       id="features"
-      className="relative py-28 overflow-hidden"
-      style={{ background: "var(--color-bg)" }}
+      aria-labelledby="features-heading"
+      style={{
+        position: "relative",
+        padding: "7rem 0 6rem",
+        background: "var(--color-bg)",
+        overflow: "hidden",
+      }}
     >
-      {/* Ambient glow */}
+      {/* Subtle top ambient glow — same as hero */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px]"
         style={{
-          background:
-            "radial-gradient(ellipse, oklch(0.52 0.22 285 / 0.05) 0%, transparent 65%)",
+          position: "absolute",
+          top: "-80px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "800px",
+          height: "400px",
+          background: "radial-gradient(ellipse, oklch(0.52 0.22 285 / 0.06) 0%, transparent 65%)",
+          pointerEvents: "none",
         }}
       />
 
-      <div className="relative mx-auto max-w-[1200px] px-6">
-        {/* Header */}
-        <div className="mb-16 max-w-[540px]">
+      <div style={{ position: "relative", maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
+
+        {/* Section header */}
+        <div style={{ maxWidth: "540px", marginBottom: "3.5rem" }}>
           <div
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide uppercase mb-5"
             style={{
-              background: "oklch(0.52 0.22 285 / 0.10)",
-              color: "var(--color-primary)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "4px 12px",
+              borderRadius: "9999px",
+              background: "oklch(0.52 0.22 285 / 0.09)",
               border: "1px solid oklch(0.52 0.22 285 / 0.20)",
+              color: "var(--color-primary)",
+              fontSize: "10px",
+              fontWeight: 700,
+              letterSpacing: "0.10em",
+              textTransform: "uppercase",
+              marginBottom: "1.25rem",
             }}
           >
             <Zap size={10} aria-hidden="true" />
             Built for speed
           </div>
           <h2
-            className="font-display font-semibold leading-[1.1] tracking-tight mb-4"
+            id="features-heading"
             style={{
               fontSize: "clamp(1.75rem, 1rem + 1.75vw, 2.75rem)",
+              fontWeight: 700,
+              lineHeight: 1.1,
+              letterSpacing: "-0.025em",
               color: "var(--color-text)",
+              marginBottom: "1rem",
             }}
           >
-            Everything wired up on day one
+            Everything wired up on day&nbsp;one
           </h2>
-          <p style={{ fontSize: "var(--text-base)", color: "var(--color-text-muted)" }}>
-            Skip the boilerplate. Auth, billing, email, and compliance are production-ready.
-            Your first commit ships features, not scaffolding.
+          <p style={{ fontSize: "1.0625rem", lineHeight: 1.7, color: "var(--color-text-muted)", maxWidth: "42ch" }}>
+            Skip the boilerplate. Auth, billing, email, and compliance are
+            production-ready from your first commit.
           </p>
         </div>
 
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-auto">
-          <FeatureCard feature={features[0]} />
-          <FeatureCard feature={features[1]} />
-          <FeatureCard feature={features[2]} />
-          <FeatureCard feature={features[3]} />
-          <FeatureCard feature={features[4]} />
+        {/* Bento grid — CSS Grid with named areas */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateRows: "auto",
+            gap: "12px",
+          }}
+        >
+          {/* Auth — col-span 2 */}
+          <div style={{ gridColumn: "span 2" }}>
+            <FeatureCard feature={features[0]} />
+          </div>
+
+          {/* Billing — row-span 2 */}
+          <div style={{ gridRow: "span 2" }}>
+            <FeatureCard feature={features[1]} stretch />
+          </div>
+
+          {/* Email + Compliance — each 1 col */}
+          <div><FeatureCard feature={features[2]} /></div>
+          <div><FeatureCard feature={features[3]} /></div>
+
+          {/* Analytics — col-span 2 (wraps to next row under email/compliance) */}
+          <div style={{ gridColumn: "span 2" }}>
+            <FeatureCard feature={features[4]} />
+          </div>
+
+          {/* Spacer so billing row-span lines up correctly */}
+          <div />
         </div>
       </div>
     </section>
   );
 }
 
-/* ─── Card ───────────────────────────────────────────── */
+/* ─── Card ───────────────────────────── */
 
-function FeatureCard({ feature }: { feature: Feature }) {
+function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean }) {
   const Icon = feature.icon;
+  const [hovered, setHovered] = useState(false);
 
   return (
     <div
-      className={[
-        "group relative flex flex-col gap-6 rounded-2xl p-7 overflow-hidden",
-        "transition-all duration-300 hover:-translate-y-0.5",
-        feature.wide === true ? "md:col-span-2" : "",
-        feature.tall === true ? "md:row-span-2" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.25rem",
+        padding: "1.75rem",
+        borderRadius: "16px",
+        overflow: "hidden",
+        height: stretch ? "100%" : undefined,
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
-        boxShadow: "var(--shadow-sm)",
+        boxShadow: hovered
+          ? "0 4px 24px oklch(0 0 0 / 0.10)"
+          : "0 1px 3px oklch(0 0 0 / 0.05)",
+        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        transition: "box-shadow 0.25s ease, transform 0.25s ease",
       }}
     >
-      {/* Hover glow overlay */}
+      {/* Hover top-edge glow line */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"
         style={{
-          background: `radial-gradient(400px circle at 50% 0%, ${feature.glowColor}, transparent 70%)`,
+          position: "absolute",
+          inset: "0 0 auto 0",
+          height: "1px",
+          background: `linear-gradient(90deg, transparent, ${feature.accent}, transparent)`,
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.3s ease",
         }}
       />
 
-      {/* Top edge glow line on hover */}
+      {/* Hover radial fill */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `linear-gradient(90deg, transparent, ${feature.color}, transparent)`,
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(400px circle at 50% 0%, ${feature.accent.replace(")", " / 0.07)")}, transparent 70%)`,
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.4s ease",
+          pointerEvents: "none",
+          borderRadius: "inherit",
         }}
       />
 
-      {/* Icon + label */}
-      <div className="relative flex items-center gap-3">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
+      {/* Icon + label row — no colored circle, just the icon + text */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", position: "relative" }}>
+        <Icon
+          size={17}
+          aria-hidden="true"
           style={{
-            background: feature.colorBg,
-            boxShadow: `0 0 0 1px ${feature.color}30`,
+            color: feature.accent,
+            flexShrink: 0,
+            transition: "opacity 0.2s",
           }}
-        >
-          <Icon size={18} aria-hidden="true" style={{ color: feature.color }} />
-        </div>
+        />
         <span
-          className="text-[11px] font-bold uppercase tracking-[0.12em]"
-          style={{ color: feature.color }}
+          style={{
+            fontSize: "10px",
+            fontWeight: 700,
+            letterSpacing: "0.11em",
+            textTransform: "uppercase",
+            color: feature.accent,
+          }}
         >
           {feature.label}
         </span>
       </div>
 
       {/* Title + description */}
-      <div className="relative">
+      <div style={{ position: "relative" }}>
         <h3
-          className="font-display font-semibold mb-2 leading-snug"
-          style={{ fontSize: "var(--text-lg)", color: "var(--color-text)" }}
+          style={{
+            fontSize: "clamp(1rem, 0.9rem + 0.4vw, 1.2rem)",
+            fontWeight: 700,
+            lineHeight: 1.25,
+            letterSpacing: "-0.015em",
+            color: "var(--color-text)",
+            marginBottom: "0.5rem",
+          }}
         >
           {feature.title}
         </h3>
         <p
-          className="leading-relaxed"
-          style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}
+          style={{
+            fontSize: "0.9375rem",
+            lineHeight: 1.65,
+            color: "var(--color-text-muted)",
+            maxWidth: "44ch",
+          }}
         >
           {feature.description}
         </p>
       </div>
 
       {/* Code block */}
-      {"code" in feature && feature.code !== undefined && (
-        <div className="relative mt-auto">
+      {feature.code && (
+        <div
+          style={{
+            position: "relative",
+            marginTop: "auto",
+            borderRadius: "10px",
+            overflow: "hidden",
+            background: "oklch(0.10 0.010 285)",
+            border: "1px solid oklch(0.52 0.22 285 / 0.14)",
+          }}
+        >
+          {/* Mini toolbar */}
           <div
-            className="relative rounded-xl overflow-hidden"
             style={{
-              background: "oklch(0.08 0.008 285)",
-              border: "1px solid oklch(0.52 0.22 285 / 0.15)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "8px 14px",
+              borderBottom: "1px solid oklch(0.52 0.22 285 / 0.10)",
             }}
           >
-            {/* Dot row */}
-            <div
-              className="flex items-center gap-1.5 px-4 py-3"
-              style={{ borderBottom: "1px solid oklch(0.52 0.22 285 / 0.10)" }}
+            {["oklch(0.62 0.20 25 / 0.5)","oklch(0.70 0.18 75 / 0.5)","oklch(0.58 0.15 145 / 0.5)"].map((c) => (
+              <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, display: "block" }} />
+            ))}
+            <span
+              style={{
+                marginLeft: "auto",
+                fontSize: "10px",
+                fontFamily: "ui-monospace, monospace",
+                color: "oklch(0.45 0.06 285)",
+              }}
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500/40" />
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
-              <span className="w-2.5 h-2.5 rounded-full bg-green-500/40" />
-              <span
-                className="ml-auto text-[10px] font-mono"
-                style={{ color: "oklch(0.45 0.06 285)" }}
-              >
-                auth.ts
-              </span>
-            </div>
-            <pre
-              className="p-4 text-[11.5px] leading-[1.8] overflow-x-auto"
-              style={{ color: "oklch(0.70 0.08 285)", fontFamily: "'Geist Mono', 'Fira Code', monospace" }}
-            >
-              <code>{feature.code}</code>
-            </pre>
+              auth.ts
+            </span>
           </div>
+          <pre
+            style={{
+              padding: "14px",
+              fontSize: "11.5px",
+              lineHeight: 1.8,
+              overflowX: "auto",
+              color: "oklch(0.72 0.08 285)",
+              fontFamily: "'Geist Mono', 'Fira Code', ui-monospace, monospace",
+              margin: 0,
+            }}
+          >
+            <code>{feature.code}</code>
+          </pre>
         </div>
       )}
 
       {/* Feature list */}
-      {"items" in feature && feature.items !== undefined && (
-        <ul className="relative space-y-3 mt-auto">
-          {feature.items.map((item: string) => (
-            <li key={item} className="flex items-center gap-3">
-              <span
-                className="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full"
-                style={{
-                  background: feature.colorBg,
-                  border: `1px solid ${feature.color}40`,
-                }}
-              >
-                <Check size={10} strokeWidth={2.5} style={{ color: feature.color }} aria-hidden="true" />
-              </span>
-              <span style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}>
-                {item}
-              </span>
+      {feature.items && (
+        <ul
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            marginTop: "auto",
+            listStyle: "none",
+            padding: 0,
+          }}
+        >
+          {feature.items.map((item) => (
+            <li key={item} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <ArrowRight
+                size={11}
+                aria-hidden="true"
+                style={{ color: feature.accent, flexShrink: 0 }}
+              />
+              <span style={{ fontSize: "0.9rem", color: "var(--color-text-muted)" }}>{item}</span>
             </li>
           ))}
         </ul>
