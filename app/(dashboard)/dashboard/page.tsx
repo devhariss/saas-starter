@@ -1,28 +1,19 @@
-import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
-import { KPICard } from '@/components/dashboard/KPICard';
-import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
-import { SkeletonCard } from '@/components/shared/SkeletonCard';
-
-const AreaChart = dynamic(
-  () => import('@/components/dashboard/AreaChart'),
-  {
-    loading: () => <SkeletonCard className="h-64 w-full" />,
-    ssr: false,
-  }
-);
+import type { Metadata } from 'next'
+import { KPICard } from '@/components/dashboard/KPICard'
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
+import { AreaChartWrapper } from '@/components/dashboard/AreaChartWrapper'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
   description: 'Your SaasStarter overview: MRR, active users, churn, and NPS.',
-};
+}
 
 const kpis = [
   { label: 'MRR', value: '$12,480', trend: '+8.2%', direction: 'up' as const },
   { label: 'Active Users', value: '1,847', trend: '+12.4%', direction: 'up' as const },
   { label: 'Churn Rate', value: '2.1%', trend: '-0.3%', direction: 'down' as const },
   { label: 'NPS', value: '67', trend: '+4', direction: 'up' as const },
-];
+]
 
 export default function DashboardPage() {
   return (
@@ -79,10 +70,10 @@ export default function DashboardPage() {
           >
             Revenue over time
           </h2>
-          <AreaChart />
+          <AreaChartWrapper />
         </div>
         <ActivityFeed />
       </div>
     </div>
-  );
+  )
 }
