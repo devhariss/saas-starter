@@ -47,8 +47,10 @@ const S = {
 
 /* ─── Dot-grid bg pattern (light & dark) ─── */
 
-const BG_PATTERN       = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23ffffff' fill-opacity='0.035'/%3E%3C/svg%3E")`;
-const BG_PATTERN_LIGHT = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23000000' fill-opacity='0.04'/%3E%3C/svg%3E")`;
+// Dark: white dots at 0.06 opacity — visible but subtle
+const BG_PATTERN       = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E")`;
+// Light: black dots at 0.05 opacity
+const BG_PATTERN_LIGHT = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23000000' fill-opacity='0.05'/%3E%3C/svg%3E")`;
 
 /* ─── AuthVisual ─── */
 
@@ -315,9 +317,10 @@ export function Features() {
         overflow: "hidden",
       }}
     >
-      {/* Dot-grid bg pattern */}
+      {/* Dot-grid bg pattern — className is required for the CSS light-mode override below */}
       <div
         aria-hidden="true"
+        className="features-pattern"
         style={{
           position: "absolute",
           inset: 0,
@@ -327,7 +330,8 @@ export function Features() {
           zIndex: 0,
         }}
       />
-      {/* Light-mode pattern override via CSS */}
+
+      {/* Light-mode pattern override — targets .features-pattern className above */}
       <style>{`
         @media (prefers-color-scheme: light) {
           .features-pattern { background-image: ${BG_PATTERN_LIGHT} !important; }
