@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
-import { CookieBanner } from '@/components/compliance/CookieBanner';
+import CookieBanner from '@/components/compliance/CookieBanner';
 import './globals.css';
 
 // next/font generates a CSS variable; we then wire it into --font-body in globals.css
