@@ -2,9 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
-import { auth } from '@/lib/auth';
 import { CookieBanner } from '@/components/compliance/CookieBanner';
-import { SkipLink } from '@/components/shared/SkipLink';
 import './globals.css';
 
 const inter = Inter({
@@ -57,13 +55,11 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -75,14 +71,14 @@ export default async function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className={inter.variable}>
-        <SessionProvider session={session}>
+        {/* SessionProvider in v5 does NOT take a session prop */}
+        <SessionProvider>
           <ThemeProvider
             attribute="data-theme"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
-            <SkipLink />
             {children}
             <CookieBanner />
           </ThemeProvider>

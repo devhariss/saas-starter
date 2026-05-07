@@ -23,7 +23,8 @@ export default async function DashboardLayout({
       }}
     >
       <SkipLink />
-      <Sidebar user={session.user} />
+      {/* Sidebar and Header read user from session hook internally */}
+      <Sidebar />
       <div
         style={{
           flex: 1,
@@ -33,7 +34,7 @@ export default async function DashboardLayout({
           overflow: 'hidden',
         }}
       >
-        <Header user={session.user} />
+        <Header />
         <main
           id="main-content"
           tabIndex={-1}

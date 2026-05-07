@@ -18,7 +18,10 @@ export function formatCurrency(
   }).format(amount)
 }
 
-export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
+export function formatDate(
+  date: Date | string,
+  options?: Intl.DateTimeFormatOptions
+): string {
   const d = typeof date === 'string' ? new Date(date) : date
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
@@ -55,4 +58,15 @@ export function slugify(str: string): string {
 export function truncate(str: string, length: number): string {
   if (str.length <= length) return str
   return str.slice(0, length) + '...'
+}
+
+/** Returns up to 2 uppercase initials from a display name or email. */
+export function getInitials(nameOrEmail: string): string {
+  const cleaned = nameOrEmail.trim()
+  if (!cleaned) return 'U'
+  // If it looks like an email, use the local part before @
+  const base = cleaned.includes('@') ? cleaned.split('@')[0] : cleaned
+  const parts = base.split(/[\s._-]+/).filter(Boolean)
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }

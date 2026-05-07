@@ -16,8 +16,11 @@ interface UIState {
   unreadCount: number
   toggleSidebar: () => void
   setSidebarCollapsed: (v: boolean) => void
+  /** Opens the command palette. Alias: setCommandOpen(true) */
   openCommandPalette: () => void
   closeCommandPalette: () => void
+  /** Convenience alias used by Header — maps to open/close */
+  setCommandOpen: (open: boolean) => void
   addNotification: (n: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void
   markAllRead: () => void
   clearNotifications: () => void
@@ -33,6 +36,7 @@ export const useUIStore = create<UIState>((set) => ({
   setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
   openCommandPalette: () => set({ commandPaletteOpen: true }),
   closeCommandPalette: () => set({ commandPaletteOpen: false }),
+  setCommandOpen: (open) => set({ commandPaletteOpen: open }),
   addNotification: (n) =>
     set((s) => {
       const notification: Notification = {
