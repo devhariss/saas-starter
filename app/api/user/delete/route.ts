@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth, signOut } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { resend } from '@/lib/resend'
 
 export async function DELETE() {
@@ -9,13 +9,13 @@ export async function DELETE() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const user = await db.user.findUnique({ where: { id: session.user.id } })
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } })
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
   // Cascade delete — Prisma schema handles related records
-  await db.user.delete({ where: { id: session.user.id } })
+  await prisma.user.delete({ where: { id: session.user.id } })
 
   // Send confirmation email
   if (user.email) {
