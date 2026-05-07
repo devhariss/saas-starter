@@ -120,10 +120,26 @@ export default function CookiesPage() {
           You can also control cookies through your browser settings:
         </p>
         <ul style={{ paddingLeft: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-          <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>Chrome</a></li>
-          <li><a href="https://support.mozilla.org/en-US/kb/clear-cookies-and-site-data-firefox" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>Firefox</a></li>
-          <li><a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>Safari</a></li>
-          <li><a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)" }}>Edge</a></li>
+          <li>
+            <a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>
+              Chrome
+            </a>
+          </li>
+          <li>
+            <a href="https://support.mozilla.org/en-US/kb/clear-cookies-and-site-data-firefox" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>
+              Firefox
+            </a>
+          </li>
+          <li>
+            <a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>
+              Safari
+            </a>
+          </li>
+          <li>
+            <a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>
+              Edge
+            </a>
+          </li>
         </ul>
         <p style={{ marginTop: 'var(--space-4)' }}>
           Note that disabling essential cookies will prevent the Service from functioning correctly.
