@@ -108,7 +108,7 @@ export default function CookiesPage() {
           We currently use no third-party advertising or tracking cookies. PostHog analytics cookies are
           only set if you have granted analytics consent.
         </p>
-      </Section>
+      </section>
 
       <section style={{ marginBottom: 'var(--space-10)' }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', fontWeight: 600, marginBottom: 'var(--space-4)' }}>Managing cookies</h2>
