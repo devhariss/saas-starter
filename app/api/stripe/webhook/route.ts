@@ -78,20 +78,34 @@ export async function POST(req: NextRequest) {
       }
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice
-        const customer = await prisma.subscription.findUnique({
+        const subscription = await prisma.subscription.findUnique({
           where: { stripeCustomerId: invoice.customer as string },
           include: { user: true },
         })
-        if (customer?.user?.email) {
+        if (subscription?.user?.email) {
+          // Derive a human-readable plan name from the price ID
+          const priceId = invoice.lines.data[0]?.price?.id ?? ''
+          const planName =
+            priceId === process.env.STRIPE_TEAM_PRICE_ID
+              ? 'Team'
+              : priceId === process.env.STRIPE_PRO_PRICE_ID
+              ? 'Pro'
+              : 'Subscription'
+
           await resend.emails.send({
             from: process.env.RESEND_FROM_EMAIL ?? 'noreply@saas-starter.com',
-            to: customer.user.email,
+            to: subscription.user.email,
             subject: 'Payment received — thank you!',
             react: InvoicePaidEmail({
-              name: customer.user.name ?? 'there',
-              amount: ((invoice.amount_paid ?? 0) / 100).toFixed(2),
-              invoiceUrl: invoice.hosted_invoice_url ?? '#',
-              date: new Date(invoice.created * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+              name: subscription.user.name ?? 'there',
+              amount: `$${((invoice.amount_paid ?? 0) / 100).toFixed(2)}`,
+              invoiceId: invoice.number ?? invoice.id,
+              date: new Date(invoice.created * 1000).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+              planName,
             }),
           })
         }
