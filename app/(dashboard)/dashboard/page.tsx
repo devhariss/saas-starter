@@ -9,10 +9,34 @@ export const metadata: Metadata = {
 }
 
 const kpis = [
-  { label: 'MRR', value: '$12,480', trend: '+8.2%', direction: 'up' as const },
-  { label: 'Active Users', value: '1,847', trend: '+12.4%', direction: 'up' as const },
-  { label: 'Churn Rate', value: '2.1%', trend: '-0.3%', direction: 'down' as const },
-  { label: 'NPS', value: '67', trend: '+4', direction: 'up' as const },
+  {
+    title: 'MRR',
+    value: '$12,480',
+    change: 8.2,
+    changeLabel: 'vs last month',
+    sparkline: [11200, 11340, 11480, 11620, 11890, 12010, 12480],
+  },
+  {
+    title: 'Active Users',
+    value: '1,847',
+    change: 12.4,
+    changeLabel: '30-day growth',
+    sparkline: [1420, 1510, 1595, 1630, 1712, 1798, 1847],
+  },
+  {
+    title: 'Churn Rate',
+    value: '2.1%',
+    change: -0.3,
+    changeLabel: 'vs last month',
+    sparkline: [2.8, 2.7, 2.6, 2.5, 2.4, 2.3, 2.1],
+  },
+  {
+    title: 'NPS',
+    value: '67',
+    change: 4,
+    changeLabel: 'promoter score change',
+    sparkline: [59, 60, 61, 62, 63, 65, 67],
+  },
 ]
 
 export default function DashboardPage() {
@@ -38,7 +62,7 @@ export default function DashboardPage() {
         }}
       >
         {kpis.map((kpi) => (
-          <KPICard key={kpi.label} {...kpi} />
+          <KPICard key={kpi.title} {...kpi} />
         ))}
       </div>
 
