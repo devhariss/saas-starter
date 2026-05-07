@@ -1,26 +1,21 @@
 import { z } from 'zod'
 
 export const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().email('Enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
 export const registerSchema = z
   .object({
-    name: z
-      .string()
-      .min(2, 'Name must be at least 2 characters')
-      .max(64, 'Name must be less than 64 characters'),
-    email: z.string().email('Please enter a valid email address'),
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().email('Enter a valid email address'),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/[0-9]/, 'Password must contain at least one number'),
+      .regex(/[A-Z]/, 'Include at least one uppercase letter')
+      .regex(/[0-9]/, 'Include at least one number'),
     confirmPassword: z.string(),
-    acceptTerms: z.literal(true, {
-      errorMap: () => ({ message: 'You must accept the terms and privacy policy' }),
-    }),
+    terms: z.literal(true, { errorMap: () => ({ message: 'You must accept the terms' }) }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
@@ -28,7 +23,7 @@ export const registerSchema = z
   })
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().email('Enter a valid email address'),
 })
 
 export type LoginInput = z.infer<typeof loginSchema>

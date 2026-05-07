@@ -1,14 +1,13 @@
 import NextAuth from 'next-auth'
-import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import GitHub from 'next-auth/providers/github'
 import Resend from 'next-auth/providers/resend'
+import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/db'
-import { resend, FROM_EMAIL, FROM_NAME } from '@/lib/resend'
-import { WelcomeEmail } from '@/emails/WelcomeEmail'
-import { render } from '@react-email/render'
+import { resend } from '@/lib/resend'
+import { MagicLinkEmail } from '@/emails/MagicLinkEmail'
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'database' },
   providers: [
@@ -22,13 +21,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
     Resend({
       apiKey: process.env.RESEND_API_KEY!,
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      from: process.env.RESEND_FROM_EMAIL ?? 'noreply@saas-starter.com',
+      sendVerificationRequest: async ({ identifier, url }) => {
+        await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL ?? 'noreply@saas-starter.com',
+          to: identifier,
+          subject: 'Sign in to SaasStarter',
+          react: MagicLinkEmail({ url, email: identifier }),
+        })
+      },
     }),
   ],
-  pages: {
-    signIn: '/login',
-    error: '/login',
-  },
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
@@ -40,50 +43,59 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             subscription: { select: { status: true } },
           },
         })
-        ;(session.user as typeof session.user & { role: string; subscriptionStatus: string | null }).role =
-          dbUser?.role ?? 'USER'
-        ;(session.user as typeof session.user & { role: string; subscriptionStatus: string | null }).subscriptionStatus =
+        ;(session.user as { role?: string }).role = dbUser?.role ?? 'USER'
+        ;(session.user as { subscriptionStatus?: string }).subscriptionStatus =
           dbUser?.subscription?.status ?? null
       }
       return session
     },
     async signIn({ user }) {
-      const dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { role: true },
-      })
+      if (!user.email) return false
+      const dbUser = await prisma.user.findUnique({ where: { email: user.email } })
       if (dbUser?.role === 'BANNED') return false
       return true
     },
   },
   events: {
     async createUser({ user }) {
-      if (user.email && user.name) {
-        try {
-          await resend.emails.send({
-            from: `${FROM_NAME} <${FROM_EMAIL}>`,
-            to: user.email,
-            subject: `Welcome to ${FROM_NAME}!`,
-            html: await render(WelcomeEmail({ name: user.name, email: user.email })),
-          })
-        } catch (error) {
-          if (process.env.NODE_ENV !== 'production') console.error('Welcome email failed:', error)
-        }
+      if (user.email) {
+        await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL ?? 'noreply@saas-starter.com',
+          to: user.email,
+          subject: 'Welcome to SaasStarter!',
+          react: (await import('@/emails/WelcomeEmail')).WelcomeEmail({
+            name: user.name ?? 'there',
+          }),
+        })
       }
+      await prisma.auditLog.create({
+        data: {
+          userId: user.id!,
+          action: 'USER_CREATED',
+          resource: 'user',
+          resourceId: user.id!,
+          metadata: {},
+          ipHash: '',
+        },
+      })
     },
     async signIn({ user }) {
-      try {
+      if (user.id) {
         await prisma.auditLog.create({
           data: {
-            userId: user.id!,
-            action: 'sign_in',
-            resource: 'auth',
-            resourceId: user.id!,
+            userId: user.id,
+            action: 'USER_SIGNED_IN',
+            resource: 'user',
+            resourceId: user.id,
             metadata: {},
-            ipHash: 'unknown',
+            ipHash: '',
           },
         })
-      } catch (_) {}
+      }
     },
+  },
+  pages: {
+    signIn: '/login',
+    error: '/login',
   },
 })
