@@ -1,14 +1,19 @@
-import { auth } from "@/lib/auth";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-const PROTECTED_PATHS = ["/dashboard"];
-const PROTECTED_API_PATHS = ["/api/user", "/api/stripe/checkout", "/api/stripe/portal"];
+// ---------------------------------------------------------------------------
+// Route matchers
+// ---------------------------------------------------------------------------
+const PROTECTED_PATHS = ['/dashboard']
+const PROTECTED_API_PATHS = ['/api/user', '/api/stripe/checkout', '/api/stripe/portal']
 
+// ---------------------------------------------------------------------------
+// Security headers
+// ---------------------------------------------------------------------------
 function applySecurityHeaders(response: NextResponse): NextResponse {
-  const headers = response.headers;
-  headers.set(
-    "Content-Security-Policy",
+  const h = response.headers
+  h.set(
+    'Content-Security-Policy',
     [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://api.fontshare.com https://fonts.googleapis.com",
@@ -19,57 +24,83 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
       "frame-src https://js.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",
-    ].join("; ")
-  );
-  headers.set("X-Frame-Options", "SAMEORIGIN");
-  headers.set("X-Content-Type-Options", "nosniff");
-  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
-  headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-  headers.set("Cross-Origin-Opener-Policy", "same-origin");
-  headers.set("Cross-Origin-Resource-Policy", "same-origin");
-  return response;
+    ].join('; '),
+  )
+  h.set('X-Frame-Options', 'SAMEORIGIN')
+  h.set('X-Content-Type-Options', 'nosniff')
+  h.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()')
+  h.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+  h.set('Cross-Origin-Opener-Policy', 'same-origin')
+  h.set('Cross-Origin-Resource-Policy', 'same-origin')
+  return response
 }
 
-export default async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+// ---------------------------------------------------------------------------
+// Session check — reads the NextAuth session cookie without importing lib/auth.
+// lib/auth pulls in Prisma + bcryptjs + Resend which exceed the 1 MB Edge limit.
+// The cookie name used by next-auth v5 in production is:
+//   __Secure-authjs.session-token  (HTTPS)
+//   authjs.session-token           (HTTP / dev)
+// A non-empty cookie value means a session exists; the actual JWT is verified
+// by the API routes and RSCs where Node.js is available.
+// ---------------------------------------------------------------------------
+function hasSessionCookie(request: NextRequest): boolean {
+  const secure = request.cookies.get('__Secure-authjs.session-token')
+  const dev = request.cookies.get('authjs.session-token')
+  return !!(secure?.value || dev?.value)
+}
 
-  // GPC detection
-  const gpc = request.headers.get("Sec-GPC");
-  const response = NextResponse.next();
+// ---------------------------------------------------------------------------
+// Middleware
+// ---------------------------------------------------------------------------
+export default function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-  if (gpc === "1") {
-    response.cookies.set("gpc_detected", "1", {
-      path: "/",
+  // Build the base response (pass-through)
+  const response = NextResponse.next()
+
+  // GPC detection — honor Global Privacy Control
+  if (request.headers.get('Sec-GPC') === '1') {
+    response.cookies.set('gpc_detected', '1', {
+      path: '/',
       maxAge: 365 * 24 * 60 * 60,
-      sameSite: "lax",
+      sameSite: 'lax',
       httpOnly: false,
-    });
+    })
   }
 
-  // Protect dashboard routes
-  const isProtectedPath = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
-  const isProtectedApi = PROTECTED_API_PATHS.some((p) => pathname.startsWith(p));
+  // Route protection
+  const isProtectedPage = PROTECTED_PATHS.some((p) => pathname.startsWith(p))
+  const isProtectedApi = PROTECTED_API_PATHS.some((p) => pathname.startsWith(p))
 
-  if (isProtectedPath || isProtectedApi) {
-    const session = await auth();
-    if (!session) {
+  if (isProtectedPage || isProtectedApi) {
+    if (!hasSessionCookie(request)) {
       if (isProtectedApi) {
         return applySecurityHeaders(
-          NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        );
+          NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+        )
       }
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return applySecurityHeaders(NextResponse.redirect(loginUrl));
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('callbackUrl', pathname)
+      return applySecurityHeaders(NextResponse.redirect(loginUrl))
     }
   }
 
-  return applySecurityHeaders(response);
+  return applySecurityHeaders(response)
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon|public|api/auth|api/health|api/stripe/webhook).*)",
+    /*
+     * Match all paths except:
+     * - _next/static  (Next.js static assets)
+     * - _next/image   (image optimisation)
+     * - favicon / public
+     * - api/auth      (NextAuth routes — handle their own auth)
+     * - api/health    (public health check)
+     * - api/stripe/webhook (Stripe sends raw POST, no session cookie)
+     */
+    '/((?!_next/static|_next/image|favicon|public|api/auth|api/health|api/stripe/webhook).*)',
   ],
-};
+}
