@@ -3,7 +3,18 @@ import { Github, Twitter, Linkedin } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
-const columns = [
+type FooterLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+};
+
+type FooterColumn = {
+  heading: string;
+  links: FooterLink[];
+};
+
+const columns: FooterColumn[] = [
   {
     heading: "Product",
     links: [
