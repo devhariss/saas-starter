@@ -15,7 +15,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'priceId is required' }, { status: 400 })
   }
 
-  const customerId = await getOrCreateStripeCustomer(session.user.id)
+  // Ensure the Stripe customer record exists before creating checkout
+  await getOrCreateStripeCustomer(session.user.id)
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
   const checkoutSession = await createCheckoutSession(

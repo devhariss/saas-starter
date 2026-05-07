@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const registerSchema = z
@@ -40,7 +39,6 @@ function getPasswordStrength(password: string): { score: number; label: string; 
 }
 
 export default function RegisterForm() {
-  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
@@ -69,6 +67,7 @@ export default function RegisterForm() {
         setIsLoading(false);
         return;
       }
+      // Sign in immediately after successful registration
       await signIn('credentials', { email: data.email, password: data.password, callbackUrl: '/dashboard' });
     } catch {
       setServerError('An unexpected error occurred.');
