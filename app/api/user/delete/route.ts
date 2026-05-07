@@ -5,22 +5,20 @@ import { resend, FROM_EMAIL } from '@/lib/resend'
 
 export async function DELETE() {
   const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const user = await prisma.user.findUnique({ where: { id: session.user.id! } })
-  if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
-
-  await prisma.user.delete({ where: { id: user.id } })
-
-  if (user.email) {
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: user.email,
-      subject: 'Your account has been deleted',
-      html: `<p>Hi ${user.name ?? 'there'}, your SaasStarter account and all associated data have been permanently deleted as requested.</p><p>If this was a mistake, please contact <a href="mailto:support@saas-starter.com">support@saas-starter.com</a>.</p>`,
-    })
+  if (!session?.user?.id || !session.user.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  await signOut()
+  const { id, email, name } = session.user
+
+  await prisma.user.delete({ where: { id } })
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: 'Your SaasStarter account has been deleted',
+    html: `<p>Hi ${name ?? 'there'},</p><p>Your account and all associated data have been permanently deleted as requested.</p><p>If you believe this was a mistake, contact us at privacy@yourcompany.com within 30 days.</p>`,
+  })
+
   return NextResponse.json({ success: true })
 }

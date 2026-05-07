@@ -1,5 +1,10 @@
+import { NextResponse } from 'next/server'
+
 export const runtime = 'edge'
 
 export async function GET() {
-  return Response.json({ status: 'ok', ts: new Date().toISOString() })
+  return NextResponse.json(
+    { status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' },
+    { status: 200 }
+  )
 }
