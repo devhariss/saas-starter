@@ -20,12 +20,12 @@ export async function POST(req: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
-  const checkoutSession = await createCheckoutSession(
+  const checkoutUrl = await createCheckoutSession(
     session.user.id,
     priceId,
     `${appUrl}/dashboard?checkout=success`,
     `${appUrl}/pricing?checkout=cancelled`
   )
 
-  return NextResponse.json({ url: checkoutSession.url })
+  return NextResponse.json({ url: checkoutUrl })
 }
