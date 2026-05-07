@@ -1,38 +1,49 @@
 import {
-  Html, Head, Body, Container, Heading, Text, Button, Hr, Preview, Section,
+  Body, Button, Container, Head, Heading,
+  Hr, Html, Preview, Section, Text
 } from '@react-email/components'
 
 interface MagicLinkEmailProps {
-  magicLink: string
+  url: string
   email: string
 }
 
-export function MagicLinkEmail({ magicLink, email }: MagicLinkEmailProps) {
+export function MagicLinkEmail({ url, email }: MagicLinkEmailProps) {
   return (
-    <Html lang="en">
+    <Html>
       <Head />
       <Preview>Your sign-in link for SaasStarter</Preview>
-      <Body style={{ backgroundColor: '#f9fafb', fontFamily: 'Inter, system-ui, sans-serif' }}>
-        <Container style={{ maxWidth: 560, margin: '40px auto', backgroundColor: '#ffffff', borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-          <Section style={{ backgroundColor: '#0f0f13', padding: '32px 40px' }}>
-            <Heading style={{ color: '#ffffff', fontSize: 24, margin: 0, fontWeight: 600 }}>SaasStarter</Heading>
-          </Section>
-          <Section style={{ padding: '32px 40px' }}>
-            <Heading as="h2" style={{ fontSize: 20, fontWeight: 600, color: '#111827', marginTop: 0 }}>
+      <Body style={{ backgroundColor: '#f9f8f5', fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <Container style={{ maxWidth: 560, margin: '40px auto', padding: '0 20px' }}>
+          <Section style={{ background: '#ffffff', borderRadius: 12, padding: '40px 36px', border: '1px solid #e8e6e1' }}>
+            <Heading style={{ fontSize: 22, fontWeight: 700, color: '#1a1916', marginBottom: 8 }}>
               Sign in to SaasStarter
             </Heading>
-            <Text style={{ color: '#4b5563', lineHeight: 1.6, fontSize: 15 }}>
-              Click the button below to sign in as <strong>{email}</strong>. This link expires in 24 hours and can only be used once.
+            <Text style={{ color: '#5c5a55', lineHeight: 1.7, marginBottom: 8 }}>
+              We received a sign-in request for <strong>{email}</strong>. Click the button below — this link expires in 24 hours.
             </Text>
             <Button
-              href={magicLink}
-              style={{ backgroundColor: '#4f46e5', color: '#ffffff', borderRadius: 6, padding: '12px 24px', fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block', marginTop: 8 }}
+              href={url}
+              style={{
+                background: 'oklch(0.52 0.22 285)',
+                color: '#fff',
+                padding: '12px 24px',
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 14,
+                textDecoration: 'none',
+                display: 'inline-block',
+                margin: '16px 0',
+              }}
             >
-              Sign in to SaasStarter
+              Sign in
             </Button>
-            <Hr style={{ borderColor: '#e5e7eb', margin: '32px 0' }} />
-            <Text style={{ color: '#9ca3af', fontSize: 13 }}>
-              If you didn&apos;t request this email, you can safely ignore it. Your account is not at risk.
+            <Text style={{ color: '#9e9c98', fontSize: 13, marginTop: 16 }}>
+              If you didn&apos;t request this, you can safely ignore this email.
+            </Text>
+            <Hr style={{ borderColor: '#e8e6e1', margin: '32px 0' }} />
+            <Text style={{ color: '#9e9c98', fontSize: 13 }}>
+              SaasStarter · This is an automated message, please do not reply.
             </Text>
           </Section>
         </Container>
