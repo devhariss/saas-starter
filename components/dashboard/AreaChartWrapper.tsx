@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { Skeleton } from '@/components/shared/SkeletonCard'
 
 const DashboardAreaChart = dynamic(
-  () => import('@/components/dashboard/AreaChart').then((m) => m.DashboardAreaChart),
+  () => import('@/components/dashboard/AreaChart'),
   {
     loading: () => <Skeleton className="h-64 w-full" />,
     ssr: false,
