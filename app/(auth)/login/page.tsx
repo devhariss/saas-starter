@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import LoginForm from '@/components/auth/LoginForm'
@@ -38,6 +39,7 @@ export default function LoginPage() {
           ))}
         </div>
       </div>
+
       {/* Right panel */}
       <main id="main-content" className="flex-1 flex items-center justify-center p-6 lg:p-12" style={{ background: 'var(--color-bg)' }}>
         <div style={{ width: '100%', maxWidth: '420px' }}>
@@ -48,7 +50,10 @@ export default function LoginPage() {
             Don&apos;t have an account?{' '}
             <Link href="/register" style={{ color: 'var(--color-primary)' }}>Sign up free</Link>
           </p>
-          <LoginForm />
+          {/* Suspense required because LoginForm calls useSearchParams() */}
+          <Suspense fallback={<div style={{ height: '320px' }} aria-label="Loading sign-in form" />}>
+            <LoginForm />
+          </Suspense>
         </div>
       </main>
     </div>
