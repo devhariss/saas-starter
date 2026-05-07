@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Github, Star, Check, Zap } from "lucide-react";
 
-/* ─── Types ───────────────────────── */
+/* ─── Types ─────────────────────────────── */
 
 interface KpiItem {
   label: string;
@@ -16,7 +16,7 @@ interface ActivityRow {
   time: string;
 }
 
-/* ─── Hero ───────────────────────── */
+/* ─── Hero ───────────────────────────────── */
 
 export function Hero() {
   const pills = [
@@ -28,339 +28,345 @@ export function Hero() {
   ];
 
   return (
-    <section
-      className="relative"
-      aria-labelledby="hero-heading"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        background: "var(--color-bg)",
-        overflow: "hidden",
-      }}
-    >
-      {/* ── Background ── */}
-      <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
-        {/* Fine dot grid — very subtle */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "radial-gradient(oklch(0.55 0.04 285 / 0.18) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-            /* Mask: visible in center, fades to nothing at all 4 edges */
-            WebkitMaskImage:
-              "radial-gradient(ellipse 70% 70% at 62% 50%, black 0%, transparent 100%)",
-            maskImage:
-              "radial-gradient(ellipse 70% 70% at 62% 50%, black 0%, transparent 100%)",
-          }}
-        />
-        {/* Single soft accent glow — upper right quadrant only */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-10%",
-            right: "-5%",
-            width: "55%",
-            height: "70%",
-            borderRadius: "50%",
-            background:
-              "radial-gradient(ellipse at 70% 30%, oklch(0.52 0.22 285 / 0.07) 0%, transparent 65%)",
-          }}
-        />
-        {/* Bottom edge fade */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "120px",
-            background: "linear-gradient(to bottom, transparent, var(--color-bg))",
-          }}
-        />
-      </div>
+    <>
+      {/* Inject CSS vars that flip between light/dark — avoids any JS theme hook */}
+      <style>{`
+        :root, [data-theme="light"] {
+          --hero-dot-color: oklch(0.45 0.06 285 / 0.38);
+          --hero-glow-primary: oklch(0.52 0.22 285 / 0.10);
+          --hero-glow-card: oklch(0.52 0.22 285 / 0.11);
+        }
+        [data-theme="dark"] {
+          --hero-dot-color: oklch(0.72 0.08 285 / 0.28);
+          --hero-glow-primary: oklch(0.52 0.22 285 / 0.14);
+          --hero-glow-card: oklch(0.52 0.22 285 / 0.16);
+        }
+        @media (prefers-color-scheme: dark) {
+          :root:not([data-theme]) {
+            --hero-dot-color: oklch(0.72 0.08 285 / 0.28);
+            --hero-glow-primary: oklch(0.52 0.22 285 / 0.14);
+            --hero-glow-card: oklch(0.52 0.22 285 / 0.16);
+          }
+        }
+      `}</style>
 
-      {/* ── Content ── */}
-      <div
-        className="relative w-full mx-auto"
-        style={{ maxWidth: "1200px", padding: "7rem 1.5rem 6rem" }}
+      <section
+        className="relative"
+        aria-labelledby="hero-heading"
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          background: "var(--color-bg)",
+          overflow: "hidden",
+        }}
       >
+        {/* ── Background ── */}
+        <div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+
+          {/* Dot grid — uses CSS var so it works in both themes */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage:
+                "radial-gradient(var(--hero-dot-color) 1.2px, transparent 1.2px)",
+              backgroundSize: "24px 24px",
+              WebkitMaskImage:
+                "radial-gradient(ellipse 72% 72% at 60% 50%, black 0%, transparent 100%)",
+              maskImage:
+                "radial-gradient(ellipse 72% 72% at 60% 50%, black 0%, transparent 100%)",
+            }}
+          />
+
+          {/* Accent glow — upper right */}
+          <div
+            style={{
+              position: "absolute",
+              top: "-10%",
+              right: "-5%",
+              width: "55%",
+              height: "70%",
+              borderRadius: "50%",
+              background:
+                "radial-gradient(ellipse at 70% 30%, var(--hero-glow-primary) 0%, transparent 65%)",
+            }}
+          />
+
+          {/* Bottom fade to bg */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "120px",
+              background: "linear-gradient(to bottom, transparent, var(--color-bg))",
+            }}
+          />
+        </div>
+
+        {/* ── Content ── */}
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "4rem",
-            alignItems: "center",
-          }}
-          className="grid-cols-1 lg:grid-cols-2"
+          style={{ position: "relative", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "7rem 1.5rem 6rem" }}
         >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "4rem",
+              alignItems: "center",
+            }}
+          >
+            {/* ── Left copy ── */}
+            <div style={{ maxWidth: "520px" }}>
 
-          {/* ── Left copy ── */}
-          <div style={{ maxWidth: "520px" }}>
-
-            {/* Changelog pill */}
-            <Link
-              href="/changelog"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "2rem",
-                padding: "5px 14px 5px 6px",
-                borderRadius: "9999px",
-                background: "var(--color-surface)",
-                border: "1px solid var(--color-border)",
-                fontSize: "12px",
-                color: "var(--color-text-muted)",
-                textDecoration: "none",
-                transition: "border-color 0.15s",
-              }}
-            >
-              <span
+              {/* Changelog pill */}
+              <Link
+                href="/changelog"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "4px",
-                  padding: "2px 8px",
+                  gap: "8px",
+                  marginBottom: "2rem",
+                  padding: "5px 14px 5px 6px",
                   borderRadius: "9999px",
-                  background: "oklch(0.52 0.22 285 / 0.12)",
-                  color: "var(--color-primary)",
-                  fontSize: "10px",
-                  fontWeight: 700,
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  fontSize: "12px",
+                  color: "var(--color-text-muted)",
+                  textDecoration: "none",
                 }}
               >
-                <Zap size={9} />
-                New
-              </span>
-              v1.0 — Prisma Pulse real-time sync
-              <ArrowRight size={11} />
-            </Link>
-
-            {/* Eyebrow */}
-            <p
-              style={{
-                fontSize: "11px",
-                fontWeight: 600,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "var(--color-text-faint)",
-                marginBottom: "1rem",
-              }}
-            >
-              Next.js SaaS Starter
-            </p>
-
-            {/* Headline */}
-            <h1
-              id="hero-heading"
-              style={{
-                fontSize: "clamp(2.6rem, 1.4rem + 3.2vw, 4rem)",
-                fontWeight: 800,
-                lineHeight: 1.04,
-                letterSpacing: "-0.03em",
-                color: "var(--color-text)",
-                marginBottom: "1.5rem",
-              }}
-            >
-              Ship your SaaS
-              <br />
-              <span style={{ color: "var(--color-primary)" }}>in days,</span>
-              {" "}not months.
-            </h1>
-
-            {/* Sub-copy */}
-            <p
-              style={{
-                fontSize: "1.0625rem",
-                lineHeight: 1.7,
-                color: "var(--color-text-muted)",
-                maxWidth: "40ch",
-                marginBottom: "2rem",
-              }}
-            >
-              Everything you need to go from idea to paying customers — auth,
-              billing, email, analytics. Production-grade, fully typed.
-            </p>
-
-            {/* Stack pills */}
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "6px",
-                marginBottom: "2.5rem",
-              }}
-            >
-              {pills.map((pill) => (
                 <span
-                  key={pill}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: "5px",
-                    padding: "4px 10px",
-                    borderRadius: "6px",
-                    background: "var(--color-surface)",
-                    border: "1px solid var(--color-border)",
-                    fontSize: "11px",
-                    fontWeight: 500,
-                    color: "var(--color-text-muted)",
-                  }}
-                >
-                  <Check
-                    size={9}
-                    style={{ color: "var(--color-primary)", flexShrink: 0 }}
-                  />
-                  {pill}
-                </span>
-              ))}
-            </div>
-
-            {/* CTAs */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                flexWrap: "wrap",
-                marginBottom: "2.5rem",
-              }}
-            >
-              <Link
-                href="/register"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "10px 22px",
-                  borderRadius: "8px",
-                  background: "var(--color-text)",
-                  color: "var(--color-bg)",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  transition: "opacity 0.15s",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Get started free
-                <ArrowRight size={14} />
-              </Link>
-              <a
-                href="https://github.com/devhariss/saas-starter"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "10px 18px",
-                  borderRadius: "8px",
-                  background: "var(--color-surface)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  textDecoration: "none",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <Github size={14} />
-                View on GitHub
-                <span
-                  style={{
-                    padding: "1px 6px",
-                    borderRadius: "4px",
-                    background: "var(--color-surface-offset)",
-                    color: "var(--color-text-faint)",
+                    gap: "4px",
+                    padding: "2px 8px",
+                    borderRadius: "9999px",
+                    background: "oklch(0.52 0.22 285 / 0.12)",
+                    color: "var(--color-primary)",
                     fontSize: "10px",
-                    fontWeight: 600,
+                    fontWeight: 700,
                   }}
                 >
-                  MIT
+                  <Zap size={9} />
+                  New
                 </span>
-              </a>
-            </div>
+                v1.0 — Prisma Pulse real-time sync
+                <ArrowRight size={11} />
+              </Link>
 
-            {/* Social proof */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ display: "flex", marginRight: "-4px" }}>
-                {([285, 192, 145, 75, 25] as number[]).map((hue, i) => (
-                  <div
-                    key={hue}
-                    aria-hidden="true"
+              {/* Eyebrow */}
+              <p
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "var(--color-text-faint)",
+                  marginBottom: "1rem",
+                }}
+              >
+                Next.js SaaS Starter
+              </p>
+
+              {/* Headline */}
+              <h1
+                id="hero-heading"
+                style={{
+                  fontSize: "clamp(2.6rem, 1.4rem + 3.2vw, 4rem)",
+                  fontWeight: 800,
+                  lineHeight: 1.04,
+                  letterSpacing: "-0.03em",
+                  color: "var(--color-text)",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                Ship your SaaS
+                <br />
+                <span style={{ color: "var(--color-primary)" }}>in days,</span>
+                {" "}not months.
+              </h1>
+
+              {/* Sub-copy */}
+              <p
+                style={{
+                  fontSize: "1.0625rem",
+                  lineHeight: 1.7,
+                  color: "var(--color-text-muted)",
+                  maxWidth: "40ch",
+                  marginBottom: "2rem",
+                }}
+              >
+                Everything you need to go from idea to paying customers — auth,
+                billing, email, analytics. Production-grade, fully typed.
+              </p>
+
+              {/* Stack pills */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "2.5rem" }}>
+                {pills.map((pill) => (
+                  <span
+                    key={pill}
                     style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      display: "flex",
+                      display: "inline-flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "9px",
-                      fontWeight: 700,
-                      background: `oklch(0.50 0.14 ${hue})`,
-                      color: "#fff",
-                      outline: "2px solid var(--color-bg)",
-                      marginLeft: i > 0 ? "-8px" : 0,
+                      gap: "5px",
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      background: "var(--color-surface)",
+                      border: "1px solid var(--color-border)",
+                      fontSize: "11px",
+                      fontWeight: 500,
+                      color: "var(--color-text-muted)",
                     }}
                   >
-                    {["J","A","R","P","T"][i]}
-                  </div>
+                    <Check size={9} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
+                    {pill}
+                  </span>
                 ))}
               </div>
-              <div>
-                <div style={{ display: "flex", gap: "2px", marginBottom: "2px" }}>
-                  {([...Array(5)] as undefined[]).map((_, i) => (
-                    <Star key={i} size={11} style={{ fill: "oklch(0.78 0.18 75)", color: "oklch(0.78 0.18 75)" }} />
+
+              {/* CTAs */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  flexWrap: "wrap",
+                  marginBottom: "2.5rem",
+                }}
+              >
+                <Link
+                  href="/register"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 22px",
+                    borderRadius: "8px",
+                    background: "var(--color-text)",
+                    color: "var(--color-bg)",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Get started free
+                  <ArrowRight size={14} />
+                </Link>
+                <a
+                  href="https://github.com/devhariss/saas-starter"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 18px",
+                    borderRadius: "8px",
+                    background: "var(--color-surface)",
+                    border: "1px solid var(--color-border)",
+                    color: "var(--color-text)",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <Github size={14} />
+                  View on GitHub
+                  <span
+                    style={{
+                      padding: "1px 6px",
+                      borderRadius: "4px",
+                      background: "var(--color-surface-offset)",
+                      color: "var(--color-text-faint)",
+                      fontSize: "10px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    MIT
+                  </span>
+                </a>
+              </div>
+
+              {/* Social proof */}
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ display: "flex" }}>
+                  {([285, 192, 145, 75, 25] as number[]).map((hue, i) => (
+                    <div
+                      key={hue}
+                      aria-hidden="true"
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "9px",
+                        fontWeight: 700,
+                        background: `oklch(0.50 0.14 ${hue})`,
+                        color: "#fff",
+                        outline: "2px solid var(--color-bg)",
+                        marginLeft: i > 0 ? "-8px" : 0,
+                      }}
+                    >
+                      {["J","A","R","P","T"][i]}
+                    </div>
                   ))}
                 </div>
-                <p style={{ fontSize: "12px", color: "var(--color-text-faint)", margin: 0 }}>
-                  <strong style={{ color: "var(--color-text-muted)", fontWeight: 600 }}>2,400+</strong> devs already shipped
-                </p>
+                <div>
+                  <div style={{ display: "flex", gap: "2px", marginBottom: "2px" }}>
+                    {([...Array(5)] as undefined[]).map((_, i) => (
+                      <Star key={i} size={11} style={{ fill: "oklch(0.78 0.18 75)", color: "oklch(0.78 0.18 75)" }} />
+                    ))}
+                  </div>
+                  <p style={{ fontSize: "12px", color: "var(--color-text-faint)", margin: 0 }}>
+                    <strong style={{ color: "var(--color-text-muted)", fontWeight: 600 }}>2,400+</strong> devs already shipped
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* ── Right: mockup ── */}
-          <div
-            aria-hidden="true"
-            className="hidden lg:block"
-            style={{ position: "relative" }}
-          >
-            {/* Soft glow behind card */}
-            <div
-              style={{
-                position: "absolute",
-                inset: "-24px",
-                borderRadius: "24px",
-                background: "radial-gradient(ellipse at 50% 40%, oklch(0.52 0.22 285 / 0.09) 0%, transparent 65%)",
-                zIndex: 0,
-              }}
-            />
-            {/* Card */}
-            <div
-              style={{
-                position: "relative",
-                zIndex: 1,
-                borderRadius: "16px",
-                overflow: "hidden",
-                border: "1px solid var(--color-border)",
-                background: "var(--color-surface)",
-                boxShadow: "0 1px 3px oklch(0 0 0 / 0.08), 0 12px 40px oklch(0 0 0 / 0.14)",
-              }}
-            >
-              <DashboardMockup />
+            {/* ── Right: mockup ── */}
+            <div aria-hidden="true" style={{ position: "relative" }}>
+              {/* Card glow */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: "-24px",
+                  borderRadius: "24px",
+                  background: "radial-gradient(ellipse at 50% 40%, var(--hero-glow-card) 0%, transparent 65%)",
+                  zIndex: 0,
+                }}
+              />
+              {/* Dashboard card */}
+              <div
+                style={{
+                  position: "relative",
+                  zIndex: 1,
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  border: "1px solid var(--color-border)",
+                  background: "var(--color-surface)",
+                  boxShadow: "0 1px 3px oklch(0 0 0 / 0.08), 0 12px 40px oklch(0 0 0 / 0.16)",
+                }}
+              >
+                <DashboardMockup />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
 
-/* ─── Dashboard Mockup ──────────────────── */
+/* ─── Dashboard Mockup ─────────────────────────── */
 
 function DashboardMockup() {
   const kpis: KpiItem[] = [
@@ -370,22 +376,21 @@ function DashboardMockup() {
     { label: "NPS",   value: "67",      delta: "+4",     up: true  },
   ];
 
-  /* Explicit opacity list — avoids CSS relative color syntax */
   const barHeights: number[] = [38,52,44,63,58,72,68,81,76,88,84,96];
   const barOpacities: number[] = [0.18,0.22,0.20,0.28,0.25,0.32,0.30,0.38,0.34,0.42,0.40,1.00];
   const months: string[] = ["J","F","M","A","M","J","J","A","S","O","N","D"];
 
   const activity: ActivityRow[] = [
     { dot: "oklch(0.62 0.15 145)", text: "New user · sarah@nexaflow.io",     time: "now" },
-    { dot: "oklch(0.62 0.20 285)", text: "Invoice paid · $49 · Pro plan",  time: "2m"  },
+    { dot: "oklch(0.62 0.20 285)", text: "Invoice paid · $49 · Pro plan",    time: "2m"  },
     { dot: "oklch(0.62 0.15 192)", text: "Webhook synced · stripe.checkout", time: "5m"  },
   ];
 
   const navItems = [
-    { label: "Overview",  active: true  },
-    { label: "Revenue",   active: false },
-    { label: "Users",     active: false },
-    { label: "Settings",  active: false },
+    { label: "Overview", active: true  },
+    { label: "Revenue",  active: false },
+    { label: "Users",    active: false },
+    { label: "Settings", active: false },
   ];
 
   return (
@@ -422,7 +427,7 @@ function DashboardMockup() {
       </div>
 
       {/* App body */}
-      <div style={{ display: "flex", gap: 0 }}>
+      <div style={{ display: "flex" }}>
 
         {/* Sidebar */}
         <div
@@ -457,15 +462,7 @@ function DashboardMockup() {
         {/* Main panel */}
         <div style={{ flex: 1, padding: "12px", minWidth: 0 }}>
 
-          {/* Page title */}
-          <p
-            style={{
-              fontSize: "12px",
-              fontWeight: 700,
-              color: "var(--color-text)",
-              marginBottom: "10px",
-            }}
-          >
+          <p style={{ fontSize: "12px", fontWeight: 700, color: "var(--color-text)", marginBottom: "10px" }}>
             Overview
           </p>
 
@@ -488,15 +485,9 @@ function DashboardMockup() {
                   border: "1px solid var(--color-border)",
                 }}
               >
-                <p style={{ fontSize: "9px", color: "var(--color-text-faint)", marginBottom: "4px" }}>
-                  {kpi.label}
-                </p>
-                <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-text)", fontVariantNumeric: "tabular-nums" }}>
-                  {kpi.value}
-                </p>
-                <p style={{ fontSize: "9px", fontWeight: 600, marginTop: "2px", color: kpi.up ? "oklch(0.58 0.15 145)" : "oklch(0.62 0.20 25)" }}>
-                  {kpi.delta}
-                </p>
+                <p style={{ fontSize: "9px", color: "var(--color-text-faint)", marginBottom: "4px" }}>{kpi.label}</p>
+                <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-text)", fontVariantNumeric: "tabular-nums" }}>{kpi.value}</p>
+                <p style={{ fontSize: "9px", fontWeight: 600, marginTop: "2px", color: kpi.up ? "oklch(0.58 0.15 145)" : "oklch(0.62 0.20 25)" }}>{kpi.delta}</p>
               </div>
             ))}
           </div>
@@ -513,16 +504,7 @@ function DashboardMockup() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
               <p style={{ fontSize: "10px", fontWeight: 600, color: "var(--color-text-muted)" }}>Revenue &middot; 2025</p>
-              <span
-                style={{
-                  fontSize: "9px",
-                  fontWeight: 600,
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                  background: "oklch(0.55 0.15 145 / 0.12)",
-                  color: "oklch(0.58 0.15 145)",
-                }}
-              >
+              <span style={{ fontSize: "9px", fontWeight: 600, padding: "2px 6px", borderRadius: "4px", background: "oklch(0.55 0.15 145 / 0.12)", color: "oklch(0.58 0.15 145)" }}>
                 +34.2%
               </span>
             </div>
@@ -544,23 +526,8 @@ function DashboardMockup() {
           </div>
 
           {/* Activity feed */}
-          <div
-            style={{
-              borderRadius: "8px",
-              overflow: "hidden",
-              border: "1px solid var(--color-border)",
-            }}
-          >
-            <p
-              style={{
-                padding: "6px 10px",
-                fontSize: "10px",
-                fontWeight: 600,
-                color: "var(--color-text-muted)",
-                background: "var(--color-surface-2)",
-                borderBottom: "1px solid var(--color-border)",
-              }}
-            >
+          <div style={{ borderRadius: "8px", overflow: "hidden", border: "1px solid var(--color-border)" }}>
+            <p style={{ padding: "6px 10px", fontSize: "10px", fontWeight: 600, color: "var(--color-text-muted)", background: "var(--color-surface-2)", borderBottom: "1px solid var(--color-border)" }}>
               Live activity
             </p>
             {activity.map((row, i) => (
@@ -576,24 +543,8 @@ function DashboardMockup() {
                   borderBottom: i < activity.length - 1 ? "1px solid var(--color-border)" : "none",
                 }}
               >
-                <span
-                  style={{
-                    width: "6px",
-                    height: "6px",
-                    borderRadius: "50%",
-                    background: row.dot,
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    flex: 1,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    color: "var(--color-text-muted)",
-                  }}
-                >
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: row.dot, flexShrink: 0 }} />
+                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--color-text-muted)" }}>
                   {row.text}
                 </span>
                 <span style={{ color: "var(--color-text-faint)", flexShrink: 0 }}>{row.time}</span>
