@@ -32,39 +32,37 @@ export function Hero() {
         background: "var(--color-bg)",
       }}
     >
-      {/* Blueprint grid — Vercel-aesthetic, barely visible */}
+      {/* Blueprint grid — 1px lines, barely visible */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(oklch(0.5 0.01 285 / 0.07) 1px, transparent 1px), linear-gradient(90deg, oklch(0.5 0.01 285 / 0.07) 1px, transparent 1px)",
+            "linear-gradient(oklch(0.5 0.01 285 / 0.07) 1px, transparent 1px)," +
+            "linear-gradient(90deg, oklch(0.5 0.01 285 / 0.07) 1px, transparent 1px)",
           backgroundSize: "40px 40px",
+          /* fade grid out near left/right edges using mask */
+          WebkitMaskImage:
+            "radial-gradient(ellipse 90% 100% at 55% 50%, black 40%, transparent 100%)",
+          maskImage:
+            "radial-gradient(ellipse 90% 100% at 55% 50%, black 40%, transparent 100%)",
         }}
       />
-      {/* Radial fade at center — softens the grid near content */}
+      {/* Bottom fade — over the grid only */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 pointer-events-none"
+        className="absolute bottom-0 inset-x-0 h-28 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 40% 50%, var(--color-bg) 30%, transparent 100%)",
+            "linear-gradient(to bottom, transparent, var(--color-bg))",
         }}
-      />
-      {/* Bottom fade */}
-      <div
-        aria-hidden="true"
-        className="absolute bottom-0 inset-x-0 h-32 pointer-events-none"
-        style={{ background: "linear-gradient(to bottom, transparent, var(--color-bg))" }}
       />
 
       <div
-        className="mx-auto w-full px-6 py-24 md:py-32"
+        className="relative mx-auto w-full px-6 py-24 md:py-32"
         style={{ maxWidth: "1200px" }}
       >
-        <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
           {/* ── Left: copy ── */}
           <div>
@@ -100,7 +98,7 @@ export function Hero() {
               Next.js SaaS starter
             </p>
 
-            {/* Headline — left-aligned, no gradient text */}
+            {/* Headline */}
             <h1
               id="hero-heading"
               className="font-display font-bold tracking-tight mb-6"
@@ -111,7 +109,7 @@ export function Hero() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Ship your SaaS{" "}
+              Ship your SaaS
               <br />
               <span style={{ color: "var(--color-primary)" }}>in days,</span>{" "}
               not months.
@@ -152,7 +150,7 @@ export function Hero() {
             <div className="flex items-center gap-3 flex-wrap mb-10">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all duration-150 hover:-translate-y-px active:translate-y-0"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                 style={{
                   background: "var(--color-text)",
                   color: "var(--color-bg)",
@@ -188,7 +186,7 @@ export function Hero() {
               </a>
             </div>
 
-            {/* Social proof row */}
+            {/* Social proof */}
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
                 {([285, 192, 145, 75, 25] as number[]).map((hue, i) => (
@@ -225,19 +223,13 @@ export function Hero() {
             aria-hidden="true"
             className="hidden lg:block relative"
           >
-            {/* Subtle glow behind card — single, low opacity */}
-            <div
-              className="absolute -inset-8 -z-10 rounded-3xl"
-              style={{
-                background: "radial-gradient(ellipse at 50% 50%, oklch(0.52 0.22 285 / 0.07) 0%, transparent 70%)",
-              }}
-            />
             <div
               className="rounded-2xl overflow-hidden"
               style={{
                 border: "1px solid var(--color-border)",
                 background: "var(--color-surface)",
-                boxShadow: "0 2px 4px oklch(0 0 0 / 0.06), 0 16px 48px oklch(0 0 0 / 0.10)",
+                boxShadow:
+                  "0 2px 4px oklch(0 0 0 / 0.08), 0 16px 48px oklch(0 0 0 / 0.12)",
               }}
             >
               <DashboardMockup />
@@ -257,6 +249,22 @@ function DashboardMockup() {
     { label: "Users", value: "1,847",   delta: "+12.4%", up: true  },
     { label: "Churn", value: "2.1%",    delta: "-0.3%",  up: false },
     { label: "NPS",   value: "67",      delta: "+4",     up: true  },
+  ];
+
+  /* explicit bar colors — avoids oklch relative color syntax (limited browser support) */
+  const barColors = [
+    "oklch(0.52 0.22 285 / 0.18)",
+    "oklch(0.52 0.22 285 / 0.22)",
+    "oklch(0.52 0.22 285 / 0.20)",
+    "oklch(0.52 0.22 285 / 0.28)",
+    "oklch(0.52 0.22 285 / 0.25)",
+    "oklch(0.52 0.22 285 / 0.32)",
+    "oklch(0.52 0.22 285 / 0.30)",
+    "oklch(0.52 0.22 285 / 0.38)",
+    "oklch(0.52 0.22 285 / 0.34)",
+    "oklch(0.52 0.22 285 / 0.42)",
+    "oklch(0.52 0.22 285 / 0.38)",
+    "oklch(0.52 0.22 285 / 1)",   /* last bar: solid accent */
   ];
 
   const bars: number[] = [38, 52, 44, 63, 58, 72, 68, 81, 76, 88, 84, 96];
@@ -294,12 +302,11 @@ function DashboardMockup() {
       </div>
 
       <div className="p-4">
-        {/* Sidebar + main layout */}
         <div className="flex gap-3">
           {/* Mini sidebar */}
           <div
             className="hidden xl:flex flex-col gap-1 pt-1"
-            style={{ width: "120px", flexShrink: 0 }}
+            style={{ width: "110px", flexShrink: 0 }}
           >
             {[
               { label: "Overview",  active: true  },
@@ -350,7 +357,7 @@ function DashboardMockup() {
               ))}
             </div>
 
-            {/* Chart */}
+            {/* Revenue chart */}
             <div
               className="rounded-lg p-3 mb-3"
               style={{
@@ -379,10 +386,7 @@ function DashboardMockup() {
                       className="w-full rounded-sm"
                       style={{
                         height: `${h}%`,
-                        background:
-                          i === bars.length - 1
-                            ? "var(--color-primary)"
-                            : `oklch(from var(--color-primary) l c h / ${0.15 + (h / 100) * 0.25})`,
+                        background: barColors[i],
                       }}
                     />
                     <span className="text-[7px]" style={{ color: "var(--color-text-faint)" }}>
