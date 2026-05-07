@@ -1,35 +1,65 @@
 'use client'
 
-import { BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import {
+  BarChart as ReBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 
-const mockData = [
-  { day: 'Mon', signups: 24 }, { day: 'Tue', signups: 38 }, { day: 'Wed', signups: 31 },
-  { day: 'Thu', signups: 45 }, { day: 'Fri', signups: 52 }, { day: 'Sat', signups: 19 }, { day: 'Sun', signups: 14 },
+const data = [
+  { day: 'Mon', signups: 12 },
+  { day: 'Tue', signups: 19 },
+  { day: 'Wed', signups: 15 },
+  { day: 'Thu', signups: 27 },
+  { day: 'Fri', signups: 24 },
+  { day: 'Sat', signups: 8 },
+  { day: 'Sun', signups: 6 },
 ]
 
-export function DashboardBarChart() {
+export default function SignupsBarChart() {
   return (
     <section
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid oklch(from var(--color-text) l c h / 0.08)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--space-6)',
-      }}
       aria-label="Signups per day chart"
+      className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.08)] p-5"
     >
-      <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text)', marginBottom: 'var(--space-6)' }}>Signups this week</h2>
-      <div style={{ height: 220 }}>
+      <h2 className="text-sm font-semibold text-[var(--color-text)] mb-4">Signups this week</h2>
+      <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
-          <ReBarChart data={mockData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+          <ReBarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(from var(--color-text) l c h / 0.06)" vertical={false} />
-            <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'var(--color-text-faint)' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: 'var(--color-text-faint)' }} axisLine={false} tickLine={false} />
-            <Tooltip
-              contentStyle={{ background: 'var(--color-surface-2)', border: '1px solid oklch(from var(--color-text) l c h / 0.10)', borderRadius: 8, fontSize: 12 }}
-              formatter={(v: number) => [v, 'Signups']}
+            <XAxis
+              dataKey="day"
+              tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
+              tickLine={false}
+              axisLine={false}
             />
-            <Bar dataKey="signups" fill="var(--color-primary)" radius={[4, 4, 0, 0]} opacity={0.85} />
+            <YAxis
+              tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
+              tickLine={false}
+              axisLine={false}
+              width={24}
+            />
+            <Tooltip
+              formatter={(v: number) => [v, 'Signups']}
+              contentStyle={{
+                background: 'var(--color-surface-2)',
+                border: '1px solid oklch(from var(--color-text) l c h / 0.10)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 12,
+              }}
+              itemStyle={{ color: 'var(--color-text)' }}
+              labelStyle={{ color: 'var(--color-text-muted)', fontWeight: 500 }}
+            />
+            <Bar
+              dataKey="signups"
+              fill="var(--color-primary)"
+              radius={[3, 3, 0, 0]}
+              maxBarSize={32}
+            />
           </ReBarChart>
         </ResponsiveContainer>
       </div>

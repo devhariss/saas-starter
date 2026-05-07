@@ -2,39 +2,36 @@ import { FolderOpen } from 'lucide-react'
 import Link from 'next/link'
 
 interface EmptyStateProps {
-  title: string
-  description: string
+  title?: string
+  description?: string
   actionLabel?: string
   actionHref?: string
 }
 
-export function EmptyState({ title, description, actionLabel, actionHref }: EmptyStateProps) {
+export default function EmptyState({
+  title = 'Nothing here yet',
+  description = 'Create your first item to get started.',
+  actionLabel = 'Get started',
+  actionHref = '#',
+}: EmptyStateProps) {
   return (
     <div
-      style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', textAlign: 'center',
-        padding: 'var(--space-16) var(--space-8)',
-        color: 'var(--color-text-muted)',
-      }}
+      className="flex flex-col items-center justify-center py-16 px-8 text-center rounded-[var(--radius-lg)] border border-dashed border-[oklch(from_var(--color-text)_l_c_h_/_0.15)] bg-[var(--color-surface)]"
       role="status"
     >
-      <FolderOpen size={48} style={{ color: 'var(--color-text-faint)', marginBottom: 'var(--space-4)' }} aria-hidden="true" />
-      <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text)', marginBottom: 'var(--space-2)' }}>{title}</h3>
-      <p style={{ fontSize: 'var(--text-sm)', maxWidth: '36ch', marginBottom: actionLabel ? 'var(--space-6)' : 0 }}>{description}</p>
-      {actionLabel && actionHref && (
-        <Link
-          href={actionHref}
-          style={{
-            display: 'inline-block', padding: 'var(--space-3) var(--space-6)',
-            background: 'var(--color-primary)', color: '#fff',
-            borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)',
-            fontWeight: 600, textDecoration: 'none',
-          }}
-        >
-          {actionLabel}
-        </Link>
-      )}
+      <FolderOpen
+        size={40}
+        className="text-[var(--color-text-faint)] mb-4"
+        aria-hidden="true"
+      />
+      <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1">{title}</h3>
+      <p className="text-sm text-[var(--color-text-muted)] max-w-xs mb-6">{description}</p>
+      <Link
+        href={actionHref}
+        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-colors"
+      >
+        {actionLabel}
+      </Link>
     </div>
   )
 }

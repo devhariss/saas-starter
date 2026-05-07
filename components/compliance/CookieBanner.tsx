@@ -1,25 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { getConsent, acceptAll, rejectAll, isConsentExpired, isGPCEnabled } from './ConsentManager'
-import { CookiePreferences } from './CookiePreferences'
+import { useEffect, useState } from 'react'
+import { needsBanner, acceptAll, rejectAll, isGPCEnabled, getConsent } from './ConsentManager'
+import dynamic from 'next/dynamic'
 
-export function CookieBanner() {
+const CookiePreferences = dynamic(() => import('./CookiePreferences'), { ssr: false })
+
+export default function CookieBanner() {
   const [visible, setVisible] = useState(false)
-  const [showPreferences, setShowPreferences] = useState(false)
   const [gpcDetected, setGpcDetected] = useState(false)
+  const [showPrefs, setShowPrefs] = useState(false)
 
   useEffect(() => {
-    const gpc = isGPCEnabled()
-    if (gpc) {
+    if (isGPCEnabled()) {
       setGpcDetected(true)
-      rejectAll()
+      // Auto-apply essential-only when GPC is detected
+      if (!getConsent()) rejectAll()
       return
     }
-    const consent = getConsent()
-    if (!consent || isConsentExpired()) {
-      setVisible(true)
-    }
+    setVisible(needsBanner())
   }, [])
 
   if (gpcDetected) {
@@ -27,15 +26,9 @@ export function CookieBanner() {
       <div
         role="status"
         aria-live="polite"
-        style={{
-          position: 'fixed', bottom: 'var(--space-4)', left: 'var(--space-4)',
-          background: 'var(--color-surface)', border: '1px solid oklch(from var(--color-text) l c h / 0.10)',
-          borderRadius: 'var(--radius-lg)', padding: 'var(--space-3) var(--space-4)',
-          fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)',
-          maxWidth: '320px', zIndex: 9998, boxShadow: 'var(--shadow-md)',
-        }}
+        className="fixed bottom-4 left-4 z-50 max-w-sm rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.10)] shadow-lg p-4 text-sm text-[var(--color-text-muted)]"
       >
-        Your privacy preferences have been honored (GPC detected).
+        🛡 Your privacy preferences have been honored (GPC detected).
       </div>
     )
   }
@@ -46,62 +39,42 @@ export function CookieBanner() {
     <>
       <div
         role="dialog"
-        aria-label="Cookie consent"
         aria-modal="false"
-        style={{
-          position: 'fixed', bottom: 'var(--space-6)', left: '50%', transform: 'translateX(-50%)',
-          width: 'min(560px, calc(100vw - var(--space-8)))',
-          background: 'var(--color-surface)', border: '1px solid oklch(from var(--color-text) l c h / 0.10)',
-          borderRadius: 'var(--radius-xl)', padding: 'var(--space-6)',
-          zIndex: 9998, boxShadow: 'var(--shadow-lg)',
-        }}
+        aria-label="Cookie consent"
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-[oklch(from_var(--color-text)_l_c_h_/_0.10)] bg-[var(--color-surface)] shadow-lg"
       >
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text)', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
-          We use cookies
-        </p>
-        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-5)', lineHeight: 1.6 }}>
-          We use essential cookies to make our site work. With your consent, we may also use analytics and functional
-          cookies to improve your experience. See our{' '}
-          <a href="/cookies" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>Cookie Policy</a>.
-        </p>
-        <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => { acceptAll(); setVisible(false) }}
-            style={{
-              flex: 1, minWidth: '100px', padding: 'var(--space-2) var(--space-4)',
-              background: 'var(--color-primary)', color: '#fff', border: 'none',
-              borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer',
-            }}
-          >
-            Accept all
-          </button>
-          <button
-            onClick={() => { rejectAll(); setVisible(false) }}
-            style={{
-              flex: 1, minWidth: '100px', padding: 'var(--space-2) var(--space-4)',
-              background: 'transparent', color: 'var(--color-text)',
-              border: '1px solid oklch(from var(--color-text) l c h / 0.12)',
-              borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer',
-            }}
-          >
-            Reject all
-          </button>
-          <button
-            onClick={() => setShowPreferences(true)}
-            style={{
-              padding: 'var(--space-2) var(--space-4)',
-              background: 'transparent', color: 'var(--color-text-muted)',
-              border: 'none', fontSize: 'var(--text-xs)', cursor: 'pointer',
-              textDecoration: 'underline',
-            }}
-          >
-            Manage preferences
-          </button>
+        <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-4">
+          <p className="flex-1 text-sm text-[var(--color-text-muted)] max-w-2xl">
+            We use cookies to improve your experience. Essential cookies are always active.
+            Optional cookies help us understand usage and improve our service.{' '}
+            <button
+              onClick={() => setShowPrefs(true)}
+              className="underline text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
+            >
+              Manage preferences
+            </button>
+          </p>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Equal weight buttons — GDPR dark-pattern prevention */}
+            <button
+              onClick={() => { rejectAll(); setVisible(false) }}
+              className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-[var(--radius-md)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.15)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors"
+            >
+              Reject all
+            </button>
+            <button
+              onClick={() => { acceptAll(); setVisible(false) }}
+              className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-colors"
+            >
+              Accept all
+            </button>
+          </div>
         </div>
       </div>
-      {showPreferences && (
+
+      {showPrefs && (
         <CookiePreferences
-          onClose={() => { setShowPreferences(false); setVisible(false) }}
+          onClose={() => { setShowPrefs(false); setVisible(false) }}
         />
       )}
     </>

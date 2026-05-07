@@ -1,45 +1,80 @@
 'use client'
 
 import {
-  AreaChart as ReAreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  AreaChart as ReAreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } from 'recharts'
 
-const mockData = [
-  { month: 'Jun', mrr: 4800 }, { month: 'Jul', mrr: 5900 }, { month: 'Aug', mrr: 6200 },
-  { month: 'Sep', mrr: 7100 }, { month: 'Oct', mrr: 7800 }, { month: 'Nov', mrr: 8400 },
-  { month: 'Dec', mrr: 9200 }, { month: 'Jan', mrr: 9800 }, { month: 'Feb', mrr: 10400 },
-  { month: 'Mar', mrr: 11100 }, { month: 'Apr', mrr: 11800 }, { month: 'May', mrr: 12480 },
+const data = [
+  { month: 'Jun', mrr: 7200 },
+  { month: 'Jul', mrr: 8100 },
+  { month: 'Aug', mrr: 7900 },
+  { month: 'Sep', mrr: 8800 },
+  { month: 'Oct', mrr: 9400 },
+  { month: 'Nov', mrr: 9100 },
+  { month: 'Dec', mrr: 9900 },
+  { month: 'Jan', mrr: 10600 },
+  { month: 'Feb', mrr: 10200 },
+  { month: 'Mar', mrr: 11300 },
+  { month: 'Apr', mrr: 11800 },
+  { month: 'May', mrr: 12480 },
 ]
 
-export function DashboardAreaChart() {
+export default function MRRAreaChart() {
   return (
     <section
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid oklch(from var(--color-text) l c h / 0.08)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--space-6)',
-      }}
       aria-label="Revenue over time chart"
+      className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.08)] p-5"
     >
-      <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text)', marginBottom: 'var(--space-6)' }}>Revenue over time</h2>
-      <div style={{ height: 260 }}>
+      <h2 className="text-sm font-semibold text-[var(--color-text)] mb-4">Revenue over time</h2>
+      <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
-          <ReAreaChart data={mockData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+          <ReAreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
             <defs>
-              <linearGradient id="mrrGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.2} />
+              <linearGradient id="mrrGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.20} />
                 <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(from var(--color-text) l c h / 0.06)" vertical={false} />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--color-text-faint)' }} axisLine={false} tickLine={false} />
-            <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: 'var(--color-text-faint)' }} axisLine={false} tickLine={false} width={40} />
-            <Tooltip
-              contentStyle={{ background: 'var(--color-surface-2)', border: '1px solid oklch(from var(--color-text) l c h / 0.10)', borderRadius: 8, fontSize: 12 }}
-              formatter={(v: number) => [`$${v.toLocaleString()}`, 'MRR']}
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
+              tickLine={false}
+              axisLine={false}
             />
-            <Area type="monotone" dataKey="mrr" stroke="var(--color-primary)" strokeWidth={2} fill="url(#mrrGradient)" />
+            <YAxis
+              tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
+              tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
+              tickLine={false}
+              axisLine={false}
+              width={40}
+            />
+            <Tooltip
+              formatter={(v: number) => [`$${v.toLocaleString()}`, 'MRR']}
+              contentStyle={{
+                background: 'var(--color-surface-2)',
+                border: '1px solid oklch(from var(--color-text) l c h / 0.10)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 12,
+              }}
+              itemStyle={{ color: 'var(--color-text)' }}
+              labelStyle={{ color: 'var(--color-text-muted)', fontWeight: 500 }}
+            />
+            <Area
+              type="monotone"
+              dataKey="mrr"
+              stroke="var(--color-primary)"
+              strokeWidth={2}
+              fill="url(#mrrGrad)"
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 0 }}
+            />
           </ReAreaChart>
         </ResponsiveContainer>
       </div>

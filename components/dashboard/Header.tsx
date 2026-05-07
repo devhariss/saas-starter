@@ -1,139 +1,130 @@
 'use client'
 
-import { Bell, Search } from 'lucide-react'
-import { ThemeToggle } from '@/components/shared/ThemeToggle'
-import { useUIStore } from '@/store/useUIStore'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
-import { getInitials } from '@/lib/utils'
+import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Bell, Search, ChevronRight, Home } from 'lucide-react'
+import { useSession, signOut } from 'next-auth/react'
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
 
-/** Header reads user from session hook — no prop needed. */
-export function Header() {
-  const { unreadCount, setCommandOpen } = useUIStore()
-  const { user } = useCurrentUser()
+interface BreadcrumbItem { label: string; href?: string }
+
+interface HeaderProps {
+  breadcrumbs?: BreadcrumbItem[]
+}
+
+export default function Header({ breadcrumbs = [] }: HeaderProps) {
+  const { data: session } = useSession()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const router = useRouter()
+
+  const initials = session?.user?.name
+    ? session.user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+    : 'U'
 
   return (
-    <header
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-        background: 'oklch(from var(--color-bg) l c h / 0.9)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid oklch(from var(--color-text) l c h / 0.08)',
-        padding: '0 var(--space-6)',
-        height: 60,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 'var(--space-4)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-        <Link
-          href="/dashboard"
-          style={{
-            fontSize: 'var(--text-sm)',
-            fontWeight: 600,
-            color: 'var(--color-text)',
-            textDecoration: 'none',
-          }}
-        >
-          SaasStarter
+    <header className="sticky top-0 z-40 h-14 flex items-center justify-between gap-4 px-4 md:px-6 bg-[var(--color-surface)] border-b border-[oklch(from_var(--color-text)_l_c_h_/_0.08)]">
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] min-w-0">
+        <Link href="/dashboard" aria-label="Dashboard home" className="hover:text-[var(--color-text)] transition-colors">
+          <Home size={14} aria-hidden="true" />
         </Link>
-      </div>
+        {breadcrumbs.map((crumb, i) => (
+          <span key={i} className="flex items-center gap-1 min-w-0">
+            <ChevronRight size={12} aria-hidden="true" className="shrink-0" />
+            {crumb.href ? (
+              <Link href={crumb.href} className="hover:text-[var(--color-text)] transition-colors truncate">{crumb.label}</Link>
+            ) : (
+              <span className="text-[var(--color-text)] font-medium truncate" aria-current="page">{crumb.label}</span>
+            )}
+          </span>
+        ))}
+      </nav>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+      {/* Right actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Search */}
         <button
-          onClick={() => setCommandOpen(true)}
-          aria-label="Open search (Cmd+K)"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)',
-            padding: 'var(--space-2) var(--space-3)',
-            background: 'var(--color-surface-2)',
-            border: '1px solid oklch(from var(--color-text) l c h / 0.08)',
-            borderRadius: 'var(--radius-md)',
-            color: 'var(--color-text-muted)',
-            fontSize: 'var(--text-xs)',
-            cursor: 'pointer',
-            minWidth: 160,
-          }}
+          aria-label="Open search (Ctrl+K)"
+          onClick={() => {}}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] bg-[var(--color-surface-2)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.10)] rounded-[var(--radius-md)] hover:border-[var(--color-primary)] transition-colors"
         >
-          <Search size={14} aria-hidden="true" />
-          <span>Search…</span>
-          <kbd
-            style={{
-              marginLeft: 'auto',
-              fontSize: 10,
-              padding: '1px 5px',
-              background: 'var(--color-surface-offset)',
-              borderRadius: 4,
-              color: 'var(--color-text-faint)',
-            }}
-          >
-            ⌘K
-          </kbd>
+          <Search size={13} aria-hidden="true" />
+          Search
+          <kbd className="ml-1 px-1 py-0.5 text-[10px] bg-[var(--color-surface-offset)] rounded font-mono">⌘K</kbd>
         </button>
 
-        <div style={{ position: 'relative' }}>
+        {/* Notifications */}
+        <div className="relative">
           <button
-            aria-label={`Notifications — ${unreadCount} unread`}
-            style={{
-              width: 44,
-              height: 44,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 'var(--radius-md)',
-              border: 'none',
-              background: 'transparent',
-              color: 'var(--color-text-muted)',
-              cursor: 'pointer',
-            }}
+            aria-label="Notifications (3 unread)"
+            className="relative size-9 flex items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors"
           >
-            <Bell size={18} aria-hidden="true" />
-          </button>
-          {unreadCount > 0 && (
+            <Bell size={17} aria-hidden="true" />
             <span
               aria-hidden="true"
-              style={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: 'var(--color-error)',
-                border: '2px solid var(--color-bg)',
-              }}
+              className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[var(--color-primary)]"
             />
-          )}
+          </button>
         </div>
 
+        {/* Theme toggle */}
         <ThemeToggle />
 
-        <Link
-          href="/settings"
-          aria-label="Account settings"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            background: 'var(--color-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 'var(--text-xs)',
-            fontWeight: 700,
-            color: '#fff',
-            textDecoration: 'none',
-            flexShrink: 0,
-          }}
-        >
-          {getInitials(user?.name ?? user?.email ?? 'U')}
-        </Link>
+        {/* User menu */}
+        <div className="relative">
+          <button
+            aria-label="User menu"
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
+            onClick={() => setMenuOpen(o => !o)}
+            className="size-9 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white text-xs font-semibold hover:opacity-90 transition-opacity"
+          >
+            {initials}
+          </button>
+
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} aria-hidden="true" />
+              <div
+                role="menu"
+                aria-label="User menu"
+                className="absolute right-0 top-11 z-50 w-48 rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.10)] shadow-lg py-1"
+              >
+                {session?.user && (
+                  <div className="px-3 py-2 border-b border-[oklch(from_var(--color-text)_l_c_h_/_0.08)]">
+                    <p className="text-xs font-medium text-[var(--color-text)] truncate">{session.user.name}</p>
+                    <p className="text-[11px] text-[var(--color-text-muted)] truncate">{session.user.email}</p>
+                  </div>
+                )}
+                {[
+                  { label: 'Profile', href: '/settings' },
+                  { label: 'Billing', href: '/settings/billing' },
+                  { label: 'Security', href: '/settings/security' },
+                ].map(item => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    role="menuitem"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <div className="border-t border-[oklch(from_var(--color-text)_l_c_h_/_0.08)] mt-1 pt-1">
+                  <button
+                    role="menuitem"
+                    onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/login' }) }}
+                    className="w-full text-left px-3 py-2 text-sm text-[var(--color-error)] hover:bg-[var(--color-surface-2)] transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </header>
   )

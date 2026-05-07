@@ -1,261 +1,163 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { signIn } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { Eye, EyeOff, Github } from 'lucide-react'
 
-const loginSchema = z.object({
+const schema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+})
+type FormData = z.infer<typeof schema>
 
 export default function LoginForm() {
-  const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
+  const [showPw, setShowPw] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
-  });
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
 
-  const onSubmit = async (data: LoginValues) => {
-    setIsLoading(true);
-    setServerError(null);
-    const result = await signIn('credentials', {
+  const onSubmit = async (data: FormData) => {
+    setLoading(true)
+    setServerError(null)
+    const res = await signIn('credentials', {
       email: data.email,
       password: data.password,
       redirect: false,
-    });
-    setIsLoading(false);
-    if (result?.error) {
-      setServerError('Invalid email or password.');
-    } else {
-      router.push('/dashboard');
+      callbackUrl,
+    })
+    setLoading(false)
+    if (res?.error) {
+      setServerError('Invalid email or password.')
+    } else if (res?.ok) {
+      router.push(callbackUrl)
     }
-  };
+  }
 
-  const handleOAuth = async (provider: 'google' | 'github') => {
-    setOauthLoading(provider);
-    await signIn(provider, { callbackUrl: '/dashboard' });
-  };
+  const handleOAuth = (provider: 'google' | 'github') => {
+    signIn(provider, { callbackUrl })
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate aria-label="Sign in form">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
       {serverError && (
-        <div
-          role="alert"
-          aria-live="polite"
-          style={{
-            marginBottom: 'var(--space-4)',
-            padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--radius-md)',
-            background: 'oklch(from var(--color-error) l c h / 0.1)',
-            color: 'var(--color-error)',
-            fontSize: 'var(--text-sm)',
-          }}
-        >
+        <div role="alert" aria-live="assertive" className="p-3 rounded-[var(--radius-md)] bg-[oklch(from_var(--color-error)_l_c_h_/_0.08)] border border-[oklch(from_var(--color-error)_l_c_h_/_0.20)] text-sm text-[var(--color-error)]">
           {serverError}
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <div>
-          <label
-            htmlFor="email"
-            style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 500, marginBottom: 'var(--space-1)', color: 'var(--color-text)' }}
-          >
-            Email address
+      <div>
+        <label htmlFor="login-email" className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+          Email address
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          autoComplete="email"
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'login-email-error' : undefined}
+          {...register('email')}
+          className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.12)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+          placeholder="you@example.com"
+        />
+        {errors.email && (
+          <p id="login-email-error" role="alert" className="mt-1 text-xs text-[var(--color-error)]">{errors.email.message}</p>
+        )}
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <label htmlFor="login-password" className="block text-sm font-medium text-[var(--color-text)]">
+            Password
           </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            aria-invalid={!!errors.email}
-            {...register('email')}
-            style={{
-              width: '100%',
-              padding: 'var(--space-3) var(--space-4)',
-              borderRadius: 'var(--radius-md)',
-              border: `1px solid ${errors.email ? 'var(--color-error)' : 'var(--color-border)'}`,
-              background: 'var(--color-surface)',
-              color: 'var(--color-text)',
-              fontSize: 'var(--text-sm)',
-              outline: 'none',
-              transition: 'border-color 150ms ease',
-              minHeight: '44px',
-            }}
-          />
-          {errors.email && (
-            <p id="email-error" role="alert" style={{ marginTop: 'var(--space-1)', fontSize: 'var(--text-xs)', color: 'var(--color-error)' }}>
-              {errors.email.message}
-            </p>
-          )}
+          <Link href="/forgot-password" className="text-xs text-[var(--color-primary)] hover:underline">
+            Forgot password?
+          </Link>
         </div>
-
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)' }}>
-            <label
-              htmlFor="password"
-              style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text)' }}
-            >
-              Password
-            </label>
-            <Link
-              href="/forgot-password"
-              style={{ fontSize: 'var(--text-xs)', color: 'var(--color-primary)' }}
-            >
-              Forgot password?
-            </Link>
-          </div>
+        <div className="relative">
           <input
-            id="password"
-            type="password"
+            id="login-password"
+            type={showPw ? 'text' : 'password'}
             autoComplete="current-password"
-            aria-describedby={errors.password ? 'password-error' : undefined}
             aria-invalid={!!errors.password}
+            aria-describedby={errors.password ? 'login-pw-error' : undefined}
             {...register('password')}
-            style={{
-              width: '100%',
-              padding: 'var(--space-3) var(--space-4)',
-              borderRadius: 'var(--radius-md)',
-              border: `1px solid ${errors.password ? 'var(--color-error)' : 'var(--color-border)'}`,
-              background: 'var(--color-surface)',
-              color: 'var(--color-text)',
-              fontSize: 'var(--text-sm)',
-              outline: 'none',
-              transition: 'border-color 150ms ease',
-              minHeight: '44px',
-            }}
+            className="w-full px-3 py-2 pr-10 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.12)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+            placeholder="••••••••"
           />
-          {errors.password && (
-            <p id="password-error" role="alert" style={{ marginTop: 'var(--space-1)', fontSize: 'var(--text-xs)', color: 'var(--color-error)' }}>
-              {errors.password.message}
-            </p>
-          )}
+          <button
+            type="button"
+            aria-label={showPw ? 'Hide password' : 'Show password'}
+            onClick={() => setShowPw(p => !p)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+          >
+            {showPw ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
+          </button>
         </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          aria-busy={isLoading}
-          style={{
-            width: '100%',
-            padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            fontWeight: 600,
-            fontSize: 'var(--text-sm)',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            opacity: isLoading ? 0.7 : 1,
-            transition: 'opacity 150ms ease, background 150ms ease',
-            minHeight: '44px',
-            border: 'none',
-          }}
-        >
-          {isLoading ? 'Signing in...' : 'Sign in'}
-        </button>
+        {errors.password && (
+          <p id="login-pw-error" role="alert" className="mt-1 text-xs text-[var(--color-error)]">{errors.password.message}</p>
+        )}
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-3)',
-          margin: 'var(--space-6) 0',
-        }}
-        role="separator"
+      <button
+        type="submit"
+        disabled={loading}
+        aria-busy={loading}
+        className="w-full py-2.5 px-4 rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        <span style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
-        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-faint)', whiteSpace: 'nowrap' }}>or continue with</span>
-        <span style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+        {loading ? 'Signing in…' : 'Sign in'}
+      </button>
+
+      <div className="relative flex items-center gap-3 my-1">
+        <div className="flex-1 h-px bg-[oklch(from_var(--color-text)_l_c_h_/_0.10)]" />
+        <span className="text-xs text-[var(--color-text-faint)]">or continue with</span>
+        <div className="flex-1 h-px bg-[oklch(from_var(--color-text)_l_c_h_/_0.10)]" />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => handleOAuth('google')}
-          disabled={oauthLoading !== null}
-          aria-busy={oauthLoading === 'google'}
+          className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-[var(--radius-md)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.12)] text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors"
           aria-label="Continue with Google"
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 'var(--space-2)',
-            padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-border)',
-            background: 'var(--color-surface)',
-            color: 'var(--color-text)',
-            fontSize: 'var(--text-sm)',
-            fontWeight: 500,
-            cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-            opacity: oauthLoading !== null ? 0.7 : 1,
-            transition: 'background 150ms ease',
-            minHeight: '44px',
-          }}
         >
-          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          {oauthLoading === 'google' ? 'Redirecting...' : 'Continue with Google'}
+          Google
         </button>
-
         <button
           type="button"
           onClick={() => handleOAuth('github')}
-          disabled={oauthLoading !== null}
-          aria-busy={oauthLoading === 'github'}
+          className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-[var(--radius-md)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.12)] text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors"
           aria-label="Continue with GitHub"
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 'var(--space-2)',
-            padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-border)',
-            background: 'var(--color-surface)',
-            color: 'var(--color-text)',
-            fontSize: 'var(--text-sm)',
-            fontWeight: 500,
-            cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-            opacity: oauthLoading !== null ? 0.7 : 1,
-            transition: 'background 150ms ease',
-            minHeight: '44px',
-          }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 0C5.37 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.572C20.565 21.795 24 17.298 24 12c0-6.627-5.373-12-12-12z"/>
-          </svg>
-          {oauthLoading === 'github' ? 'Redirecting...' : 'Continue with GitHub'}
+          <Github size={15} aria-hidden="true" />
+          GitHub
         </button>
       </div>
 
-      <p style={{ marginTop: 'var(--space-6)', textAlign: 'center', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
-        Don&apos;t have an account?{' '}
-        <Link href="/register" style={{ color: 'var(--color-primary)', fontWeight: 500 }}>
+      <p className="text-center text-sm text-[var(--color-text-muted)]">
+        No account?{' '}
+        <Link href="/register" className="text-[var(--color-primary)] hover:underline font-medium">
           Create one
         </Link>
       </p>
     </form>
-  );
+  )
 }

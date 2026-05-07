@@ -2,53 +2,70 @@
 
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { LineChart, Line, ResponsiveContainer } from 'recharts'
+import { cn } from '@/lib/utils'
 
 interface KPICardProps {
   title: string
   value: string
   change: number
   changeLabel?: string
-  sparkline?: number[]
+  sparklineData?: { v: number }[]
+  trend?: 'up' | 'down' | 'neutral'
 }
 
-export function KPICard({ title, value, change, changeLabel, sparkline }: KPICardProps) {
-  const trend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral'
-  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus
-  const trendColor = trend === 'up' ? 'var(--color-success)' : trend === 'down' ? 'var(--color-error)' : 'var(--color-text-muted)'
+export default function KPICard({
+  title,
+  value,
+  change,
+  changeLabel,
+  sparklineData = [],
+  trend = 'neutral',
+}: KPICardProps) {
+  const isPositive = trend === 'up'
+  const isNegative = trend === 'down'
 
-  const chartData = (sparkline ?? []).map((v, i) => ({ i, v }))
+  const TrendIcon = isPositive ? TrendingUp : isNegative ? TrendingDown : Minus
+  const trendColor = isPositive
+    ? 'text-[var(--color-success)]'
+    : isNegative
+    ? 'text-[var(--color-error)]'
+    : 'text-[var(--color-text-muted)]'
+  const sparkColor = isPositive
+    ? 'var(--color-success)'
+    : isNegative
+    ? 'var(--color-error)'
+    : 'var(--color-text-faint)'
 
   return (
-    <article
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid oklch(from var(--color-text) l c h / 0.08)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--space-6)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--space-3)',
-      }}
-    >
-      <p style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</p>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'var(--space-2)' }}>
-        <span style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{value}</span>
-        {sparkline && (
-          <div style={{ width: 80, height: 36 }} aria-hidden="true">
+    <article className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.08)] p-5 flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">{title}</p>
+          <p className="mt-1 text-2xl font-semibold text-[var(--color-text)] tabular-nums">{value}</p>
+        </div>
+        {sparklineData.length > 0 && (
+          <div className="w-20 h-10 shrink-0">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <Line type="monotone" dataKey="v" stroke="var(--color-primary)" strokeWidth={1.5} dot={false} />
+              <LineChart data={sparklineData}>
+                <Line
+                  type="monotone"
+                  dataKey="v"
+                  stroke={sparkColor}
+                  strokeWidth={1.5}
+                  dot={false}
+                  isAnimationActive={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         )}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
-        <TrendIcon size={14} color={trendColor} aria-hidden="true" />
-        <span style={{ fontSize: 'var(--text-xs)', color: trendColor, fontVariantNumeric: 'tabular-nums' }}>
+      <div className={cn('flex items-center gap-1 text-xs font-medium', trendColor)}>
+        <TrendIcon size={13} aria-hidden="true" />
+        <span aria-label={`${change > 0 ? '+' : ''}${change}% ${changeLabel ?? ''}`}>
           {change > 0 ? '+' : ''}{change}%
+          {changeLabel && <span className="ml-1 font-normal text-[var(--color-text-faint)]">{changeLabel}</span>}
         </span>
-        {changeLabel && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-faint)' }}> {changeLabel}</span>}
       </div>
     </article>
   )

@@ -1,169 +1,87 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import Link from 'next/link';
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { signIn } from 'next-auth/react'
+import Link from 'next/link'
+import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 
 const schema = z.object({
   email: z.string().email('Please enter a valid email address'),
-});
-
-type ForgotValues = z.infer<typeof schema>;
+})
+type FormData = z.infer<typeof schema>
 
 export default function ForgotPasswordForm() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle');
+  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
-  } = useForm<ForgotValues>({
-    resolver: zodResolver(schema),
-  });
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
 
-  const onSubmit = async (data: ForgotValues) => {
-    setStatus('loading');
-    try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: data.email }),
-      });
-      setStatus(res.ok ? 'sent' : 'error');
-    } catch {
-      setStatus('error');
-    }
-  };
+  const onSubmit = async (data: FormData) => {
+    setLoading(true)
+    await signIn('resend', { email: data.email, redirect: false })
+    setLoading(false)
+    setSent(true)
+  }
 
-  if (status === 'sent') {
+  if (sent) {
     return (
-      <div
-        role="status"
-        aria-live="polite"
-        style={{
-          padding: 'var(--space-6)',
-          borderRadius: 'var(--radius-lg)',
-          background: 'oklch(from var(--color-success) l c h / 0.08)',
-          border: '1px solid oklch(from var(--color-success) l c h / 0.2)',
-          textAlign: 'center',
-        }}
-      >
-        <svg
-          width="40"
-          height="40"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--color-success)"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ margin: '0 auto var(--space-3)' }}
-          aria-hidden="true"
-        >
-          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.9a16 16 0 006.29 6.29l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
-        </svg>
-        <p style={{ fontWeight: 600, color: 'var(--color-text)', marginBottom: 'var(--space-1)' }}>Check your inbox</p>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
-          If that email is registered, you&apos;ll receive a magic link shortly.
+      <div className="text-center space-y-4" role="status" aria-live="polite">
+        <CheckCircle2 size={40} className="text-[var(--color-success)] mx-auto" aria-hidden="true" />
+        <h2 className="text-base font-semibold text-[var(--color-text)]">Check your inbox</h2>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          We sent a magic link to <strong className="text-[var(--color-text)]">{getValues('email')}</strong>.
+          The link expires in 10 minutes.
         </p>
-        <Link
-          href="/login"
-          style={{ display: 'inline-block', marginTop: 'var(--space-4)', fontSize: 'var(--text-sm)', color: 'var(--color-primary)', fontWeight: 500 }}
-        >
-          Back to sign in
+        <Link href="/login" className="inline-flex items-center gap-1.5 text-sm text-[var(--color-primary)] hover:underline">
+          <ArrowLeft size={13} aria-hidden="true" /> Back to sign in
         </Link>
       </div>
-    );
+    )
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate aria-label="Password reset form">
-      {status === 'error' && (
-        <div
-          role="alert"
-          aria-live="polite"
-          style={{
-            marginBottom: 'var(--space-4)',
-            padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--radius-md)',
-            background: 'oklch(from var(--color-error) l c h / 0.1)',
-            color: 'var(--color-error)',
-            fontSize: 'var(--text-sm)',
-          }}
-        >
-          Something went wrong. Please try again.
-        </div>
-      )}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <div>
-          <label
-            htmlFor="forgot-email"
-            style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 500, marginBottom: 'var(--space-1)', color: 'var(--color-text)' }}
-          >
-            Email address
-          </label>
-          <input
-            id="forgot-email"
-            type="email"
-            autoComplete="email"
-            aria-describedby={errors.email ? 'forgot-email-error' : 'forgot-email-hint'}
-            aria-invalid={!!errors.email}
-            {...register('email')}
-            style={{
-              width: '100%',
-              padding: 'var(--space-3) var(--space-4)',
-              borderRadius: 'var(--radius-md)',
-              border: `1px solid ${errors.email ? 'var(--color-error)' : 'var(--color-border)'}`,
-              background: 'var(--color-surface)',
-              color: 'var(--color-text)',
-              fontSize: 'var(--text-sm)',
-              outline: 'none',
-              transition: 'border-color 150ms ease',
-              minHeight: '44px',
-            }}
-          />
-          <p id="forgot-email-hint" style={{ marginTop: 'var(--space-1)', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
-            We&apos;ll send a magic link to this address.
-          </p>
-          {errors.email && (
-            <p id="forgot-email-error" role="alert" style={{ marginTop: 'var(--space-1)', fontSize: 'var(--text-xs)', color: 'var(--color-error)' }}>
-              {errors.email.message}
-            </p>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={status === 'loading'}
-          aria-busy={status === 'loading'}
-          style={{
-            width: '100%',
-            padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            fontWeight: 600,
-            fontSize: 'var(--text-sm)',
-            cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-            opacity: status === 'loading' ? 0.7 : 1,
-            border: 'none',
-            minHeight: '44px',
-            transition: 'opacity 150ms ease',
-          }}
-        >
-          {status === 'loading' ? 'Sending...' : 'Send magic link'}
-        </button>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+      <div>
+        <label htmlFor="forgot-email" className="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+          Email address
+        </label>
+        <input
+          id="forgot-email"
+          type="email"
+          autoComplete="email"
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'forgot-email-error' : undefined}
+          {...register('email')}
+          className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[oklch(from_var(--color-text)_l_c_h_/_0.12)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+          placeholder="you@example.com"
+        />
+        {errors.email && (
+          <p id="forgot-email-error" role="alert" className="mt-1 text-xs text-[var(--color-error)]">{errors.email.message}</p>
+        )}
       </div>
 
-      <p style={{ marginTop: 'var(--space-6)', textAlign: 'center', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
-        Remembered it?{' '}
-        <Link href="/login" style={{ color: 'var(--color-primary)', fontWeight: 500 }}>
-          Back to sign in
+      <button
+        type="submit"
+        disabled={loading}
+        aria-busy={loading}
+        className="w-full py-2.5 px-4 rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {loading ? 'Sending link…' : 'Send magic link'}
+      </button>
+
+      <p className="text-center text-sm text-[var(--color-text-muted)]">
+        <Link href="/login" className="inline-flex items-center gap-1.5 text-[var(--color-primary)] hover:underline">
+          <ArrowLeft size={13} aria-hidden="true" /> Back to sign in
         </Link>
       </p>
     </form>
-  );
+  )
 }
