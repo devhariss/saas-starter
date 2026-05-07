@@ -1,6 +1,3 @@
-// This is your Prisma schema file
-// Learn more: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,7 +8,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum UserRole {
+enum Role {
   USER
   ADMIN
   BANNED
@@ -30,7 +27,7 @@ enum ProjectStatus {
   archived
 }
 
-enum TeamMemberRole {
+enum TeamRole {
   OWNER
   ADMIN
   MEMBER
@@ -44,10 +41,10 @@ enum ConsentAction {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          UserRole  @default(USER)
+  role          Role      @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -56,8 +53,8 @@ model User {
   subscription Subscription?
   projects     Project[]
   teamMembers  TeamMember[]
-  auditLogs    AuditLog[]
   ownedTeams   Team[]       @relation("TeamOwner")
+  auditLogs    AuditLog[]
 }
 
 model Account {
@@ -84,8 +81,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -102,7 +98,7 @@ model Subscription {
   stripeCustomerId     String?            @unique
   stripePriceId        String?
   stripeSubscriptionId String?            @unique
-  status               SubscriptionStatus @default(incomplete)
+  status               SubscriptionStatus @default(trialing)
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean            @default(false)
@@ -110,21 +106,6 @@ model Subscription {
   updatedAt            DateTime           @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Project {
-  id          String        @id @default(cuid())
-  name        String
-  slug        String        @unique
-  description String?       @db.Text
-  userId      String
-  teamId      String?
-  status      ProjectStatus @default(active)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team Team? @relation(fields: [teamId], references: [id], onDelete: SetNull)
 }
 
 model Team {
@@ -142,11 +123,11 @@ model Team {
 }
 
 model TeamMember {
-  id       String         @id @default(cuid())
+  id       String   @id @default(cuid())
   teamId   String
   userId   String
-  role     TeamMemberRole @default(MEMBER)
-  joinedAt DateTime       @default(now())
+  role     TeamRole @default(MEMBER)
+  joinedAt DateTime @default(now())
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -155,15 +136,30 @@ model TeamMember {
 }
 
 model TeamInvite {
-  id        String         @id @default(cuid())
+  id        String   @id @default(cuid())
   teamId    String
   email     String
-  role      TeamMemberRole @default(MEMBER)
-  token     String         @unique @default(cuid())
+  role      TeamRole @default(MEMBER)
+  token     String   @unique @default(cuid())
   expiresAt DateTime
-  createdAt DateTime       @default(now())
+  createdAt DateTime @default(now())
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  userId      String
+  teamId      String?
+  status      ProjectStatus @default(active)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team? @relation(fields: [teamId], references: [id])
 }
 
 model AuditLog {
