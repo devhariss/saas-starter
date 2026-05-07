@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, CreditCard, Mail, Globe, BarChart3, Zap, Check, ArrowRight } from "lucide-react";
+import { Shield, CreditCard, Mail, Globe, BarChart3, Zap, ArrowRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ import { useState } from "react";
 interface Feature {
   icon: LucideIcon;
   label: string;
-  accent: string;          /* oklch color string */
+  accent: string;
   title: string;
   description: string;
   code?: string;
@@ -92,7 +92,6 @@ export function Features() {
         overflow: "hidden",
       }}
     >
-      {/* Subtle top ambient glow — same as hero */}
       <div
         aria-hidden="true"
         style={{
@@ -150,35 +149,19 @@ export function Features() {
           </p>
         </div>
 
-        {/* Bento grid — CSS Grid with named areas */}
+        {/* Bento grid */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
-            gridTemplateRows: "auto",
             gap: "12px",
           }}
         >
-          {/* Auth — col-span 2 */}
-          <div style={{ gridColumn: "span 2" }}>
-            <FeatureCard feature={features[0]} />
-          </div>
-
-          {/* Billing — row-span 2 */}
-          <div style={{ gridRow: "span 2" }}>
-            <FeatureCard feature={features[1]} stretch />
-          </div>
-
-          {/* Email + Compliance — each 1 col */}
+          <div style={{ gridColumn: "span 2" }}><FeatureCard feature={features[0]} /></div>
+          <div style={{ gridRow: "span 2" }}><FeatureCard feature={features[1]} stretch /></div>
           <div><FeatureCard feature={features[2]} /></div>
           <div><FeatureCard feature={features[3]} /></div>
-
-          {/* Analytics — col-span 2 (wraps to next row under email/compliance) */}
-          <div style={{ gridColumn: "span 2" }}>
-            <FeatureCard feature={features[4]} />
-          </div>
-
-          {/* Spacer so billing row-span lines up correctly */}
+          <div style={{ gridColumn: "span 2" }}><FeatureCard feature={features[4]} /></div>
           <div />
         </div>
       </div>
@@ -207,14 +190,12 @@ function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean
         height: stretch ? "100%" : undefined,
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
-        boxShadow: hovered
-          ? "0 4px 24px oklch(0 0 0 / 0.10)"
-          : "0 1px 3px oklch(0 0 0 / 0.05)",
+        boxShadow: hovered ? "0 4px 24px oklch(0 0 0 / 0.10)" : "0 1px 3px oklch(0 0 0 / 0.05)",
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
         transition: "box-shadow 0.25s ease, transform 0.25s ease",
       }}
     >
-      {/* Hover top-edge glow line */}
+      {/* Top-edge glow line on hover */}
       <div
         aria-hidden="true"
         style={{
@@ -227,7 +208,7 @@ function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean
         }}
       />
 
-      {/* Hover radial fill */}
+      {/* Radial fill on hover */}
       <div
         aria-hidden="true"
         style={{
@@ -241,17 +222,9 @@ function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean
         }}
       />
 
-      {/* Icon + label row — no colored circle, just the icon + text */}
+      {/* Icon + label */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px", position: "relative" }}>
-        <Icon
-          size={17}
-          aria-hidden="true"
-          style={{
-            color: feature.accent,
-            flexShrink: 0,
-            transition: "opacity 0.2s",
-          }}
-        />
+        <Icon size={17} aria-hidden="true" style={{ color: feature.accent, flexShrink: 0 }} />
         <span
           style={{
             fontSize: "10px",
@@ -279,14 +252,7 @@ function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean
         >
           {feature.title}
         </h3>
-        <p
-          style={{
-            fontSize: "0.9375rem",
-            lineHeight: 1.65,
-            color: "var(--color-text-muted)",
-            maxWidth: "44ch",
-          }}
-        >
+        <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "var(--color-text-muted)", maxWidth: "44ch" }}>
           {feature.description}
         </p>
       </div>
@@ -295,7 +261,6 @@ function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean
       {feature.code && (
         <div
           style={{
-            position: "relative",
             marginTop: "auto",
             borderRadius: "10px",
             overflow: "hidden",
@@ -303,7 +268,6 @@ function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean
             border: "1px solid oklch(0.52 0.22 285 / 0.14)",
           }}
         >
-          {/* Mini toolbar */}
           <div
             style={{
               display: "flex",
@@ -316,14 +280,7 @@ function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean
             {["oklch(0.62 0.20 25 / 0.5)","oklch(0.70 0.18 75 / 0.5)","oklch(0.58 0.15 145 / 0.5)"].map((c) => (
               <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, display: "block" }} />
             ))}
-            <span
-              style={{
-                marginLeft: "auto",
-                fontSize: "10px",
-                fontFamily: "ui-monospace, monospace",
-                color: "oklch(0.45 0.06 285)",
-              }}
-            >
+            <span style={{ marginLeft: "auto", fontSize: "10px", fontFamily: "ui-monospace, monospace", color: "oklch(0.45 0.06 285)" }}>
               auth.ts
             </span>
           </div>
@@ -345,23 +302,10 @@ function FeatureCard({ feature, stretch }: { feature: Feature; stretch?: boolean
 
       {/* Feature list */}
       {feature.items && (
-        <ul
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            marginTop: "auto",
-            listStyle: "none",
-            padding: 0,
-          }}
-        >
+        <ul style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "auto", listStyle: "none", padding: 0 }}>
           {feature.items.map((item) => (
             <li key={item} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <ArrowRight
-                size={11}
-                aria-hidden="true"
-                style={{ color: feature.accent, flexShrink: 0 }}
-              />
+              <ArrowRight size={11} aria-hidden="true" style={{ color: feature.accent, flexShrink: 0 }} />
               <span style={{ fontSize: "0.9rem", color: "var(--color-text-muted)" }}>{item}</span>
             </li>
           ))}
