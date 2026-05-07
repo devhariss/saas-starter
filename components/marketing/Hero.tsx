@@ -152,11 +152,12 @@ export function Hero() {
                   <div
                     key={initials}
                     aria-hidden="true"
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-semibold ring-2"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-semibold"
                     style={{
                       background: `oklch(${0.50 + i * 0.04} 0.15 ${220 + i * 25})`,
                       color: "#fff",
-                      ringColor: "var(--color-bg)",
+                      outline: "2px solid var(--color-bg)",
+                      outlineOffset: "-1px",
                     }}
                   >
                     {initials}
