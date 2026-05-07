@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Bell, Search, ChevronRight, Home } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
@@ -16,7 +15,6 @@ interface HeaderProps {
 export default function Header({ breadcrumbs = [] }: HeaderProps) {
   const { data: session } = useSession()
   const [menuOpen, setMenuOpen] = useState(false)
-  const router = useRouter()
 
   const initials = session?.user?.name
     ? session.user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()

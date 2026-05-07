@@ -15,13 +15,6 @@ const activities = [
   { id: 12, type: 'signup', text: 'Mia Torres signed up', time: new Date(Date.now() - 23 * 3600000) },
 ]
 
-const colorMap: Record<string, string> = {
-  signup: 'bg-[oklch(from_var(--color-success)_l_c_h_/_0.15)] text-[var(--color-success)]',
-  upgrade: 'bg-[oklch(from_var(--color-primary)_l_c_h_/_0.12)] text-[var(--color-primary)]',
-  project: 'bg-[oklch(from_var(--color-secondary)_l_c_h_/_0.12)] text-[var(--color-secondary)]',
-  payment: 'bg-[oklch(from_var(--color-warning)_l_c_h_/_0.12)] text-[var(--color-warning)]',
-}
-
 const dotMap: Record<string, string> = {
   signup: 'bg-[var(--color-success)]',
   upgrade: 'bg-[var(--color-primary)]',

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
-import { getConsent, setConsent, type ConsentState } from './ConsentManager'
+import { getConsent, setConsent } from './ConsentManager'
 
 interface Props { onClose: () => void }
 
