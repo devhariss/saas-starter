@@ -1,14 +1,10 @@
 "use client";
 
-import { Zap } from "lucide-react";
+import { Zap, Chrome, Github, Mail, CheckCircle2, TrendingUp, TrendingDown } from "lucide-react";
 
-/* ────────────────────────────────────────────────────
-   Features — alternating rows, each with copy + visual
-   Inspired by Linear / Stripe / Vercel feature pages
-──────────────────────────────────────────────────── */
+/* ─── Shared style tokens ─── */
 
 const S = {
-  /* reusable inline-style snippets */
   pill: {
     display: "inline-flex" as const,
     alignItems: "center" as const,
@@ -33,158 +29,135 @@ const S = {
     letterSpacing: "0.10em",
     textTransform: "uppercase" as const,
     marginBottom: "1rem",
-    background: `${accent.replace(")", " / 0.10)")}`,
+    background: `${accent.replace(")", " / 0.12)")}`,
     color: accent,
-    border: `1px solid ${accent.replace(")", " / 0.25)")}`,
+    border: `1px solid ${accent.replace(")", " / 0.28)")}`,
   }),
+  /* Card surfaces — explicit bg so dark mode is always readable */
+  card: {
+    background: "var(--color-surface)",
+    border: "1px solid var(--color-border)",
+    borderRadius: "14px",
+    boxShadow: "0 4px 20px oklch(0 0 0 / 0.10)",
+  } as React.CSSProperties,
+  /* Readable muted text — bumped to text-muted so it passes 4.5:1 on both modes */
+  muted: { color: "var(--color-text-muted)" } as React.CSSProperties,
+  faint: { color: "var(--color-text-faint)" } as React.CSSProperties,
+  text:  { color: "var(--color-text)"       } as React.CSSProperties,
 };
 
-/* ─── Visual components (one per feature row) ─── */
+import React from "react";
+
+/* ─── Background SVG pattern (dot grid) ─── */
+
+const BG_PATTERN = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23ffffff' fill-opacity='0.035'/%3E%3C/svg%3E")`;
+const BG_PATTERN_LIGHT = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23000000' fill-opacity='0.04'/%3E%3C/svg%3E")`;
+
+/* ─── Visuals ─── */
 
 function AuthVisual() {
   const providers = [
-    { name: "Google",  bg: "#fff",         border: "#e2e2e2", icon: "🔵", label: "Continue with Google"  },
-    { name: "GitHub",  bg: "#24292e",      border: "#444",    icon: "⚫",    label: "Continue with GitHub"  },
-    { name: "Email",   bg: "var(--color-surface-offset)", border: "var(--color-border)", icon: "✉️",  label: "Continue with Email"   },
+    { name: "Google", Icon: Chrome,  bg: "var(--color-surface-2, var(--color-surface))", label: "Continue with Google"  },
+    { name: "GitHub", Icon: Github,  bg: "oklch(0.18 0.01 285)",                         label: "Continue with GitHub", light: true },
+    { name: "Email",  Icon: Mail,    bg: "var(--color-surface-offset, var(--color-surface))", label: "Continue with Email"  },
   ];
   return (
-    <div
-      style={{
-        background: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
-        borderRadius: "16px",
-        padding: "2rem",
-        boxShadow: "0 8px 32px oklch(0 0 0 / 0.10)",
-      }}
-    >
-      <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-text)", marginBottom: "4px" }}>Sign in to Acme</p>
-      <p style={{ fontSize: "11px", color: "var(--color-text-faint)", marginBottom: "1.5rem" }}>Welcome back</p>
+    <div style={{ ...S.card, padding: "1.75rem" }}>
+      <p style={{ fontSize: "13px", fontWeight: 700, marginBottom: "3px", ...S.text }}>Sign in to Acme</p>
+      <p style={{ fontSize: "11px", marginBottom: "1.5rem", ...S.faint }}>Welcome back</p>
+
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        {providers.map((p) => (
+        {providers.map(({ name, Icon, bg, light }) => (
           <div
-            key={p.name}
+            key={name}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "9px 14px",
-              borderRadius: "8px",
-              background: p.bg,
-              border: `1px solid ${p.border}`,
-              fontSize: "12px",
-              fontWeight: 500,
-              color: p.name === "GitHub" ? "#fff" : "var(--color-text)",
+              display: "flex", alignItems: "center", gap: "10px",
+              padding: "9px 14px", borderRadius: "8px",
+              background: bg,
+              border: "1px solid var(--color-border)",
+              fontSize: "12px", fontWeight: 500,
+              color: light ? "#f1f1f1" : "var(--color-text)",
             }}
           >
-            <span style={{ fontSize: "14px" }}>{p.icon}</span>
-            {p.label}
+            <Icon size={14} aria-hidden="true" />
+            {label}
           </div>
         ))}
       </div>
+
       <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "1rem 0" }}>
         <div style={{ flex: 1, height: "1px", background: "var(--color-border)" }} />
-        <span style={{ fontSize: "10px", color: "var(--color-text-faint)" }}>or</span>
+        <span style={{ fontSize: "10px", ...S.faint }}>or</span>
         <div style={{ flex: 1, height: "1px", background: "var(--color-border)" }} />
       </div>
-      <div
-        style={{
-          padding: "9px 14px",
-          borderRadius: "8px",
-          background: "var(--color-text)",
-          color: "var(--color-bg)",
-          fontSize: "12px",
-          fontWeight: 600,
-          textAlign: "center" as const,
-        }}
-      >
-        Create account →
-      </div>
-      {/* Session badge */}
-      <div
-        style={{
-          marginTop: "1rem",
-          padding: "8px 12px",
-          borderRadius: "8px",
-          background: "oklch(0.52 0.22 285 / 0.08)",
-          border: "1px solid oklch(0.52 0.22 285 / 0.16)",
-          fontSize: "10px",
-          color: "var(--color-primary)",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-        }}
-      >
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-primary)", display: "block", flexShrink: 0 }} />
-        Session stored · Prisma · strategy: database
+
+      <div style={{
+        padding: "9px 14px", borderRadius: "8px",
+        background: "var(--color-text)", color: "var(--color-bg)",
+        fontSize: "12px", fontWeight: 600, textAlign: "center" as const,
+      }}>Create account &rarr;</div>
+
+      <div style={{
+        marginTop: "1rem", padding: "8px 12px", borderRadius: "8px",
+        background: "oklch(0.52 0.22 285 / 0.10)",
+        border: "1px solid oklch(0.52 0.22 285 / 0.20)",
+        fontSize: "10px", color: "var(--color-primary)",
+        display: "flex", alignItems: "center", gap: "6px",
+      }}>
+        <CheckCircle2 size={11} aria-hidden="true" />
+        Session stored &middot; Prisma &middot; strategy: database
       </div>
     </div>
   );
 }
 
 function BillingVisual() {
-  const plan = { name: "Pro", price: "$49", period: "/mo", users: 5, storage: "50 GB" };
   const events = [
-    { label: "checkout.session.completed", time: "just now",  dot: "oklch(0.60 0.16 145)" },
-    { label: "invoice.payment_succeeded",  time: "2s ago",    dot: "oklch(0.62 0.20 285)" },
-    { label: "customer.subscription.updated", time: "8s ago", dot: "oklch(0.68 0.18 75)"  },
+    { label: "checkout.session.completed",    time: "just now", dot: "oklch(0.62 0.16 145)" },
+    { label: "invoice.payment_succeeded",      time: "2s ago",   dot: "oklch(0.62 0.20 285)" },
+    { label: "customer.subscription.updated", time: "8s ago",   dot: "oklch(0.72 0.18 75)"  },
   ];
   return (
-    <div style={{ display: "flex", flexDirection: "column" as const, gap: "10px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       {/* Plan card */}
-      <div
-        style={{
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "14px",
-          padding: "1.25rem 1.5rem",
-          boxShadow: "0 4px 16px oklch(0 0 0 / 0.07)",
-        }}
-      >
+      <div style={{ ...S.card, padding: "1.25rem 1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
-            <p style={{ fontSize: "11px", color: "var(--color-text-faint)", marginBottom: "4px" }}>Current plan</p>
-            <p style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-text)", letterSpacing: "-0.02em" }}>
-              {plan.price}<span style={{ fontSize: "12px", fontWeight: 400, color: "var(--color-text-muted)" }}>{plan.period}</span>
+            <p style={{ fontSize: "11px", marginBottom: "4px", ...S.faint }}>Current plan</p>
+            <p style={{ fontSize: "20px", fontWeight: 800, letterSpacing: "-0.02em", ...S.text }}>
+              $49<span style={{ fontSize: "12px", fontWeight: 400, ...S.muted }}>/mo</span>
             </p>
           </div>
-          <span
-            style={{
-              padding: "3px 10px",
-              borderRadius: "9999px",
-              background: "oklch(0.52 0.22 285 / 0.12)",
-              color: "var(--color-primary)",
-              fontSize: "10px",
-              fontWeight: 700,
-            }}
-          >
-            {plan.name}
-          </span>
+          <span style={{
+            padding: "3px 10px", borderRadius: "9999px",
+            background: "oklch(0.52 0.22 285 / 0.12)",
+            color: "var(--color-primary)",
+            fontSize: "10px", fontWeight: 700,
+          }}>Pro</span>
         </div>
         <div style={{ display: "flex", gap: "1.5rem", marginTop: "1rem" }}>
-          {[{ label: "Seats", val: plan.users }, { label: "Storage", val: plan.storage }].map((m) => (
+          {[{ label: "Seats", val: "5" }, { label: "Storage", val: "50 GB" }].map((m) => (
             <div key={m.label}>
-              <p style={{ fontSize: "9px", color: "var(--color-text-faint)", marginBottom: "2px" }}>{m.label}</p>
-              <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-text)" }}>{m.val}</p>
+              <p style={{ fontSize: "9px", marginBottom: "2px", ...S.faint }}>{m.label}</p>
+              <p style={{ fontSize: "13px", fontWeight: 600, ...S.text }}>{m.val}</p>
             </div>
           ))}
         </div>
       </div>
       {/* Webhook feed */}
-      <div
-        style={{
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "14px",
-          overflow: "hidden",
-          boxShadow: "0 4px 16px oklch(0 0 0 / 0.07)",
-        }}
-      >
-        <p style={{ padding: "8px 14px", fontSize: "10px", fontWeight: 600, color: "var(--color-text-muted)", borderBottom: "1px solid var(--color-border)" }}>Stripe webhooks</p>
+      <div style={{ ...S.card, overflow: "hidden" as const }}>
+        <p style={{ padding: "8px 14px", fontSize: "10px", fontWeight: 600, borderBottom: "1px solid var(--color-border)", ...S.muted }}>
+          Stripe webhooks
+        </p>
         {events.map((e) => (
-          <div key={e.label} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 14px", borderBottom: "1px solid var(--color-border)", fontSize: "10px" }}>
+          <div key={e.label} style={{
+            display: "flex", alignItems: "center", gap: "8px",
+            padding: "9px 14px", borderBottom: "1px solid var(--color-border)",
+            fontSize: "10px",
+          }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: e.dot, flexShrink: 0, display: "block" }} />
-            <span style={{ flex: 1, color: "var(--color-text-muted)", fontFamily: "ui-monospace, monospace" }}>{e.label}</span>
-            <span style={{ color: "var(--color-text-faint)" }}>{e.time}</span>
+            <span style={{ flex: 1, fontFamily: "ui-monospace, monospace", ...S.muted }}>{e.label}</span>
+            <span style={{ ...S.faint }}>{e.time}</span>
           </div>
         ))}
       </div>
@@ -194,126 +167,89 @@ function BillingVisual() {
 
 function EmailVisual() {
   return (
-    <div
-      style={{
-        background: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
-        borderRadius: "16px",
-        overflow: "hidden",
-        boxShadow: "0 8px 32px oklch(0 0 0 / 0.10)",
-      }}
-    >
-      {/* Email header */}
-      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--color-border)", display: "flex", alignItems: "center", gap: "10px" }}>
-        <div
-          style={{
-            width: 30, height: 30, borderRadius: "50%",
-            background: "oklch(0.52 0.22 285 / 0.15)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "13px",
-          }}
-        >A</div>
+    <div style={{ ...S.card, overflow: "hidden" as const }}>
+      {/* Header */}
+      <div style={{
+        padding: "12px 16px", borderBottom: "1px solid var(--color-border)",
+        display: "flex", alignItems: "center", gap: "10px",
+      }}>
+        <div style={{
+          width: 30, height: 30, borderRadius: "50%",
+          background: "oklch(0.52 0.22 285 / 0.18)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: "12px", fontWeight: 700,
+          color: "var(--color-primary)",
+        }}>A</div>
         <div>
-          <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-text)", margin: 0 }}>Acme — Welcome!</p>
-          <p style={{ fontSize: "10px", color: "var(--color-text-faint)", margin: 0 }}>hello@acme.com → you@email.com</p>
+          <p style={{ fontSize: "11px", fontWeight: 600, margin: 0, ...S.text }}>Acme &mdash; Welcome!</p>
+          <p style={{ fontSize: "10px", margin: 0, ...S.faint }}>hello@acme.com &rarr; you@email.com</p>
         </div>
       </div>
-      {/* Email body */}
+      {/* Body */}
       <div style={{ padding: "1.25rem 1.5rem" }}>
-        <p style={{ fontSize: "16px", fontWeight: 700, color: "var(--color-text)", marginBottom: "8px" }}>Welcome to Acme 🚀</p>
-        <p style={{ fontSize: "11px", lineHeight: 1.7, color: "var(--color-text-muted)", marginBottom: "1.25rem" }}>
-          You’re all set. Your account is live and ready to use. Click below to get started.
+        <p style={{ fontSize: "15px", fontWeight: 700, marginBottom: "8px", ...S.text }}>Welcome to Acme</p>
+        <p style={{ fontSize: "11px", lineHeight: 1.75, marginBottom: "1.25rem", ...S.muted }}>
+          You&rsquo;re all set. Your account is live and ready. Click below to get started.
         </p>
-        <div
-          style={{
-            display: "inline-block",
-            padding: "9px 20px",
-            borderRadius: "7px",
-            background: "var(--color-text)",
-            color: "var(--color-bg)",
-            fontSize: "11px",
-            fontWeight: 600,
-            marginBottom: "1rem",
-          }}
-        >
-          Open dashboard →
-        </div>
-        {/* Code chip */}
-        <div
-          style={{
-            padding: "8px 12px",
-            borderRadius: "8px",
-            background: "oklch(0.72 0.18 75 / 0.08)",
-            border: "1px solid oklch(0.72 0.18 75 / 0.18)",
-            fontSize: "10px",
-            fontFamily: "ui-monospace, monospace",
-            color: "oklch(0.60 0.18 75)",
-          }}
-        >
-          Built with React Email + Resend · type-safe
-        </div>
+        <div style={{
+          display: "inline-block", padding: "9px 20px", borderRadius: "7px",
+          background: "var(--color-text)", color: "var(--color-bg)",
+          fontSize: "11px", fontWeight: 600, marginBottom: "1rem",
+        }}>Open dashboard &rarr;</div>
+        <div style={{
+          padding: "8px 12px", borderRadius: "8px",
+          background: "oklch(0.72 0.18 75 / 0.10)",
+          border: "1px solid oklch(0.72 0.18 75 / 0.22)",
+          fontSize: "10px", fontFamily: "ui-monospace, monospace",
+          color: "oklch(0.68 0.16 75)",
+        }}>React Email + Resend &middot; type-safe</div>
       </div>
     </div>
   );
 }
 
 function AnalyticsVisual() {
-  const bars = [42, 58, 50, 71, 65, 80, 74, 90, 86, 95, 88, 100];
+  const bars   = [42, 58, 50, 71, 65, 80, 74, 90, 86, 95, 88, 100];
   const months = ["J","F","M","A","M","J","J","A","S","O","N","D"];
   const kpis = [
-    { label: "MRR",    value: "$12.4k", delta: "+8.2%",  up: true  },
-    { label: "Users",  value: "1,847",  delta: "+12.4%", up: true  },
-    { label: "Churn",  value: "2.1%",   delta: "-0.3%",  up: false },
+    { label: "MRR",   value: "$12.4k", delta: "+8.2%",  up: true  },
+    { label: "Users", value: "1,847",  delta: "+12.4%", up: true  },
+    { label: "Churn", value: "2.1%",   delta: "-0.3%",  up: false },
   ];
   return (
-    <div style={{ display: "flex", flexDirection: "column" as const, gap: "10px" }}>
-      {/* KPI row */}
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
         {kpis.map((k) => (
-          <div
-            key={k.label}
-            style={{
-              padding: "14px",
-              borderRadius: "12px",
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-              boxShadow: "0 2px 8px oklch(0 0 0 / 0.05)",
-            }}
-          >
-            <p style={{ fontSize: "9px", color: "var(--color-text-faint)", marginBottom: "6px" }}>{k.label}</p>
-            <p style={{ fontSize: "16px", fontWeight: 800, color: "var(--color-text)", letterSpacing: "-0.02em", marginBottom: "4px", fontVariantNumeric: "tabular-nums" }}>{k.value}</p>
-            <p style={{ fontSize: "9px", fontWeight: 600, color: k.up ? "oklch(0.58 0.15 145)" : "oklch(0.62 0.20 25)" }}>{k.delta}</p>
+          <div key={k.label} style={{ ...S.card, padding: "14px" }}>
+            <p style={{ fontSize: "9px", marginBottom: "6px", ...S.faint }}>{k.label}</p>
+            <p style={{ fontSize: "16px", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "4px", fontVariantNumeric: "tabular-nums", ...S.text }}>{k.value}</p>
+            <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+              {k.up
+                ? <TrendingUp  size={10} style={{ color: "oklch(0.62 0.16 145)" }} aria-hidden="true" />
+                : <TrendingDown size={10} style={{ color: "oklch(0.62 0.18 25)"  }} aria-hidden="true" />}
+              <p style={{ fontSize: "9px", fontWeight: 600, color: k.up ? "oklch(0.62 0.16 145)" : "oklch(0.62 0.18 25)" }}>{k.delta}</p>
+            </div>
           </div>
         ))}
       </div>
-      {/* Chart */}
-      <div
-        style={{
-          padding: "1.25rem",
-          borderRadius: "12px",
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          boxShadow: "0 2px 8px oklch(0 0 0 / 0.05)",
-        }}
-      >
+      <div style={{ ...S.card, padding: "1.25rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-          <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-text-muted)" }}>Revenue · 2025</p>
-          <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px", background: "oklch(0.55 0.15 145 / 0.10)", color: "oklch(0.55 0.15 145)" }}>+34.2%</span>
+          <p style={{ fontSize: "11px", fontWeight: 600, ...S.muted }}>Revenue &middot; 2025</p>
+          <span style={{
+            fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px",
+            background: "oklch(0.58 0.15 145 / 0.12)", color: "oklch(0.62 0.15 145)",
+          }}>+34.2%</span>
         </div>
         <div style={{ display: "flex", alignItems: "flex-end", gap: "3px", height: "64px" }}>
           {bars.map((h, i) => (
-            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column" as const, alignItems: "center", gap: "3px" }}>
-              <div
-                style={{
-                  width: "100%",
-                  height: `${h}%`,
-                  borderRadius: "3px",
-                  background: i === bars.length - 1
-                    ? "oklch(0.52 0.22 285)"
-                    : `oklch(0.52 0.22 285 / ${0.15 + i * 0.06})`,
-                }}
-              />
-              <span style={{ fontSize: "7px", color: "var(--color-text-faint)" }}>{months[i]}</span>
+            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "3px" }}>
+              <div style={{
+                width: "100%", height: `${h}%", borderRadius: "3px",
+                background: i === bars.length - 1
+                  ? "oklch(0.52 0.22 285)"
+                  : `oklch(0.52 0.22 285 / ${0.15 + i * 0.06})`,
+              }} />
+              <span style={{ fontSize: "7px", ...S.faint }}>{months[i]}</span>
             </div>
           ))}
         </div>
@@ -322,45 +258,41 @@ function AnalyticsVisual() {
   );
 }
 
-/* ─── Feature row data ─── */
+/* ─── Row data ─── */
 
 const rows = [
   {
     tag: "Authentication",
-    accent: "oklch(0.62 0.20 285)",
+    accent: "oklch(0.65 0.20 285)",
     title: "Auth in 5 minutes,\nnot 5 days.",
-    description:
-      "NextAuth v5 pre-configured with Google, GitHub, and magic-link email. Prisma-backed sessions, middleware-protected routes, and role-based access — ready from your first \`git clone\`.",
+    description: "NextAuth v5 pre-configured with Google, GitHub, and magic-link email. Prisma-backed sessions, middleware-protected routes, and role-based access — ready from your first git clone.",
     bullets: ["Google + GitHub + magic-link", "Prisma session strategy", "Middleware route protection", "Role-based access control"],
     visual: <AuthVisual />,
     flip: false,
   },
   {
     tag: "Billing",
-    accent: "oklch(0.62 0.18 192)",
+    accent: "oklch(0.65 0.18 192)",
     title: "Stripe billing,\nfully wired up.",
-    description:
-      "Checkout, webhooks, the billing portal, Stripe Tax, and invoice emails — all connected. Subscription status lives in the session so every component knows the plan in real time.",
-    bullets: ["Checkout + Stripe Tax", "Webhook → Prisma sync", "Billing portal redirect", "Invoice emails via Resend"],
+    description: "Checkout, webhooks, billing portal, Stripe Tax, and invoice emails — all connected. Subscription status lives in the session so every component knows the plan in real time.",
+    bullets: ["Checkout + Stripe Tax", "Webhook to Prisma sync", "Billing portal redirect", "Invoice emails via Resend"],
     visual: <BillingVisual />,
     flip: true,
   },
   {
     tag: "Email",
-    accent: "oklch(0.70 0.18 75)",
+    accent: "oklch(0.72 0.18 75)",
     title: "Beautiful emails\nout of the box.",
-    description:
-      "React Email components + Resend delivery. Fully typed, preview in the browser, and pixel-perfect across every client. Welcome, invoice, and password-reset templates included.",
+    description: "React Email components + Resend delivery. Fully typed, preview in the browser, and pixel-perfect across every client. Welcome, invoice, and password-reset templates included.",
     bullets: ["React Email components", "Resend API integration", "Browser preview dev mode", "Welcome + invoice templates"],
     visual: <EmailVisual />,
     flip: false,
   },
   {
     tag: "Analytics",
-    accent: "oklch(0.60 0.16 145)",
+    accent: "oklch(0.65 0.16 145)",
     title: "KPIs you can\nact on instantly.",
-    description:
-      "Recharts dashboards with MRR, churn, and user metrics. Prisma Pulse streams real-time events so your charts update the moment something happens — no polling, no delay.",
+    description: "Recharts dashboards with MRR, churn, and user metrics. Prisma Pulse streams real-time events so your charts update the moment something happens — no polling, no delay.",
     bullets: ["MRR, churn, NPS tracking", "Prisma Pulse real-time sync", "Recharts + custom tooltips", "Exportable CSV data"],
     visual: <AnalyticsVisual />,
     flip: true,
@@ -381,22 +313,37 @@ export function Features() {
         overflow: "hidden",
       }}
     >
-      {/* Ambient top glow */}
+      {/* Dot-grid bg pattern — light and dark handled via CSS custom props */}
+      <div
+        aria-hidden="true"
+        className="features-bg-pattern"
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: BG_PATTERN,
+          backgroundRepeat: "repeat",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
+      {/* Ambient top glow — sits on top of pattern */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
-          top: "-80px",
+          top: "-100px",
           left: "50%",
           transform: "translateX(-50%)",
-          width: "800px",
-          height: "400px",
-          background: "radial-gradient(ellipse, oklch(0.52 0.22 285 / 0.06) 0%, transparent 65%)",
+          width: "900px",
+          height: "500px",
+          background: "radial-gradient(ellipse, oklch(0.52 0.22 285 / 0.10) 0%, transparent 65%)",
           pointerEvents: "none",
+          zIndex: 1,
         }}
       />
 
-      <div style={{ position: "relative", maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
+      <div style={{ position: "relative", zIndex: 2, maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
 
         {/* Section header */}
         <div style={{ maxWidth: "560px", marginBottom: "5rem" }}>
@@ -411,13 +358,13 @@ export function Features() {
               fontWeight: 700,
               lineHeight: 1.1,
               letterSpacing: "-0.025em",
-              color: "var(--color-text)",
               marginBottom: "1rem",
+              ...S.text,
             }}
           >
             Everything wired up on day&nbsp;one
           </h2>
-          <p style={{ fontSize: "1.0625rem", lineHeight: 1.7, color: "var(--color-text-muted)", maxWidth: "42ch" }}>
+          <p style={{ fontSize: "1.0625rem", lineHeight: 1.75, maxWidth: "42ch", ...S.muted }}>
             Skip the boilerplate. Auth, billing, email, and analytics are
             production-ready from your very first commit.
           </p>
@@ -448,73 +395,53 @@ function FeatureRow({ row }: { row: typeof rows[number] }) {
         direction: row.flip ? "rtl" : "ltr",
       }}
     >
-      {/* Copy side */}
+      {/* Copy */}
       <div style={{ direction: "ltr" }}>
         <span style={S.tag(row.accent)}>{row.tag}</span>
-
         <h3
           style={{
             fontSize: "clamp(1.5rem, 1rem + 1.2vw, 2.1rem)",
             fontWeight: 800,
             lineHeight: 1.1,
             letterSpacing: "-0.025em",
-            color: "var(--color-text)",
             marginBottom: "1rem",
             whiteSpace: "pre-line",
+            ...S.text,
           }}
         >
           {row.title}
         </h3>
-
-        <p
-          style={{
-            fontSize: "1rem",
-            lineHeight: 1.75,
-            color: "var(--color-text-muted)",
-            maxWidth: "42ch",
-            marginBottom: "1.75rem",
-          }}
-        >
+        <p style={{ fontSize: "1rem", lineHeight: 1.75, maxWidth: "42ch", marginBottom: "1.75rem", ...S.muted }}>
           {row.description}
         </p>
-
         <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
           {row.bullets.map((b) => (
             <li key={b} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              {/* Accent dash — no circles */}
-              <span
-                style={{
-                  width: "16px",
-                  height: "1.5px",
-                  background: row.accent,
-                  flexShrink: 0,
-                  display: "block",
-                  borderRadius: "1px",
-                }}
-              />
-              <span style={{ fontSize: "0.9375rem", color: "var(--color-text-muted)" }}>{b}</span>
+              <span style={{
+                width: "14px", height: "1.5px",
+                background: row.accent,
+                flexShrink: 0, display: "block", borderRadius: "1px",
+              }} />
+              <span style={{ fontSize: "0.9375rem", ...S.muted }}>{b}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Visual side */}
+      {/* Visual */}
       <div style={{ direction: "ltr", position: "relative" }}>
-        {/* Subtle glow behind each visual */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
-            inset: "-32px",
+            inset: "-40px",
             borderRadius: "24px",
-            background: `radial-gradient(ellipse at 50% 50%, ${row.accent.replace(")", " / 0.08)")}, transparent 65%)`,
+            background: `radial-gradient(ellipse at 50% 50%, ${row.accent.replace(")", " / 0.10)")}, transparent 65%)`,
             pointerEvents: "none",
             zIndex: 0,
           }}
         />
-        <div style={{ position: "relative", zIndex: 1 }}>
-          {row.visual}
-        </div>
+        <div style={{ position: "relative", zIndex: 1 }}>{row.visual}</div>
       </div>
     </div>
   );
