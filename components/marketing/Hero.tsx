@@ -1,43 +1,71 @@
 import Link from "next/link";
-import { ArrowRight, Github, Star, Zap } from "lucide-react";
+import { ArrowRight, Github, Star, Zap, TrendingUp } from "lucide-react";
+
+/* ─── Types ────────────────────────────────────── */
+
+interface KpiItem {
+  label: string;
+  value: string;
+  delta: string;
+  up: boolean;
+}
+
+interface ActivityItem {
+  dot: string;
+  text: string;
+  time: string;
+}
+
+/* ─── Hero ────────────────────────────────────── */
 
 export function Hero() {
   return (
     <section
-      className="relative min-h-[92vh] flex items-center overflow-hidden"
+      className="relative min-h-[96vh] flex items-center overflow-hidden"
       aria-labelledby="hero-heading"
+      style={{ background: "var(--color-bg)" }}
     >
-      {/* Gradient mesh background */}
+      {/* ── Background layer ── */}
       <div className="absolute inset-0 -z-10" aria-hidden="true">
+        {/* Dot grid */}
         <div
           className="absolute inset-0"
           style={{
-            background: "var(--color-bg)",
-          }}
-        />
-        {/* Radial glow top-left */}
-        <div
-          className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, oklch(0.52 0.22 285 / 0.08) 0%, transparent 70%)",
-          }}
-        />
-        {/* Radial glow bottom-right */}
-        <div
-          className="absolute -bottom-48 -right-24 w-[600px] h-[600px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, oklch(0.60 0.15 192 / 0.06) 0%, transparent 70%)",
-          }}
-        />
-        {/* Subtle dot grid */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(oklch(0.5 0.01 285 / 0.12) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(oklch(0.5 0.01 285 / 0.10) 1px, transparent 1px)",
             backgroundSize: "28px 28px",
+          }}
+        />
+        {/* Primary orb — top center */}
+        <div
+          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(ellipse, oklch(0.52 0.22 285 / 0.12) 0%, transparent 65%)",
+            filter: "blur(1px)",
+          }}
+        />
+        {/* Secondary orb — bottom right */}
+        <div
+          className="absolute -bottom-48 -right-24 w-[700px] h-[700px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, oklch(0.60 0.15 192 / 0.08) 0%, transparent 70%)",
+          }}
+        />
+        {/* Accent orb — left */}
+        <div
+          className="absolute top-1/3 -left-48 w-[500px] h-[500px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, oklch(0.65 0.15 145 / 0.05) 0%, transparent 70%)",
+          }}
+        />
+        {/* Bottom fade */}
+        <div
+          className="absolute bottom-0 inset-x-0 h-40"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent, var(--color-bg))",
           }}
         />
       </div>
@@ -46,44 +74,42 @@ export function Hero() {
         {/* Announcement badge */}
         <Link
           href="/changelog"
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-10 text-[var(--text-xs)] font-medium transition-all hover:shadow-[var(--shadow-sm)]"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-10 transition-all duration-200 hover:-translate-y-px"
           style={{
             background: "var(--color-surface)",
             border: "1px solid var(--color-border)",
             color: "var(--color-text-muted)",
+            fontSize: "var(--text-xs)",
+            boxShadow: "var(--shadow-sm)",
           }}
         >
           <span
-            className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
             style={{
-              background: "oklch(0.52 0.22 285 / 0.12)",
+              background: "oklch(0.52 0.22 285 / 0.14)",
               color: "var(--color-primary)",
             }}
           >
-            <Zap size={10} aria-hidden="true" />
+            <Zap size={9} aria-hidden="true" />
             New
           </span>
-          v1.0 — now with Prisma Pulse real-time sync
-          <ArrowRight size={12} aria-hidden="true" />
+          <span>v1.0 — now with Prisma Pulse real-time sync</span>
+          <ArrowRight size={11} aria-hidden="true" />
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_460px] gap-16 items-center">
-          {/* Left: copy */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-16 items-center">
+          {/* ── Left: copy ── */}
           <div>
             <h1
               id="hero-heading"
-              className="font-display font-semibold leading-[1.08] tracking-tight mb-6"
-              style={{
-                fontSize: "clamp(2.4rem, 1rem + 4vw, 4.2rem)",
-                color: "var(--color-text)",
-              }}
+              className="font-display font-bold leading-[1.06] tracking-tight mb-6"
+              style={{ fontSize: "clamp(2.6rem, 1rem + 4.5vw, 4.8rem)", color: "var(--color-text)" }}
             >
               Ship your SaaS{" "}
               <br className="hidden md:block" />
               <span
                 style={{
-                  background:
-                    "linear-gradient(135deg in oklch, var(--color-primary), oklch(0.60 0.15 192))",
+                  background: "linear-gradient(135deg in oklch, var(--color-primary) 20%, oklch(0.68 0.18 192) 80%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -92,28 +118,30 @@ export function Hero() {
                 in days.
               </span>
             </h1>
+
             <p
-              className="mb-10 leading-relaxed max-w-[46ch]"
+              className="mb-10 leading-relaxed"
               style={{
                 fontSize: "var(--text-lg)",
                 color: "var(--color-text-muted)",
+                maxWidth: "44ch",
               }}
             >
               A production-ready Next.js 15 starter with auth, billing, and
-              analytics wired up. Delete what you don&apos;t need — ship the
-              rest.
+              analytics wired up. Delete what you don&apos;t need — ship the rest.
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-wrap gap-3 mb-10">
+            <div className="flex flex-wrap gap-3 mb-12">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-[var(--radius-md)] font-medium transition-all hover:-translate-y-px active:translate-y-0"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 hover:-translate-y-px active:translate-y-0"
                 style={{
                   background: "var(--color-primary)",
                   color: "#fff",
                   fontSize: "var(--text-sm)",
-                  boxShadow: "0 1px 3px oklch(0.52 0.22 285 / 0.35), 0 4px 16px oklch(0.52 0.22 285 / 0.15)",
+                  boxShadow:
+                    "0 1px 3px oklch(0.52 0.22 285 / 0.40), 0 6px 24px oklch(0.52 0.22 285 / 0.20)",
                 }}
               >
                 Start building free
@@ -123,7 +151,7 @@ export function Hero() {
                 href="https://github.com/devhariss/saas-starter"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-[var(--radius-md)] font-medium transition-all hover:bg-[var(--color-surface-offset)] active:scale-[0.99]"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 hover:bg-[var(--color-surface-offset)] active:scale-[0.99]"
                 style={{
                   border: "1px solid var(--color-border)",
                   background: "var(--color-surface)",
@@ -132,7 +160,7 @@ export function Hero() {
                 }}
               >
                 <Github size={15} aria-hidden="true" />
-                Star on GitHub
+                View on GitHub
                 <span
                   className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
                   style={{
@@ -145,18 +173,22 @@ export function Hero() {
               </a>
             </div>
 
-            {/* Social proof strip */}
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex -space-x-2">
-                {["JK", "AM", "RS", "PL", "TC"].map((initials, i) => (
+            {/* Social proof */}
+            <div
+              className="flex items-center gap-5 pt-8 flex-wrap"
+              style={{ borderTop: "1px solid var(--color-border)" }}
+            >
+              {/* Avatars */}
+              <div className="flex -space-x-2.5">
+                {(["JK", "AM", "RS", "PL", "TC"] as string[]).map((initials, i) => (
                   <div
                     key={initials}
                     aria-hidden="true"
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-semibold"
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold"
                     style={{
-                      background: `oklch(${0.50 + i * 0.04} 0.15 ${220 + i * 25})`,
+                      background: `oklch(${0.48 + i * 0.04} 0.16 ${210 + i * 28})`,
                       color: "#fff",
-                      outline: "2px solid var(--color-bg)",
+                      outline: "2.5px solid var(--color-bg)",
                       outlineOffset: "-1px",
                     }}
                   >
@@ -164,38 +196,63 @@ export function Hero() {
                   </div>
                 ))}
               </div>
+              {/* Stars + count */}
               <div>
                 <div className="flex items-center gap-0.5 mb-0.5">
-                  {[...Array(5)].map((_, i) => (
+                  {([...Array(5)] as undefined[]).map((_, i) => (
                     <Star
                       key={i}
-                      size={12}
+                      size={13}
                       aria-hidden="true"
-                      style={{ fill: "oklch(0.75 0.18 75)", color: "oklch(0.75 0.18 75)" }}
+                      style={{ fill: "oklch(0.78 0.18 75)", color: "oklch(0.78 0.18 75)" }}
                     />
                   ))}
                 </div>
                 <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-faint)" }}>
-                  Loved by <strong style={{ color: "var(--color-text-muted)" }}>2,400+</strong> developers
+                  Loved by{" "}
+                  <strong style={{ color: "var(--color-text-muted)" }}>2,400+</strong>
+                  {" "}developers
+                </p>
+              </div>
+              {/* Divider */}
+              <div
+                className="hidden sm:block w-px h-8"
+                style={{ background: "var(--color-border)" }}
+              />
+              {/* Stat */}
+              <div className="hidden sm:flex items-center gap-2">
+                <TrendingUp size={15} style={{ color: "var(--color-success)" }} aria-hidden="true" />
+                <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-faint)" }}>
+                  <strong style={{ color: "var(--color-text-muted)" }}>$0 → live</strong>{" "}
+                  in under 48h
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Right: product card */}
+          {/* ── Right: mockup card ── */}
           <div
             aria-hidden="true"
-            className="hidden lg:block"
-            style={{ perspective: "1200px" }}
+            className="hidden lg:block relative"
+            style={{ perspective: "1400px" }}
           >
+            {/* Glow behind card */}
             <div
-              className="rounded-[var(--radius-xl)] overflow-hidden"
+              className="absolute inset-0 -z-10 blur-2xl"
               style={{
-                border: "1px solid var(--color-border)",
-                background: "var(--color-surface)",
+                background:
+                  "radial-gradient(ellipse at 50% 60%, oklch(0.52 0.22 285 / 0.18) 0%, transparent 70%)",
+                transform: "scale(1.1)",
+              }}
+            />
+            <div
+              className="rounded-2xl overflow-hidden transition-transform duration-700"
+              style={{
+                border: "1px solid oklch(0.52 0.22 285 / 0.25)",
+                background: "oklch(0.11 0.008 285)",
                 boxShadow:
-                  "0 2px 4px oklch(0.2 0.02 285 / 0.06), 0 16px 48px oklch(0.2 0.02 285 / 0.12), 0 0 0 1px oklch(0.2 0.02 285 / 0.04)",
-                transform: "rotateY(-4deg) rotateX(2deg)",
+                  "0 0 0 1px oklch(0.52 0.22 285 / 0.08), 0 4px 8px oklch(0 0 0 / 0.30), 0 24px 64px oklch(0.52 0.22 285 / 0.12)",
+                transform: "rotateY(-5deg) rotateX(2.5deg) translateZ(0)",
               }}
             >
               <DashboardMockup />
@@ -207,23 +264,31 @@ export function Hero() {
   );
 }
 
+/* ─── Dashboard Mockup ──────────────────────────── */
+
 function DashboardMockup() {
-  const kpis = [
+  const kpis: KpiItem[] = [
     { label: "MRR", value: "$12,480", delta: "+8.2%", up: true },
     { label: "Users", value: "1,847", delta: "+12.4%", up: true },
     { label: "Churn", value: "2.1%", delta: "-0.3%", up: false },
     { label: "NPS", value: "67", delta: "+4", up: true },
   ];
 
-  const bars = [38, 52, 44, 63, 58, 72, 68, 81, 76, 88, 84, 96];
-  const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  const bars: number[] = [38, 52, 44, 63, 58, 72, 68, 81, 76, 88, 84, 96];
+  const months: string[] = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+
+  const activity: ActivityItem[] = [
+    { dot: "oklch(0.68 0.15 145)", text: "New user · sarah@nexaflow.io", time: "now" },
+    { dot: "oklch(0.68 0.22 285)", text: "Invoice paid · $49 · Pro plan", time: "2m" },
+    { dot: "oklch(0.72 0.15 192)", text: "Webhook synced · stripe.checkout", time: "5m" },
+  ];
 
   return (
     <div className="p-5">
       {/* Window chrome */}
       <div
-        className="flex items-center gap-4 pb-4 mb-4"
-        style={{ borderBottom: "1px solid var(--color-border)" }}
+        className="flex items-center gap-3 pb-4 mb-4"
+        style={{ borderBottom: "1px solid oklch(0.52 0.22 285 / 0.12)" }}
       >
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full" style={{ background: "oklch(0.62 0.20 25)" }} />
@@ -231,33 +296,39 @@ function DashboardMockup() {
           <span className="w-2.5 h-2.5 rounded-full" style={{ background: "oklch(0.58 0.15 145)" }} />
         </div>
         <div
-          className="flex-1 rounded-md px-2 py-1 text-[10px]"
-          style={{ background: "var(--color-surface-2)", color: "var(--color-text-faint)" }}
+          className="flex-1 rounded-md px-3 py-1 text-[10px] font-mono"
+          style={{
+            background: "oklch(0.08 0.006 285)",
+            color: "oklch(0.45 0.06 285)",
+            border: "1px solid oklch(0.52 0.22 285 / 0.10)",
+          }}
         >
           app.saastarter.dev/dashboard
         </div>
       </div>
 
       {/* KPI grid */}
-      <div className="grid grid-cols-2 gap-2 mb-4">
+      <div className="grid grid-cols-4 gap-2 mb-4">
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="rounded-[var(--radius-md)] p-3"
+            className="rounded-xl p-3"
             style={{
-              background: "var(--color-surface-2)",
-              border: "1px solid var(--color-border)",
+              background: "oklch(0.14 0.009 285)",
+              border: "1px solid oklch(0.52 0.22 285 / 0.10)",
             }}
           >
-            <p className="text-[10px] mb-1" style={{ color: "var(--color-text-faint)" }}>
+            <p className="text-[9px] mb-1 font-medium" style={{ color: "oklch(0.45 0.06 285)" }}>
               {kpi.label}
             </p>
-            <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+            <p className="text-[13px] font-bold tabular-nums" style={{ color: "oklch(0.92 0.02 285)" }}>
               {kpi.value}
             </p>
             <p
-              className="text-[10px] font-medium"
-              style={{ color: kpi.up ? "var(--color-success)" : "var(--color-error)" }}
+              className="text-[9px] font-semibold mt-0.5"
+              style={{
+                color: kpi.up ? "oklch(0.68 0.15 145)" : "oklch(0.68 0.18 25)",
+              }}
             >
               {kpi.delta}
             </p>
@@ -265,15 +336,29 @@ function DashboardMockup() {
         ))}
       </div>
 
-      {/* Chart */}
+      {/* Revenue chart */}
       <div
-        className="rounded-[var(--radius-md)] p-3 mb-4"
-        style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}
+        className="rounded-xl p-4 mb-4"
+        style={{
+          background: "oklch(0.14 0.009 285)",
+          border: "1px solid oklch(0.52 0.22 285 / 0.10)",
+        }}
       >
-        <p className="text-[10px] font-medium mb-3" style={{ color: "var(--color-text-muted)" }}>
-          Revenue · 2025
-        </p>
-        <div className="flex items-end gap-1 h-20">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[10px] font-semibold" style={{ color: "oklch(0.65 0.08 285)" }}>
+            Revenue &middot; 2025
+          </p>
+          <span
+            className="text-[9px] px-2 py-0.5 rounded-full font-semibold"
+            style={{
+              background: "oklch(0.55 0.15 145 / 0.15)",
+              color: "oklch(0.68 0.15 145)",
+            }}
+          >
+            +34.2%
+          </span>
+        </div>
+        <div className="flex items-end gap-[3px] h-20">
           {bars.map((h, i) => (
             <div key={i} className="flex flex-col items-center gap-1 flex-1">
               <div
@@ -281,12 +366,13 @@ function DashboardMockup() {
                 style={{
                   height: `${h}%`,
                   background:
-                    i === 11
-                      ? "var(--color-primary)"
-                      : "oklch(from var(--color-primary) l c h / 0.25)",
+                    i === bars.length - 1
+                      ? "oklch(0.68 0.22 285)"
+                      : `oklch(0.52 0.22 285 / ${0.15 + (h / 100) * 0.30})`,
+                  boxShadow: i === bars.length - 1 ? "0 0 8px oklch(0.52 0.22 285 / 0.50)" : "none",
                 }}
               />
-              <span className="text-[8px]" style={{ color: "var(--color-text-faint)" }}>
+              <span className="text-[7px]" style={{ color: "oklch(0.38 0.04 285)" }}>
                 {months[i]}
               </span>
             </div>
@@ -296,30 +382,40 @@ function DashboardMockup() {
 
       {/* Activity feed */}
       <div
-        className="rounded-[var(--radius-md)] overflow-hidden"
-        style={{ border: "1px solid var(--color-border)" }}
+        className="rounded-xl overflow-hidden"
+        style={{
+          border: "1px solid oklch(0.52 0.22 285 / 0.10)",
+          background: "oklch(0.14 0.009 285)",
+        }}
       >
-        {[
-          { dot: "var(--color-success)", text: "New user · sarah@nexaflow.io", time: "now" },
-          { dot: "var(--color-primary)", text: "Invoice paid · $49 · Pro plan", time: "2m" },
-          { dot: "var(--color-secondary)", text: "Webhook synced · stripe.checkout", time: "5m" },
-        ].map((item, i) => (
+        <p
+          className="text-[10px] font-semibold px-3 py-2.5"
+          style={{
+            color: "oklch(0.65 0.08 285)",
+            borderBottom: "1px solid oklch(0.52 0.22 285 / 0.10)",
+          }}
+        >
+          Live activity
+        </p>
+        {activity.map((item, i) => (
           <div
             key={i}
             className="flex items-center gap-2.5 px-3 py-2 text-[10px]"
             style={{
-              borderBottom: i < 2 ? "1px solid var(--color-border)" : "none",
-              background: "var(--color-surface-2)",
+              borderBottom:
+                i < activity.length - 1
+                  ? "1px solid oklch(0.52 0.22 285 / 0.08)"
+                  : "none",
             }}
           >
             <span
               className="w-1.5 h-1.5 rounded-full flex-shrink-0"
               style={{ background: item.dot }}
             />
-            <span className="flex-1 truncate" style={{ color: "var(--color-text-muted)" }}>
+            <span className="flex-1 truncate" style={{ color: "oklch(0.62 0.06 285)" }}>
               {item.text}
             </span>
-            <span style={{ color: "var(--color-text-faint)" }}>{item.time}</span>
+            <span style={{ color: "oklch(0.40 0.04 285)" }}>{item.time}</span>
           </div>
         ))}
       </div>
