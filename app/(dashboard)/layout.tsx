@@ -1,11 +1,9 @@
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import dynamic from 'next/dynamic'
 import { SkipLink } from '@/components/shared/SkipLink'
 import Header from '@/components/dashboard/Header'
-
-const Sidebar = dynamic(() => import('@/components/dashboard/Sidebar'), { ssr: false })
+import Sidebar from '@/components/dashboard/Sidebar'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const session = await auth()
