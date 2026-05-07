@@ -16,7 +16,7 @@ export function Hero() {
         {/* Beta badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[var(--radius-full)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--text-xs)] text-[var(--color-text-muted)] mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)]" aria-hidden="true" />
-          Now in public beta · v1.0
+          Now in public beta &middot; v1.0
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-12 lg:gap-16 items-center">
@@ -32,7 +32,7 @@ export function Hero() {
             </h1>
             <p className="text-[var(--text-lg)] text-[var(--color-text-muted)] mb-10 max-w-[48ch] leading-relaxed">
               A production-ready Next.js 15 starter with auth, billing, and
-              analytics wired up. Delete what you don't need.
+              analytics wired up. Delete what you don&apos;t need.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
@@ -55,7 +55,7 @@ export function Hero() {
 
             {/* Social signals */}
             <p className="mt-8 text-[var(--text-xs)] text-[var(--color-text-faint)]">
-              MIT licensed · No vendor lock-in · Deploy to Vercel in 2 minutes
+              MIT licensed &middot; No vendor lock-in &middot; Deploy to Vercel in 2 minutes
             </p>
           </div>
 
@@ -80,7 +80,7 @@ function DashboardMockup() {
         <span className="w-3 h-3 rounded-full bg-[oklch(0.55_0.20_25)]" />
         <span className="w-3 h-3 rounded-full bg-[oklch(0.65_0.18_75)]" />
         <span className="w-3 h-3 rounded-full bg-[oklch(0.55_0.15_145)]" />
-        <span className="ml-3 text-[var(--color-text-faint)]">dashboard — SaasStarter</span>
+        <span className="ml-3 text-[var(--color-text-faint)]">dashboard &mdash; SaasStarter</span>
       </div>
       {/* KPI row */}
       <div className="grid grid-cols-2 gap-2 mb-3">
@@ -115,8 +115,7 @@ function DashboardMockup() {
             className="flex-1 rounded-sm"
             style={{
               height: `${h}%`,
-              background:
-                "oklch(from var(--color-primary) l c h / 0.35)",
+              background: "oklch(from var(--color-primary) l c h / 0.35)",
             }}
           />
         ))}
