@@ -1,152 +1,129 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { getConsent, setConsent, ConsentState } from './ConsentManager'
+import { useState, useEffect, useRef } from 'react'
+import { getConsent, setConsent, type ConsentState } from './ConsentManager'
+import { Lock, X } from 'lucide-react'
+
+const CATEGORIES = [
+  {
+    id: 'essential' as const,
+    label: 'Essential',
+    description: 'Required for the site to function. Cannot be disabled. Includes session cookies and CSRF tokens.',
+    locked: true,
+  },
+  {
+    id: 'analytics' as const,
+    label: 'Analytics',
+    description: 'Help us understand how visitors use the site so we can improve it. No personal data is sold.',
+    locked: false,
+  },
+  {
+    id: 'marketing' as const,
+    label: 'Marketing',
+    description: 'Used to show relevant ads and measure campaign performance across external platforms.',
+    locked: false,
+  },
+  {
+    id: 'functional' as const,
+    label: 'Functional',
+    description: 'Enable enhanced functionality like remembering your preferences and settings.',
+    locked: false,
+  },
+]
 
 interface CookiePreferencesProps {
   onClose: () => void
 }
 
-const CATEGORIES = [
-  {
-    key: 'essential' as const,
-    label: 'Essential',
-    description: 'Required for the site to function. Cannot be disabled.',
-    locked: true,
-  },
-  {
-    key: 'analytics' as const,
-    label: 'Analytics',
-    description: 'Help us understand how you use SaasStarter so we can improve it.',
-    locked: false,
-  },
-  {
-    key: 'marketing' as const,
-    label: 'Marketing',
-    description: 'Used to serve relevant ads and measure campaign effectiveness.',
-    locked: false,
-  },
-  {
-    key: 'functional' as const,
-    label: 'Functional',
-    description: 'Enable enhanced features like live chat and personalisation.',
-    locked: false,
-  },
-]
-
 export function CookiePreferences({ onClose }: CookiePreferencesProps) {
-  const [prefs, setPrefs] = useState<ConsentState>({
+  const existing = getConsent()
+  const [state, setState] = useState<ConsentState>({
     essential: true,
-    analytics: false,
-    marketing: false,
-    functional: false,
+    analytics: existing?.analytics ?? false,
+    marketing: existing?.marketing ?? false,
+    functional: existing?.functional ?? false,
   })
   const dialogRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    const existing = getConsent()
-    if (existing) setPrefs(existing)
-    dialogRef.current?.focus()
-  }, [])
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
+    closeRef.current?.focus()
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
   }, [onClose])
 
-  const save = () => {
-    setConsent(prefs)
-    onClose()
-  }
+  const save = () => { setConsent(state); onClose() }
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Cookie preferences"
+      ref={dialogRef}
       style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
+        position: 'fixed', inset: 0, background: 'oklch(0 0 0 / 0.5)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'oklch(0.1 0.005 285 / 0.6)',
-        backdropFilter: 'blur(4px)',
+        zIndex: 9999, padding: 'var(--space-4)',
       }}
     >
       <div
-        ref={dialogRef}
-        tabIndex={-1}
         style={{
-          background: 'var(--color-surface)',
+          width: 'min(520px, 100%)',
+          background: 'var(--color-surface)', borderRadius: 'var(--radius-xl)',
           border: '1px solid oklch(from var(--color-text) l c h / 0.10)',
-          borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-8)',
-          width: 'min(480px, calc(100vw - var(--space-8)))',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          boxShadow: 'var(--shadow-lg)',
+          boxShadow: 'var(--shadow-lg)', overflow: 'hidden',
         }}
       >
-        <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-2)' }}>
-          Cookie preferences
-        </h2>
-        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-6)' }}>
-          Choose which cookies you allow SaasStarter to use.
-        </p>
-        <fieldset style={{ border: 'none', padding: 0 }}>
-          <legend className="sr-only">Cookie categories</legend>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-5) var(--space-6)', borderBottom: '1px solid oklch(from var(--color-text) l c h / 0.08)' }}>
+          <h2 style={{ fontSize: 'var(--text-base)', fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>
+            Cookie preferences
+          </h2>
+          <button ref={closeRef} onClick={onClose} aria-label="Close preferences" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '2.75rem', height: '2.75rem' }}>
+            <X size={16} />
+          </button>
+        </div>
+        <div style={{ padding: 'var(--space-4) var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           {CATEGORIES.map((cat) => (
-            <div
-              key={cat.key}
-              style={{
-                display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-                gap: 'var(--space-4)', padding: 'var(--space-4) 0',
-                borderBottom: '1px solid oklch(from var(--color-text) l c h / 0.08)',
-              }}
-            >
-              <div>
-                <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: 4 }}>{cat.label}</p>
-                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>{cat.description}</p>
+            <div key={cat.id} style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text)', margin: '0 0 var(--space-1)' }}>
+                  {cat.label}{cat.locked && <Lock size={12} style={{ display: 'inline', marginLeft: 4, verticalAlign: 'middle', color: 'var(--color-text-faint)' }} />}
+                </p>
+                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', margin: 0, lineHeight: 1.5 }}>
+                  {cat.description}
+                </p>
               </div>
-              <label
-                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
+              <button
+                role="switch"
+                aria-checked={state[cat.id]}
+                aria-label={`Toggle ${cat.label} cookies`}
+                disabled={cat.locked}
+                onClick={() => !cat.locked && setState((s) => ({ ...s, [cat.id]: !s[cat.id] }))}
+                style={{
+                  width: '2.5rem', height: '1.5rem', borderRadius: 'var(--radius-full)',
+                  background: state[cat.id] ? 'var(--color-primary)' : 'var(--color-surface-offset)',
+                  border: 'none', cursor: cat.locked ? 'not-allowed' : 'pointer',
+                  position: 'relative', flexShrink: 0, transition: 'background 0.2s',
+                  opacity: cat.locked ? 0.5 : 1,
+                }}
               >
-                <span className="sr-only">{cat.locked ? `${cat.label} (always on)` : `Toggle ${cat.label}`}</span>
-                <input
-                  type="checkbox"
-                  checked={cat.locked ? true : prefs[cat.key]}
-                  disabled={cat.locked}
-                  onChange={(e) => setPrefs((p) => ({ ...p, [cat.key]: e.target.checked }))}
-                  style={{ width: 18, height: 18, accentColor: 'var(--color-primary)' }}
-                />
-              </label>
+                <span style={{
+                  position: 'absolute', top: '2px',
+                  left: state[cat.id] ? 'calc(100% - 1.25rem - 2px)' : '2px',
+                  width: '1.25rem', height: '1.25rem', borderRadius: '50%',
+                  background: '#fff', transition: 'left 0.2s',
+                }} />
+              </button>
             </div>
           ))}
-        </fieldset>
-        <div style={{ display: 'flex', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
-          <button
-            onClick={save}
-            style={{
-              flex: 1, padding: 'var(--space-3)',
-              background: 'var(--color-primary)', color: '#fff',
-              borderRadius: 'var(--radius-md)', fontWeight: 600,
-              fontSize: 'var(--text-sm)', border: 'none', cursor: 'pointer',
-            }}
-          >
-            Save preferences
-          </button>
-          <button
-            onClick={onClose}
-            style={{
-              padding: 'var(--space-3) var(--space-4)',
-              background: 'transparent',
-              border: '1px solid oklch(from var(--color-text) l c h / 0.15)',
-              borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)',
-              color: 'var(--color-text-muted)', cursor: 'pointer',
-            }}
-          >
+        </div>
+        <div style={{ padding: 'var(--space-4) var(--space-6)', borderTop: '1px solid oklch(from var(--color-text) l c h / 0.08)', display: 'flex', gap: 'var(--space-2)', justifyContent: 'flex-end' }}>
+          <button onClick={onClose} style={{ padding: 'var(--space-2) var(--space-4)', background: 'transparent', border: '1px solid oklch(from var(--color-text) l c h / 0.12)', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text)', cursor: 'pointer' }}>
             Cancel
+          </button>
+          <button onClick={save} style={{ padding: 'var(--space-2) var(--space-4)', background: 'var(--color-primary)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', fontWeight: 600, color: '#fff', cursor: 'pointer' }}>
+            Save preferences
           </button>
         </div>
       </div>

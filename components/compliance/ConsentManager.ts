@@ -5,26 +5,32 @@ export interface ConsentState {
   analytics: boolean
   marketing: boolean
   functional: boolean
-  gpc?: boolean
+  timestamp?: string
 }
 
 const CONSENT_COOKIE = 'consent_state'
 const CONSENT_DATE_COOKIE = 'consent_date'
-const CONSENT_EXPIRY_DAYS = 365
+const CONSENT_TTL_DAYS = 365
 
-function setCookie(name: string, value: string, days: number) {
-  const expires = new Date(Date.now() + days * 864e5).toUTCString()
-  document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax;Secure`
+function parseCookies(): Record<string, string> {
+  if (typeof document === 'undefined') return {}
+  return Object.fromEntries(
+    document.cookie.split('; ').map((c) => {
+      const [k, ...v] = c.split('=')
+      return [k, decodeURIComponent(v.join('='))]
+    })
+  )
 }
 
-function getCookieValue(name: string): string | null {
-  const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'))
-  return match ? decodeURIComponent(match[1]) : null
+function setCookie(name: string, value: string, days: number) {
+  const expires = new Date()
+  expires.setDate(expires.getDate() + days)
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/;SameSite=Lax`
 }
 
 export function getConsent(): ConsentState | null {
-  if (typeof document === 'undefined') return null
-  const raw = getCookieValue(CONSENT_COOKIE)
+  const cookies = parseCookies()
+  const raw = cookies[CONSENT_COOKIE]
   if (!raw) return null
   try {
     return JSON.parse(raw) as ConsentState
@@ -34,15 +40,24 @@ export function getConsent(): ConsentState | null {
 }
 
 export function setConsent(state: ConsentState): void {
-  setCookie(CONSENT_COOKIE, JSON.stringify(state), CONSENT_EXPIRY_DAYS)
-  setCookie(CONSENT_DATE_COOKIE, new Date().toISOString(), CONSENT_EXPIRY_DAYS)
+  const withTimestamp = { ...state, timestamp: new Date().toISOString() }
+  setCookie(CONSENT_COOKIE, JSON.stringify(withTimestamp), CONSENT_TTL_DAYS)
+  setCookie(CONSENT_DATE_COOKIE, new Date().toISOString(), CONSENT_TTL_DAYS)
 }
 
 export function hasConsent(category: ConsentCategory): boolean {
-  if (category === 'essential') return true
   const state = getConsent()
-  if (!state) return false
+  if (!state) return category === 'essential'
   return state[category] === true
+}
+
+export function isConsentExpired(): boolean {
+  const cookies = parseCookies()
+  const dateStr = cookies[CONSENT_DATE_COOKIE]
+  if (!dateStr) return true
+  const consentDate = new Date(dateStr)
+  const daysSince = (Date.now() - consentDate.getTime()) / (1000 * 60 * 60 * 24)
+  return daysSince >= CONSENT_TTL_DAYS
 }
 
 export function isGPCEnabled(): boolean {
@@ -50,18 +65,10 @@ export function isGPCEnabled(): boolean {
   return (navigator as { globalPrivacyControl?: boolean }).globalPrivacyControl === true
 }
 
-export function isConsentExpired(): boolean {
-  const dateStr = getCookieValue(CONSENT_DATE_COOKIE)
-  if (!dateStr) return true
-  const consentDate = new Date(dateStr)
-  const now = new Date()
-  const diffDays = (now.getTime() - consentDate.getTime()) / 864e5
-  return diffDays > CONSENT_EXPIRY_DAYS
+export function acceptAll(): void {
+  setConsent({ essential: true, analytics: true, marketing: true, functional: true })
 }
 
-export function shouldShowBanner(): boolean {
-  const existing = getConsent()
-  if (!existing) return true
-  if (isConsentExpired()) return true
-  return false
+export function rejectAll(): void {
+  setConsent({ essential: true, analytics: false, marketing: false, functional: false })
 }
