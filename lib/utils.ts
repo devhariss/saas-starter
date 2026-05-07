@@ -5,8 +5,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(
+  amount: number,
+  currency = 'USD',
+  locale = 'en-US'
+): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
@@ -14,24 +18,25 @@ export function formatCurrency(amount: number, currency = 'USD'): string {
   }).format(amount)
 }
 
-export function formatDate(date: Date | string): string {
+export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
+  const d = typeof date === 'string' ? new Date(date) : date
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(new Date(date))
+    ...options,
+  }).format(d)
 }
 
 export function formatRelativeTime(date: Date | string): string {
-  const now = Date.now()
-  const then = new Date(date).getTime()
-  const diff = now - then
+  const d = typeof date === 'string' ? new Date(date) : date
+  const now = new Date()
+  const diff = now.getTime() - d.getTime()
   const seconds = Math.floor(diff / 1000)
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
 
-  if (days > 30) return formatDate(date)
   if (days > 0) return `${days}d ago`
   if (hours > 0) return `${hours}h ago`
   if (minutes > 0) return `${minutes}m ago`
@@ -41,10 +46,13 @@ export function formatRelativeTime(date: Date | string): string {
 export function slugify(str: string): string {
   return str
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
-export function truncate(str: string, max: number): string {
-  return str.length > max ? str.slice(0, max) + '...' : str
+export function truncate(str: string, length: number): string {
+  if (str.length <= length) return str
+  return str.slice(0, length) + '...'
 }

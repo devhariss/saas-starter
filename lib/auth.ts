@@ -1,15 +1,19 @@
 import NextAuth from 'next-auth'
+import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import GitHub from 'next-auth/providers/github'
 import Resend from 'next-auth/providers/resend'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from '@/lib/db'
-import { resend } from '@/lib/resend'
-import { MagicLinkEmail } from '@/emails/MagicLinkEmail'
+import { prisma } from './db'
+import { resend, FROM_EMAIL } from './resend'
+import { WelcomeEmail } from '@/emails/WelcomeEmail'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'database' },
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -21,37 +25,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
     Resend({
       apiKey: process.env.RESEND_API_KEY!,
-      from: process.env.RESEND_FROM_EMAIL ?? 'noreply@saas-starter.com',
-      sendVerificationRequest: async ({ identifier, url }) => {
-        await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL ?? 'noreply@saas-starter.com',
-          to: identifier,
-          subject: 'Sign in to SaasStarter',
-          react: MagicLinkEmail({ url, email: identifier }),
-        })
-      },
+      from: FROM_EMAIL,
     }),
   ],
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: {
-            role: true,
-            subscription: { select: { status: true } },
-          },
+        session.user.role = (user as { role?: string }).role ?? 'USER'
+        const subscription = await prisma.subscription.findUnique({
+          where: { userId: user.id },
         })
-        ;(session.user as { role?: string }).role = dbUser?.role ?? 'USER'
-        ;(session.user as { subscriptionStatus?: string }).subscriptionStatus =
-          dbUser?.subscription?.status ?? null
+        session.user.subscriptionStatus = subscription?.status ?? null
       }
       return session
     },
     async signIn({ user }) {
-      if (!user.email) return false
-      const dbUser = await prisma.user.findUnique({ where: { email: user.email } })
+      const dbUser = await prisma.user.findUnique({ where: { email: user.email! } })
       if (dbUser?.role === 'BANNED') return false
       return true
     },
@@ -60,42 +50,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async createUser({ user }) {
       if (user.email) {
         await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL ?? 'noreply@saas-starter.com',
+          from: FROM_EMAIL,
           to: user.email,
-          subject: 'Welcome to SaasStarter!',
-          react: (await import('@/emails/WelcomeEmail')).WelcomeEmail({
-            name: user.name ?? 'there',
-          }),
+          subject: 'Welcome to SaasStarter',
+          react: WelcomeEmail({ name: user.name ?? 'there', email: user.email }),
         })
       }
+    },
+    async signIn({ user }) {
       await prisma.auditLog.create({
         data: {
           userId: user.id!,
-          action: 'USER_CREATED',
-          resource: 'user',
+          action: 'sign_in',
+          resource: 'session',
           resourceId: user.id!,
           metadata: {},
           ipHash: '',
         },
       })
     },
-    async signIn({ user }) {
-      if (user.id) {
-        await prisma.auditLog.create({
-          data: {
-            userId: user.id,
-            action: 'USER_SIGNED_IN',
-            resource: 'user',
-            resourceId: user.id,
-            metadata: {},
-            ipHash: '',
-          },
-        })
-      }
-    },
-  },
-  pages: {
-    signIn: '/login',
-    error: '/login',
   },
 })
