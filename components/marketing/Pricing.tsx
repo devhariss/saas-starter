@@ -105,7 +105,7 @@ export function Pricing() {
             Simple, transparent pricing
           </h2>
           <p style={{ fontSize: "var(--text-base)", color: "var(--color-text-muted)" }}>
-            Start free. Upgrade when you're ready. No hidden fees, cancel anytime.
+            Start free. Upgrade when you&apos;re ready. No hidden fees, cancel anytime.
           </p>
 
           {/* Billing toggle */}
@@ -176,7 +176,7 @@ export function Pricing() {
             className="text-[var(--text-sm)] font-medium hover:underline transition-colors"
             style={{ color: "var(--color-primary)" }}
           >
-            See full comparison →
+            See full comparison &rarr;
           </Link>
         </div>
       </div>
@@ -275,7 +275,7 @@ function PricingCard({
               style={{ fontSize: "var(--text-xs)", color: popular ? "oklch(0.55 0.08 285)" : "var(--color-text-faint)" }}
             >
               <s className="opacity-60">${plan.monthlyPrice}/mo</s>
-              {" "}&mdash; billed ${plan.monthlyPrice * 0.8 * 12}/yr
+              {" "}&mdash; billed ${Math.floor(plan.monthlyPrice * 0.8 * 12)}/yr
             </p>
           )}
         </div>
