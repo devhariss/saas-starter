@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Github, Star, Check } from "lucide-react";
+import { ArrowRight, Github, Star, Check, Zap } from "lucide-react";
 
-/* ─── Types ──────────────────────────────── */
+/* ─── Types ───────────────────────── */
 
 interface KpiItem {
   label: string;
@@ -16,169 +16,267 @@ interface ActivityRow {
   time: string;
 }
 
-/* ─── Hero ──────────────────────────────── */
+/* ─── Hero ───────────────────────── */
 
 export function Hero() {
-  const pills = ["Next.js 15", "Prisma", "Stripe", "NextAuth v5", "Resend"];
+  const pills = [
+    "Next.js 15",
+    "Prisma ORM",
+    "Stripe Billing",
+    "NextAuth v5",
+    "Resend Email",
+  ];
 
   return (
     <section
-      className="relative overflow-hidden"
+      className="relative"
       aria-labelledby="hero-heading"
       style={{
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         background: "var(--color-bg)",
+        overflow: "hidden",
       }}
     >
-      {/* Blueprint grid — 1px lines, barely visible */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(oklch(0.5 0.01 285 / 0.07) 1px, transparent 1px)," +
-            "linear-gradient(90deg, oklch(0.5 0.01 285 / 0.07) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-          /* fade grid out near left/right edges using mask */
-          WebkitMaskImage:
-            "radial-gradient(ellipse 90% 100% at 55% 50%, black 40%, transparent 100%)",
-          maskImage:
-            "radial-gradient(ellipse 90% 100% at 55% 50%, black 40%, transparent 100%)",
-        }}
-      />
-      {/* Bottom fade — over the grid only */}
-      <div
-        aria-hidden="true"
-        className="absolute bottom-0 inset-x-0 h-28 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to bottom, transparent, var(--color-bg))",
-        }}
-      />
+      {/* ── Background ── */}
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+        {/* Fine dot grid — very subtle */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "radial-gradient(oklch(0.55 0.04 285 / 0.18) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+            /* Mask: visible in center, fades to nothing at all 4 edges */
+            WebkitMaskImage:
+              "radial-gradient(ellipse 70% 70% at 62% 50%, black 0%, transparent 100%)",
+            maskImage:
+              "radial-gradient(ellipse 70% 70% at 62% 50%, black 0%, transparent 100%)",
+          }}
+        />
+        {/* Single soft accent glow — upper right quadrant only */}
+        <div
+          style={{
+            position: "absolute",
+            top: "-10%",
+            right: "-5%",
+            width: "55%",
+            height: "70%",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(ellipse at 70% 30%, oklch(0.52 0.22 285 / 0.07) 0%, transparent 65%)",
+          }}
+        />
+        {/* Bottom edge fade */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "120px",
+            background: "linear-gradient(to bottom, transparent, var(--color-bg))",
+          }}
+        />
+      </div>
 
+      {/* ── Content ── */}
       <div
-        className="relative mx-auto w-full px-6 py-24 md:py-32"
-        style={{ maxWidth: "1200px" }}
+        className="relative w-full mx-auto"
+        style={{ maxWidth: "1200px", padding: "7rem 1.5rem 6rem" }}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "4rem",
+            alignItems: "center",
+          }}
+          className="grid-cols-1 lg:grid-cols-2"
+        >
 
-          {/* ── Left: copy ── */}
-          <div>
-            {/* Announcement badge */}
+          {/* ── Left copy ── */}
+          <div style={{ maxWidth: "520px" }}>
+
+            {/* Changelog pill */}
             <Link
               href="/changelog"
-              className="inline-flex items-center gap-2 mb-8 rounded-full px-3 py-1 transition-opacity hover:opacity-80"
               style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "2rem",
+                padding: "5px 14px 5px 6px",
+                borderRadius: "9999px",
                 background: "var(--color-surface)",
                 border: "1px solid var(--color-border)",
                 fontSize: "12px",
                 color: "var(--color-text-muted)",
+                textDecoration: "none",
+                transition: "border-color 0.15s",
               }}
             >
               <span
-                className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  padding: "2px 8px",
+                  borderRadius: "9999px",
                   background: "oklch(0.52 0.22 285 / 0.12)",
                   color: "var(--color-primary)",
+                  fontSize: "10px",
+                  fontWeight: 700,
                 }}
               >
-                v1.0
+                <Zap size={9} />
+                New
               </span>
-              Prisma Pulse real-time sync is live
-              <ArrowRight size={11} aria-hidden="true" />
+              v1.0 — Prisma Pulse real-time sync
+              <ArrowRight size={11} />
             </Link>
 
             {/* Eyebrow */}
             <p
-              className="uppercase tracking-widest mb-4"
-              style={{ fontSize: "11px", color: "var(--color-text-faint)", letterSpacing: "0.14em" }}
+              style={{
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--color-text-faint)",
+                marginBottom: "1rem",
+              }}
             >
-              Next.js SaaS starter
+              Next.js SaaS Starter
             </p>
 
             {/* Headline */}
             <h1
               id="hero-heading"
-              className="font-display font-bold tracking-tight mb-6"
               style={{
-                fontSize: "clamp(2.4rem, 1rem + 4vw, 4rem)",
-                lineHeight: 1.05,
+                fontSize: "clamp(2.6rem, 1.4rem + 3.2vw, 4rem)",
+                fontWeight: 800,
+                lineHeight: 1.04,
+                letterSpacing: "-0.03em",
                 color: "var(--color-text)",
-                letterSpacing: "-0.02em",
+                marginBottom: "1.5rem",
               }}
             >
               Ship your SaaS
               <br />
-              <span style={{ color: "var(--color-primary)" }}>in days,</span>{" "}
-              not months.
+              <span style={{ color: "var(--color-primary)" }}>in days,</span>
+              {" "}not months.
             </h1>
 
+            {/* Sub-copy */}
             <p
-              className="mb-8 leading-relaxed"
               style={{
-                fontSize: "var(--text-base)",
+                fontSize: "1.0625rem",
+                lineHeight: 1.7,
                 color: "var(--color-text-muted)",
-                maxWidth: "42ch",
+                maxWidth: "40ch",
+                marginBottom: "2rem",
               }}
             >
-              Production-ready Next.js 15 with auth, billing, email and analytics
-              pre-wired. Fork, configure, and ship — everything else is already done.
+              Everything you need to go from idea to paying customers — auth,
+              billing, email, analytics. Production-grade, fully typed.
             </p>
 
             {/* Stack pills */}
-            <div className="flex flex-wrap gap-2 mb-10">
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px",
+                marginBottom: "2.5rem",
+              }}
+            >
               {pills.map((pill) => (
                 <span
                   key={pill}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md"
                   style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "4px 10px",
+                    borderRadius: "6px",
                     background: "var(--color-surface)",
                     border: "1px solid var(--color-border)",
                     fontSize: "11px",
+                    fontWeight: 500,
                     color: "var(--color-text-muted)",
                   }}
                 >
-                  <Check size={9} style={{ color: "var(--color-primary)" }} aria-hidden="true" />
+                  <Check
+                    size={9}
+                    style={{ color: "var(--color-primary)", flexShrink: 0 }}
+                  />
                   {pill}
                 </span>
               ))}
             </div>
 
             {/* CTAs */}
-            <div className="flex items-center gap-3 flex-wrap mb-10">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                flexWrap: "wrap",
+                marginBottom: "2.5rem",
+              }}
+            >
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 22px",
+                  borderRadius: "8px",
                   background: "var(--color-text)",
                   color: "var(--color-bg)",
-                  fontSize: "var(--text-sm)",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  transition: "opacity 0.15s",
+                  whiteSpace: "nowrap",
                 }}
               >
                 Get started free
-                <ArrowRight size={14} aria-hidden="true" />
+                <ArrowRight size={14} />
               </Link>
               <a
                 href="https://github.com/devhariss/saas-starter"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-150 hover:bg-[var(--color-surface-offset)]"
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 18px",
+                  borderRadius: "8px",
                   background: "var(--color-surface)",
                   border: "1px solid var(--color-border)",
                   color: "var(--color-text)",
-                  fontSize: "var(--text-sm)",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
                 }}
               >
-                <Github size={14} aria-hidden="true" />
-                GitHub
+                <Github size={14} />
+                View on GitHub
                 <span
-                  className="px-1.5 py-0.5 rounded text-[10px] font-semibold"
                   style={{
+                    padding: "1px 6px",
+                    borderRadius: "4px",
                     background: "var(--color-surface-offset)",
                     color: "var(--color-text-faint)",
+                    fontSize: "10px",
+                    fontWeight: 600,
                   }}
                 >
                   MIT
@@ -187,49 +285,70 @@ export function Hero() {
             </div>
 
             {/* Social proof */}
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-2">
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ display: "flex", marginRight: "-4px" }}>
                 {([285, 192, 145, 75, 25] as number[]).map((hue, i) => (
                   <div
                     key={hue}
                     aria-hidden="true"
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold"
                     style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "9px",
+                      fontWeight: 700,
                       background: `oklch(0.50 0.14 ${hue})`,
                       color: "#fff",
                       outline: "2px solid var(--color-bg)",
+                      marginLeft: i > 0 ? "-8px" : 0,
                     }}
                   >
-                    {["J", "A", "R", "P", "T"][i]}
+                    {["J","A","R","P","T"][i]}
                   </div>
                 ))}
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-0.5">
+              <div>
+                <div style={{ display: "flex", gap: "2px", marginBottom: "2px" }}>
                   {([...Array(5)] as undefined[]).map((_, i) => (
-                    <Star key={i} size={11} aria-hidden="true"
-                      style={{ fill: "oklch(0.78 0.18 75)", color: "oklch(0.78 0.18 75)" }} />
+                    <Star key={i} size={11} style={{ fill: "oklch(0.78 0.18 75)", color: "oklch(0.78 0.18 75)" }} />
                   ))}
                 </div>
-                <p style={{ fontSize: "12px", color: "var(--color-text-faint)" }}>
-                  <strong style={{ color: "var(--color-text-muted)" }}>2,400+</strong> devs shipped with this
+                <p style={{ fontSize: "12px", color: "var(--color-text-faint)", margin: 0 }}>
+                  <strong style={{ color: "var(--color-text-muted)", fontWeight: 600 }}>2,400+</strong> devs already shipped
                 </p>
               </div>
             </div>
           </div>
 
-          {/* ── Right: dashboard mockup ── */}
+          {/* ── Right: mockup ── */}
           <div
             aria-hidden="true"
-            className="hidden lg:block relative"
+            className="hidden lg:block"
+            style={{ position: "relative" }}
           >
+            {/* Soft glow behind card */}
             <div
-              className="rounded-2xl overflow-hidden"
               style={{
+                position: "absolute",
+                inset: "-24px",
+                borderRadius: "24px",
+                background: "radial-gradient(ellipse at 50% 40%, oklch(0.52 0.22 285 / 0.09) 0%, transparent 65%)",
+                zIndex: 0,
+              }}
+            />
+            {/* Card */}
+            <div
+              style={{
+                position: "relative",
+                zIndex: 1,
+                borderRadius: "16px",
+                overflow: "hidden",
                 border: "1px solid var(--color-border)",
                 background: "var(--color-surface)",
-                boxShadow:
-                  "0 2px 4px oklch(0 0 0 / 0.08), 0 16px 48px oklch(0 0 0 / 0.12)",
+                boxShadow: "0 1px 3px oklch(0 0 0 / 0.08), 0 12px 40px oklch(0 0 0 / 0.14)",
               }}
             >
               <DashboardMockup />
@@ -241,7 +360,7 @@ export function Hero() {
   );
 }
 
-/* ─── Dashboard Mockup ────────────────────── */
+/* ─── Dashboard Mockup ──────────────────── */
 
 function DashboardMockup() {
   const kpis: KpiItem[] = [
@@ -251,188 +370,237 @@ function DashboardMockup() {
     { label: "NPS",   value: "67",      delta: "+4",     up: true  },
   ];
 
-  /* explicit bar colors — avoids oklch relative color syntax (limited browser support) */
-  const barColors = [
-    "oklch(0.52 0.22 285 / 0.18)",
-    "oklch(0.52 0.22 285 / 0.22)",
-    "oklch(0.52 0.22 285 / 0.20)",
-    "oklch(0.52 0.22 285 / 0.28)",
-    "oklch(0.52 0.22 285 / 0.25)",
-    "oklch(0.52 0.22 285 / 0.32)",
-    "oklch(0.52 0.22 285 / 0.30)",
-    "oklch(0.52 0.22 285 / 0.38)",
-    "oklch(0.52 0.22 285 / 0.34)",
-    "oklch(0.52 0.22 285 / 0.42)",
-    "oklch(0.52 0.22 285 / 0.38)",
-    "oklch(0.52 0.22 285 / 1)",   /* last bar: solid accent */
-  ];
-
-  const bars: number[] = [38, 52, 44, 63, 58, 72, 68, 81, 76, 88, 84, 96];
+  /* Explicit opacity list — avoids CSS relative color syntax */
+  const barHeights: number[] = [38,52,44,63,58,72,68,81,76,88,84,96];
+  const barOpacities: number[] = [0.18,0.22,0.20,0.28,0.25,0.32,0.30,0.38,0.34,0.42,0.40,1.00];
   const months: string[] = ["J","F","M","A","M","J","J","A","S","O","N","D"];
 
   const activity: ActivityRow[] = [
-    { dot: "oklch(0.65 0.15 145)", text: "New user · sarah@nexaflow.io",     time: "now" },
-    { dot: "oklch(0.65 0.20 285)", text: "Invoice paid · $49 · Pro plan",  time: "2m"  },
-    { dot: "oklch(0.65 0.15 192)", text: "Webhook synced · stripe.checkout", time: "5m"  },
+    { dot: "oklch(0.62 0.15 145)", text: "New user · sarah@nexaflow.io",     time: "now" },
+    { dot: "oklch(0.62 0.20 285)", text: "Invoice paid · $49 · Pro plan",  time: "2m"  },
+    { dot: "oklch(0.62 0.15 192)", text: "Webhook synced · stripe.checkout", time: "5m"  },
+  ];
+
+  const navItems = [
+    { label: "Overview",  active: true  },
+    { label: "Revenue",   active: false },
+    { label: "Users",     active: false },
+    { label: "Settings",  active: false },
   ];
 
   return (
-    <div style={{ background: "var(--color-surface)" }}>
+    <div style={{ background: "var(--color-surface)", fontSize: "0" }}>
+
       {/* Window chrome */}
       <div
-        className="flex items-center gap-3 px-4 py-3"
-        style={{ borderBottom: "1px solid var(--color-border)" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "10px 14px",
+          borderBottom: "1px solid var(--color-border)",
+        }}
       >
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full" style={{ background: "oklch(0.62 0.20 25)" }} />
-          <span className="w-2.5 h-2.5 rounded-full" style={{ background: "oklch(0.70 0.18 75)" }} />
-          <span className="w-2.5 h-2.5 rounded-full" style={{ background: "oklch(0.58 0.15 145)" }} />
+        <div style={{ display: "flex", gap: "5px" }}>
+          {["oklch(0.62 0.20 25)","oklch(0.70 0.18 75)","oklch(0.58 0.15 145)"].map((c) => (
+            <span key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c, display: "block" }} />
+          ))}
         </div>
         <div
-          className="flex-1 rounded px-2.5 py-1"
           style={{
+            flex: 1,
+            padding: "3px 10px",
+            borderRadius: "5px",
             background: "var(--color-surface-offset)",
             fontSize: "10px",
             color: "var(--color-text-faint)",
-            fontFamily: "monospace",
+            fontFamily: "ui-monospace, monospace",
           }}
         >
           app.saastarter.dev/dashboard
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="flex gap-3">
-          {/* Mini sidebar */}
-          <div
-            className="hidden xl:flex flex-col gap-1 pt-1"
-            style={{ width: "110px", flexShrink: 0 }}
+      {/* App body */}
+      <div style={{ display: "flex", gap: 0 }}>
+
+        {/* Sidebar */}
+        <div
+          style={{
+            width: "120px",
+            flexShrink: 0,
+            padding: "12px 8px",
+            borderRight: "1px solid var(--color-border)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+          }}
+        >
+          {navItems.map((item) => (
+            <div
+              key={item.label}
+              style={{
+                padding: "6px 10px",
+                borderRadius: "6px",
+                fontSize: "11px",
+                fontWeight: item.active ? 600 : 400,
+                color: item.active ? "var(--color-text)" : "var(--color-text-faint)",
+                background: item.active ? "var(--color-surface-offset)" : "transparent",
+                border: item.active ? "1px solid var(--color-border)" : "1px solid transparent",
+              }}
+            >
+              {item.label}
+            </div>
+          ))}
+        </div>
+
+        {/* Main panel */}
+        <div style={{ flex: 1, padding: "12px", minWidth: 0 }}>
+
+          {/* Page title */}
+          <p
+            style={{
+              fontSize: "12px",
+              fontWeight: 700,
+              color: "var(--color-text)",
+              marginBottom: "10px",
+            }}
           >
-            {[
-              { label: "Overview",  active: true  },
-              { label: "Revenue",   active: false },
-              { label: "Users",     active: false },
-              { label: "Settings",  active: false },
-            ].map((item) => (
+            Overview
+          </p>
+
+          {/* KPI grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "6px",
+              marginBottom: "10px",
+            }}
+          >
+            {kpis.map((kpi) => (
               <div
-                key={item.label}
-                className="px-2.5 py-1.5 rounded-md text-[10px] font-medium"
+                key={kpi.label}
                 style={{
-                  background: item.active ? "var(--color-surface-offset)" : "transparent",
-                  color: item.active ? "var(--color-text)" : "var(--color-text-faint)",
-                  border: item.active ? "1px solid var(--color-border)" : "1px solid transparent",
+                  padding: "8px",
+                  borderRadius: "8px",
+                  background: "var(--color-surface-2)",
+                  border: "1px solid var(--color-border)",
                 }}
               >
-                {item.label}
+                <p style={{ fontSize: "9px", color: "var(--color-text-faint)", marginBottom: "4px" }}>
+                  {kpi.label}
+                </p>
+                <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-text)", fontVariantNumeric: "tabular-nums" }}>
+                  {kpi.value}
+                </p>
+                <p style={{ fontSize: "9px", fontWeight: 600, marginTop: "2px", color: kpi.up ? "oklch(0.58 0.15 145)" : "oklch(0.62 0.20 25)" }}>
+                  {kpi.delta}
+                </p>
               </div>
             ))}
           </div>
 
-          {/* Main content */}
-          <div className="flex-1 min-w-0">
-            {/* KPI row */}
-            <div className="grid grid-cols-4 gap-2 mb-3">
-              {kpis.map((kpi) => (
-                <div
-                  key={kpi.label}
-                  className="rounded-lg p-2.5"
-                  style={{
-                    background: "var(--color-surface-2)",
-                    border: "1px solid var(--color-border)",
-                  }}
-                >
-                  <p className="text-[8px] mb-1 font-medium" style={{ color: "var(--color-text-faint)" }}>
-                    {kpi.label}
-                  </p>
-                  <p className="text-[12px] font-bold tabular-nums" style={{ color: "var(--color-text)" }}>
-                    {kpi.value}
-                  </p>
-                  <p
-                    className="text-[8px] font-semibold mt-0.5"
-                    style={{ color: kpi.up ? "oklch(0.58 0.15 145)" : "oklch(0.62 0.20 25)" }}
-                  >
-                    {kpi.delta}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Revenue chart */}
-            <div
-              className="rounded-lg p-3 mb-3"
-              style={{
-                background: "var(--color-surface-2)",
-                border: "1px solid var(--color-border)",
-              }}
-            >
-              <div className="flex items-center justify-between mb-2.5">
-                <p className="text-[10px] font-semibold" style={{ color: "var(--color-text-muted)" }}>
-                  Revenue &middot; 2025
-                </p>
-                <span
-                  className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
-                  style={{
-                    background: "oklch(0.55 0.15 145 / 0.12)",
-                    color: "oklch(0.58 0.15 145)",
-                  }}
-                >
-                  +34.2%
-                </span>
-              </div>
-              <div className="flex items-end gap-[2px] h-16">
-                {bars.map((h, i) => (
-                  <div key={i} className="flex flex-col items-center gap-[3px] flex-1">
-                    <div
-                      className="w-full rounded-sm"
-                      style={{
-                        height: `${h}%`,
-                        background: barColors[i],
-                      }}
-                    />
-                    <span className="text-[7px]" style={{ color: "var(--color-text-faint)" }}>
-                      {months[i]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Activity feed */}
-            <div
-              className="rounded-lg overflow-hidden"
-              style={{ border: "1px solid var(--color-border)" }}
-            >
-              <p
-                className="px-3 py-2 text-[10px] font-semibold"
+          {/* Chart */}
+          <div
+            style={{
+              padding: "10px",
+              borderRadius: "8px",
+              background: "var(--color-surface-2)",
+              border: "1px solid var(--color-border)",
+              marginBottom: "10px",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+              <p style={{ fontSize: "10px", fontWeight: 600, color: "var(--color-text-muted)" }}>Revenue &middot; 2025</p>
+              <span
                 style={{
-                  background: "var(--color-surface-2)",
-                  color: "var(--color-text-muted)",
-                  borderBottom: "1px solid var(--color-border)",
+                  fontSize: "9px",
+                  fontWeight: 600,
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  background: "oklch(0.55 0.15 145 / 0.12)",
+                  color: "oklch(0.58 0.15 145)",
                 }}
               >
-                Live activity
-              </p>
-              {activity.map((row, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 px-3 py-2 text-[10px]"
-                  style={{
-                    background: "var(--color-surface-2)",
-                    borderBottom: i < activity.length - 1 ? "1px solid var(--color-border)" : "none",
-                  }}
-                >
-                  <span
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{ background: row.dot }}
+                +34.2%
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "56px" }}>
+              {barHeights.map((h, i) => (
+                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: `${h}%`,
+                      borderRadius: "2px",
+                      background: `oklch(0.52 0.22 285 / ${barOpacities[i]})`,
+                    }}
                   />
-                  <span className="flex-1 truncate" style={{ color: "var(--color-text-muted)" }}>
-                    {row.text}
-                  </span>
-                  <span style={{ color: "var(--color-text-faint)" }}>{row.time}</span>
+                  <span style={{ fontSize: "7px", color: "var(--color-text-faint)" }}>{months[i]}</span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Activity feed */}
+          <div
+            style={{
+              borderRadius: "8px",
+              overflow: "hidden",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            <p
+              style={{
+                padding: "6px 10px",
+                fontSize: "10px",
+                fontWeight: 600,
+                color: "var(--color-text-muted)",
+                background: "var(--color-surface-2)",
+                borderBottom: "1px solid var(--color-border)",
+              }}
+            >
+              Live activity
+            </p>
+            {activity.map((row, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "7px 10px",
+                  fontSize: "10px",
+                  background: "var(--color-surface-2)",
+                  borderBottom: i < activity.length - 1 ? "1px solid var(--color-border)" : "none",
+                }}
+              >
+                <span
+                  style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: row.dot,
+                    flexShrink: 0,
+                  }}
+                />
+                <span
+                  style={{
+                    flex: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    color: "var(--color-text-muted)",
+                  }}
+                >
+                  {row.text}
+                </span>
+                <span style={{ color: "var(--color-text-faint)", flexShrink: 0 }}>{row.time}</span>
+              </div>
+            ))}
+          </div>
+
         </div>
       </div>
     </div>
