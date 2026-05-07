@@ -1,16 +1,20 @@
 /* ═══════════════════════════════════════════
    SAAS STARTER — Design Tokens + Base Styles
+   Tailwind v4: @theme registers tokens for
+   utility generation. :root block below makes
+   all tokens available as plain CSS variables
+   so var() references in components work.
    ═══════════════════════════════════════════ */
 
 @import "tailwindcss";
 
+/* ── Tailwind v4 theme tokens ── */
 @theme {
-  /* ── Color Palette (OKLCH) ── */
+  /* Colors */
   --color-bg: oklch(0.98 0.003 285);
   --color-surface: oklch(0.96 0.004 285);
   --color-surface-2: oklch(0.94 0.005 285);
   --color-surface-offset: oklch(0.91 0.006 285);
-  --color-border: oklch(from var(--color-text) l c h / 0.10);
   --color-text: oklch(0.12 0.008 285);
   --color-text-muted: oklch(0.45 0.01 285);
   --color-text-faint: oklch(0.70 0.005 285);
@@ -21,11 +25,11 @@
   --color-error: oklch(0.55 0.20 25);
   --color-warning: oklch(0.65 0.18 75);
 
-  /* ── Typography ── */
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-display: 'Cal Sans', 'Inter', sans-serif;
+  /* Typography — wire next/font var into Tailwind */
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-display: 'Cal Sans', var(--font-inter), sans-serif;
 
-  /* ── Fluid Type Scale ── */
+  /* Fluid Type Scale */
   --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
   --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
   --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
@@ -33,7 +37,7 @@
   --text-xl:   clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
   --text-2xl:  clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
 
-  /* ── Spacing (4px grid) ── */
+  /* Spacing (4px grid) */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -47,29 +51,76 @@
   --space-24: 6rem;
   --space-32: 8rem;
 
-  /* ── Radius ── */
+  /* Radius */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-full: 9999px;
 
-  /* ── Shadows ── */
+  /* Shadows */
   --shadow-sm: 0 1px 2px oklch(0.1 0.01 285 / 0.06);
   --shadow-md: 0 4px 12px oklch(0.1 0.01 285 / 0.08);
   --shadow-lg: 0 12px 32px oklch(0.1 0.01 285 / 0.12);
 
-  /* ── Transitions ── */
+  /* Transitions */
+  --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── :root — expose all tokens as plain CSS custom properties ──
+   Tailwind v4's @theme tokens are available in utility classes
+   but NOT automatically as var() in arbitrary inline styles or
+   non-Tailwind CSS. Redeclaring them under :root fixes this.
+   ── */
+:root {
+  --color-bg: oklch(0.98 0.003 285);
+  --color-surface: oklch(0.96 0.004 285);
+  --color-surface-2: oklch(0.94 0.005 285);
+  --color-surface-offset: oklch(0.91 0.006 285);
+  --color-border: oklch(0.12 0.008 285 / 0.10);
+  --color-text: oklch(0.12 0.008 285);
+  --color-text-muted: oklch(0.45 0.01 285);
+  --color-text-faint: oklch(0.70 0.005 285);
+  --color-primary: oklch(0.52 0.22 285);
+  --color-primary-hover: oklch(0.46 0.25 285);
+  --color-secondary: oklch(0.60 0.15 192);
+  --color-success: oklch(0.55 0.15 145);
+  --color-error: oklch(0.55 0.20 25);
+  --color-warning: oklch(0.65 0.18 75);
+
+  --font-body: var(--font-inter, system-ui, sans-serif);
+  --font-display: 'Cal Sans', var(--font-inter, system-ui, sans-serif);
+
+  --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl:   clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --text-2xl:  clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+
+  --space-1: 0.25rem;  --space-2: 0.5rem;   --space-3: 0.75rem;
+  --space-4: 1rem;     --space-6: 1.5rem;   --space-8: 2rem;
+  --space-10: 2.5rem;  --space-12: 3rem;    --space-16: 4rem;
+  --space-20: 5rem;    --space-24: 6rem;    --space-32: 8rem;
+
+  --radius-sm: 0.375rem; --radius-md: 0.5rem;  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;     --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px oklch(0.1 0.01 285 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.1 0.01 285 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.1 0.01 285 / 0.12);
+
   --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Dark Mode ── */
-[data-theme="dark"], .dark {
+[data-theme="dark"],
+.dark {
   --color-bg: oklch(0.09 0.006 285);
   --color-surface: oklch(0.12 0.007 285);
   --color-surface-2: oklch(0.14 0.008 285);
   --color-surface-offset: oklch(0.17 0.009 285);
-  --color-border: oklch(from var(--color-text) l c h / 0.12);
+  --color-border: oklch(0.94 0.005 285 / 0.12);
   --color-text: oklch(0.94 0.005 285);
   --color-text-muted: oklch(0.65 0.01 285);
   --color-text-faint: oklch(0.42 0.008 285);
@@ -90,18 +141,23 @@
     --color-surface: oklch(0.12 0.007 285);
     --color-surface-2: oklch(0.14 0.008 285);
     --color-surface-offset: oklch(0.17 0.009 285);
+    --color-border: oklch(0.94 0.005 285 / 0.12);
     --color-text: oklch(0.94 0.005 285);
     --color-text-muted: oklch(0.65 0.01 285);
     --color-text-faint: oklch(0.42 0.008 285);
     --color-primary: oklch(0.68 0.22 285);
     --color-primary-hover: oklch(0.74 0.20 285);
+    --color-secondary: oklch(0.72 0.15 192);
+    --color-success: oklch(0.68 0.15 145);
+    --color-error: oklch(0.70 0.20 25);
+    --color-warning: oklch(0.75 0.18 75);
     --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2);
     --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
     --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.4);
   }
 }
 
-/* ── Base Reset + Styles ── */
+/* ── Base Reset ── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -121,7 +177,7 @@ html {
 body {
   min-height: 100dvh;
   line-height: 1.6;
-  font-family: var(--font-body);
+  font-family: var(--font-inter), system-ui, sans-serif;
   font-size: var(--text-base);
   color: var(--color-text);
   background-color: var(--color-bg);
@@ -138,7 +194,7 @@ input, button, textarea, select { font: inherit; color: inherit; }
 h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
   line-height: 1.15;
-  font-family: var(--font-display);
+  font-family: 'Cal Sans', var(--font-inter), system-ui, sans-serif;
 }
 
 p, li, figcaption {
@@ -147,7 +203,7 @@ p, li, figcaption {
 }
 
 ::selection {
-  background: oklch(from var(--color-primary) l c h / 0.25);
+  background: oklch(0.52 0.22 285 / 0.25);
   color: var(--color-text);
 }
 

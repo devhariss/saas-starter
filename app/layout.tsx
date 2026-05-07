@@ -5,9 +5,10 @@ import { SessionProvider } from 'next-auth/react';
 import { CookieBanner } from '@/components/compliance/CookieBanner';
 import './globals.css';
 
+// next/font generates a CSS variable; we then wire it into --font-body in globals.css
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-body-loaded',
+  variable: '--font-inter',   // ← matches var(--font-inter) used in globals.css
   display: 'swap',
   preload: true,
 });
@@ -61,8 +62,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head>
+        {/* Cal Sans via Fontshare CDN for display headings */}
         <link rel="preconnect" href="https://api.fontshare.com" />
         <link
           href="https://api.fontshare.com/v2/css?f[]=cal-sans@400&display=swap"
@@ -70,8 +72,7 @@ export default function RootLayout({
         />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={inter.variable}>
-        {/* SessionProvider in v5 does NOT take a session prop */}
+      <body>
         <SessionProvider>
           <ThemeProvider
             attribute="data-theme"
