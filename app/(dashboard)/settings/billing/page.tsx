@@ -1,69 +1,25 @@
-import type { Metadata } from 'next';
-import { auth } from '@/lib/auth';
+import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Settings — Billing' };
+export const dynamic = 'force-dynamic'
+export const metadata: Metadata = { title: 'Billing' }
 
-export default async function BillingPage() {
-  const session = await auth();
-
+export default function BillingPage() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', maxWidth: '640px' }}>
-      <h1
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'var(--text-xl)',
-          fontWeight: 700,
-          color: 'var(--color-text)',
-        }}
-      >
-        Billing
-      </h1>
-      <div
-        style={{
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: 'var(--space-6)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+    <main id="main-content" style={{ padding: 'var(--space-8)', maxWidth: '640px' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', fontWeight: 600, color: 'var(--color-text)', marginBottom: 'var(--space-2)' }}>Billing</h1>
+      <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-8)' }}>Manage your subscription and payment method.</p>
+      <div style={{ padding: 'var(--space-6)', borderRadius: 'var(--radius-lg)', border: '1px solid oklch(from var(--color-text) l c h / 0.08)', background: 'var(--color-surface)', marginBottom: 'var(--space-6)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
           <div>
-            <p style={{ fontWeight: 600, color: 'var(--color-text)', fontSize: 'var(--text-base)' }}>Pro Plan</p>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>$29 / month &middot; renews June 1, 2026</p>
+            <p style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text)' }}>Pro Plan</p>
+            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginTop: 'var(--space-1)' }}>$29 / month &mdash; renews June 6, 2026</p>
           </div>
-          <span
-            style={{
-              fontSize: 'var(--text-xs)',
-              fontWeight: 600,
-              padding: '2px 10px',
-              borderRadius: 'var(--radius-full)',
-              background: 'oklch(from var(--color-success) l c h / 0.12)',
-              color: 'var(--color-success)',
-            }}
-          >
-            Active
-          </span>
+          <span style={{ fontSize: 'var(--text-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'oklch(from var(--color-success) l c h / 0.12)', color: 'var(--color-success)' }}>Active</span>
         </div>
         <form action="/api/stripe/portal" method="POST">
-          <input type="hidden" name="userId" value={session?.user?.id ?? ''} />
-          <button
-            type="submit"
-            style={{
-              background: 'var(--color-primary)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-2) var(--space-6)',
-              fontSize: 'var(--text-sm)',
-              fontWeight: 500,
-              cursor: 'pointer',
-              minHeight: '44px',
-            }}
-          >
-            Manage billing
-          </button>
+          <button type="submit" style={{ padding: 'var(--space-2) var(--space-4)', border: '1px solid oklch(from var(--color-text) l c h / 0.15)', borderRadius: 'var(--radius-md)', background: 'transparent', color: 'var(--color-text)', fontSize: 'var(--text-sm)', fontWeight: 500 }}>Manage subscription</button>
         </form>
       </div>
-    </div>
-  );
+    </main>
+  )
 }
