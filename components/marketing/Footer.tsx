@@ -1,100 +1,94 @@
 import Link from "next/link";
-import { Github, Twitter, Linkedin } from "lucide-react";
+import { Github } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
-type FooterLink = {
-  label: string;
-  href: string;
-  external?: boolean;
+const links = {
+  Product: [
+    { label: "Features", href: "/#features" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "Changelog", href: "/changelog" },
+    { label: "Roadmap", href: "/changelog" },
+  ],
+  Developers: [
+    { label: "Documentation", href: "/docs" },
+    { label: "GitHub", href: "https://github.com/devhariss/saas-starter" },
+    { label: "Blog", href: "/blog" },
+  ],
+  Company: [
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ],
+  Legal: [
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Cookie Policy", href: "/cookies" },
+  ],
 };
-
-type FooterColumn = {
-  heading: string;
-  links: FooterLink[];
-};
-
-const columns: FooterColumn[] = [
-  {
-    heading: "Product",
-    links: [
-      { label: "Features", href: "/#features" },
-      { label: "Pricing", href: "/pricing" },
-      { label: "Changelog", href: "/changelog" },
-      { label: "Roadmap", href: "/changelog#roadmap" },
-    ],
-  },
-  {
-    heading: "Company",
-    links: [
-      { label: "About", href: "/about" },
-      { label: "Blog", href: "/blog" },
-      { label: "Careers", href: "/about#careers" },
-    ],
-  },
-  {
-    heading: "Legal",
-    links: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Cookie Policy", href: "/cookies" },
-      { label: "Accessibility", href: "/accessibility" },
-    ],
-  },
-  {
-    heading: "Connect",
-    links: [
-      { label: "GitHub", href: "https://github.com/devhariss/saas-starter", external: true },
-      { label: "Twitter / X", href: "https://twitter.com", external: true },
-      { label: "LinkedIn", href: "https://linkedin.com", external: true },
-    ],
-  },
-];
 
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface)]">
+    <footer
+      style={{
+        background: "var(--color-surface)",
+        borderTop: "1px solid var(--color-border)",
+      }}
+      aria-label="Site footer"
+    >
       <div className="mx-auto max-w-[1200px] px-6 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-          {/* Brand column */}
+        {/* Top: brand + columns */}
+        <div className="grid grid-cols-2 md:grid-cols-[220px_1fr_1fr_1fr_1fr] gap-10 mb-14">
+          {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <Logo size={24} />
-              <span className="text-[var(--text-sm)] font-semibold text-[var(--color-text)]">
+            <Link href="/" className="inline-flex items-center gap-2.5 mb-4" aria-label="SaasStarter home">
+              <Logo className="w-6 h-6" />
+              <span
+                className="font-display font-semibold"
+                style={{ fontSize: "var(--text-base)", color: "var(--color-text)" }}
+              >
                 SaasStarter
               </span>
             </Link>
-            <p className="text-[var(--text-xs)] text-[var(--color-text-faint)] max-w-[24ch]">
-              Production-ready Next.js 15 SaaS boilerplate. MIT licensed.
+            <p
+              className="mb-5 max-w-[22ch]"
+              style={{ fontSize: "var(--text-sm)", color: "var(--color-text-faint)", lineHeight: 1.7 }}
+            >
+              Production-ready Next.js 15 SaaS starter. Ship faster.
             </p>
+            <div className="flex items-center gap-2">
+              <a
+                href="https://github.com/devhariss/saas-starter"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub repository"
+                className="p-2 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--color-surface-offset)]"
+                style={{ color: "var(--color-text-faint)" }}
+              >
+                <Github size={17} aria-hidden="true" />
+              </a>
+            </div>
           </div>
 
-          {/* Nav columns */}
-          {columns.map((col) => (
-            <div key={col.heading}>
-              <p className="text-[var(--text-xs)] font-semibold text-[var(--color-text)] uppercase tracking-widest mb-4">
-                {col.heading}
+          {/* Link columns */}
+          {Object.entries(links).map(([group, items]) => (
+            <div key={group}>
+              <p
+                className="font-semibold mb-4"
+                style={{ fontSize: "var(--text-xs)", color: "var(--color-text)", letterSpacing: "0.06em", textTransform: "uppercase" }}
+              >
+                {group}
               </p>
               <ul className="space-y-2.5" role="list">
-                {col.links.map((link) => (
-                  <li key={link.href}>
-                    {link.external ? (
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[var(--text-sm)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                    ) : (
-                      <Link
-                        href={link.href}
-                        className="text-[var(--text-sm)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                      >
-                        {link.label}
-                      </Link>
-                    )}
+                {items.map((item) => (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      target={item.href.startsWith("http") ? "_blank" : undefined}
+                      rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                      className="transition-colors hover:text-[var(--color-text)]"
+                      style={{ fontSize: "var(--text-sm)", color: "var(--color-text-faint)" }}
+                    >
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -103,47 +97,34 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[var(--text-xs)] text-[var(--color-text-faint)]">
-            © {new Date().getFullYear()} SaasStarter. Made with ♥ by YourCompany.
+        <div
+          className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6"
+          style={{ borderTop: "1px solid var(--color-border)" }}
+        >
+          <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-faint)" }}>
+            &copy; {new Date().getFullYear()} SaasStarter. MIT Licensed.
           </p>
           <div className="flex items-center gap-4">
-            <Link
-              href="/cookies#withdraw"
-              className="text-[var(--text-xs)] text-[var(--color-text-faint)] hover:text-[var(--color-text-muted)] transition-colors"
-            >
-              Withdraw consent
-            </Link>
-            <div className="flex items-center gap-3">
-              <a
-                href="https://github.com/devhariss/saas-starter"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="text-[var(--color-text-faint)] hover:text-[var(--color-text-muted)] transition-colors"
+            {[
+              { label: "GDPR", title: "GDPR Compliant" },
+              { label: "SOC 2", title: "SOC 2 Type II" },
+              { label: "100", title: "Lighthouse Score 100" },
+            ].map((badge) => (
+              <span
+                key={badge.label}
+                title={badge.title}
+                className="px-2.5 py-1 rounded-full font-semibold"
+                style={{
+                  fontSize: "10px",
+                  background: "var(--color-surface-offset)",
+                  color: "var(--color-text-faint)",
+                  border: "1px solid var(--color-border)",
+                  letterSpacing: "0.04em",
+                }}
               >
-                <Github size={16} aria-hidden="true" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Twitter / X"
-                className="text-[var(--color-text-faint)] hover:text-[var(--color-text-muted)] transition-colors"
-              >
-                <Twitter size={16} aria-hidden="true" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="text-[var(--color-text-faint)] hover:text-[var(--color-text-muted)] transition-colors"
-              >
-                <Linkedin size={16} aria-hidden="true" />
-              </a>
-            </div>
-            <ThemeToggle />
+                {badge.label}
+              </span>
+            ))}
           </div>
         </div>
       </div>
