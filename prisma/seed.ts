@@ -1,135 +1,145 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Role, TeamRole, ConsentAction } from '@prisma/client'
+import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // Admin user
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@saas-starter.com' },
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@saas-starter.dev' },
     update: {},
     create: {
       name: 'Admin User',
-      email: 'admin@saas-starter.com',
-      role: 'ADMIN',
+      email: 'admin@saas-starter.dev',
       emailVerified: new Date(),
+      role: Role.ADMIN,
     },
   })
 
-  // Regular users
-  const alice = await prisma.user.upsert({
+  const user1 = await prisma.user.upsert({
     where: { email: 'alice@example.com' },
     update: {},
     create: {
-      name: 'Alice Chen',
+      name: 'Alice Johnson',
       email: 'alice@example.com',
       emailVerified: new Date(),
+      role: Role.USER,
     },
   })
 
-  const bob = await prisma.user.upsert({
+  const user2 = await prisma.user.upsert({
     where: { email: 'bob@example.com' },
     update: {},
     create: {
-      name: 'Bob Martinez',
+      name: 'Bob Smith',
       email: 'bob@example.com',
       emailVerified: new Date(),
+      role: Role.USER,
     },
   })
 
-  // Subscription for alice
   await prisma.subscription.upsert({
-    where: { userId: alice.id },
+    where: { userId: user1.id },
     update: {},
     create: {
-      userId: alice.id,
+      userId: user1.id,
       stripeCustomerId: 'cus_demo_alice',
       stripePriceId: process.env.STRIPE_PRO_PRICE_ID ?? 'price_demo',
       stripeSubscriptionId: 'sub_demo_alice',
       status: 'active',
-      currentPeriodStart: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-      currentPeriodEnd: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      currentPeriodStart: new Date('2026-04-01'),
+      currentPeriodEnd: new Date('2026-05-01'),
     },
   })
 
-  // Team
   const team = await prisma.team.upsert({
     where: { slug: 'acme-corp' },
     update: {},
     create: {
       name: 'Acme Corp',
       slug: 'acme-corp',
-      ownerId: alice.id,
+      ownerId: user1.id,
     },
   })
 
-  // Team members
   await prisma.teamMember.upsert({
-    where: { teamId_userId: { teamId: team.id, userId: alice.id } },
+    where: { teamId_userId: { teamId: team.id, userId: user1.id } },
     update: {},
-    create: { teamId: team.id, userId: alice.id, role: 'OWNER' },
-  })
-  await prisma.teamMember.upsert({
-    where: { teamId_userId: { teamId: team.id, userId: bob.id } },
-    update: {},
-    create: { teamId: team.id, userId: bob.id, role: 'MEMBER' },
+    create: { teamId: team.id, userId: user1.id, role: TeamRole.OWNER },
   })
 
-  // Projects
-  const projectData = [
-    { name: 'Marketing Site Revamp', slug: 'marketing-site-revamp', description: 'Redesign the company marketing site with new brand guidelines.' },
-    { name: 'API v2 Migration', slug: 'api-v2-migration', description: 'Migrate all endpoints to the new REST + GraphQL hybrid API.' },
-    { name: 'Analytics Dashboard', slug: 'analytics-dashboard', description: 'Build real-time analytics dashboard for product metrics.' },
-  ]
+  await prisma.teamMember.upsert({
+    where: { teamId_userId: { teamId: team.id, userId: user2.id } },
+    update: {},
+    create: { teamId: team.id, userId: user2.id, role: TeamRole.MEMBER },
+  })
 
-  for (const p of projectData) {
+  const projectSlugs = ['saas-dashboard', 'marketing-site', 'api-backend']
+  for (const slug of projectSlugs) {
     await prisma.project.upsert({
-      where: { slug: p.slug },
+      where: { slug },
       update: {},
-      create: { ...p, userId: alice.id, teamId: team.id },
+      create: {
+        name: slug.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' '),
+        slug,
+        description: `Demo project: ${slug}`,
+        userId: user1.id,
+        teamId: team.id,
+        status: 'active',
+      },
     })
   }
 
-  // Audit logs
   const auditActions = [
-    'USER_CREATED', 'USER_SIGNED_IN', 'PROJECT_CREATED',
-    'SUBSCRIPTION_UPGRADED', 'TEAM_CREATED', 'MEMBER_INVITED',
-    'INVOICE_PAID', 'PASSWORD_CHANGED', 'EXPORT_REQUESTED', 'SETTINGS_UPDATED',
+    { action: 'sign_in', resource: 'session' },
+    { action: 'project_created', resource: 'project' },
+    { action: 'subscription_upgraded', resource: 'subscription' },
+    { action: 'team_member_invited', resource: 'team' },
+    { action: 'profile_updated', resource: 'user' },
+    { action: 'sign_in', resource: 'session' },
+    { action: 'invoice_paid', resource: 'invoice' },
+    { action: 'project_created', resource: 'project' },
+    { action: 'sign_in', resource: 'session' },
+    { action: 'settings_updated', resource: 'user' },
   ]
 
-  for (const action of auditActions) {
+  for (const entry of auditActions) {
     await prisma.auditLog.create({
       data: {
-        userId: alice.id,
-        action,
-        resource: 'user',
-        resourceId: alice.id,
-        metadata: { demo: true },
-        ipHash: 'hash_demo',
+        userId: user1.id,
+        action: entry.action,
+        resource: entry.resource,
+        resourceId: user1.id,
+        metadata: {},
+        ipHash: 'sha256_demo_hash',
+        createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+      },
+    })
+  }
+
+  const consentEntries = [
+    { action: ConsentAction.granted, categories: { essential: true, analytics: true, marketing: false, functional: true } },
+    { action: ConsentAction.revoked, categories: { essential: true, analytics: false, marketing: false, functional: false } },
+    { action: ConsentAction.granted, categories: { essential: true, analytics: true, marketing: true, functional: true } },
+    { action: ConsentAction.granted, categories: { essential: true, analytics: false, marketing: false, functional: false } },
+    { action: ConsentAction.revoked, categories: { essential: true, analytics: false, marketing: false, functional: false } },
+  ]
+
+  for (const entry of consentEntries) {
+    await prisma.consentLog.create({
+      data: {
+        ipHash: 'sha256_demo_consent_hash',
+        categories: entry.categories,
+        action: entry.action,
         createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
       },
     })
   }
 
-  // Consent logs
-  for (let i = 0; i < 5; i++) {
-    await prisma.consentLog.create({
-      data: {
-        ipHash: `hash_demo_${i}`,
-        categories: { essential: true, analytics: i % 2 === 0, marketing: false, functional: true },
-        action: i % 3 === 0 ? 'revoked' : 'granted',
-        createdAt: new Date(Date.now() - i * 7 * 24 * 60 * 60 * 1000),
-      },
-    })
-  }
-
   if (process.env.NODE_ENV !== 'production') {
-    console.log('✅ Seed complete: admin, 2 users, 1 team, 3 projects, subscriptions, audit logs')
+    console.log('✅ Seed complete')
   }
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
+  .catch((e) => { console.error(e); process.exit(1) })
   .finally(() => prisma.$disconnect())

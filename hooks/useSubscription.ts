@@ -1,13 +1,20 @@
-'use client'
+import { useCurrentUser } from './useCurrentUser'
 
-import { useSession } from 'next-auth/react'
+export type SubscriptionStatus =
+  | 'active'
+  | 'trialing'
+  | 'canceled'
+  | 'past_due'
+  | 'incomplete'
+  | null
 
 export function useSubscription() {
-  const { data: session } = useSession()
-  const status = (session?.user as { subscriptionStatus?: string })?.subscriptionStatus ?? null
+  const { user } = useCurrentUser()
+  const status = (user?.subscriptionStatus as SubscriptionStatus) ?? null
   return {
     status,
-    isPro: status === 'active' || status === 'trialing',
-    isFree: !status || status === 'canceled',
+    isActive: status === 'active' || status === 'trialing',
+    isPro: status === 'active',
+    isFree: !status || status === 'canceled' || status === 'incomplete',
   }
 }

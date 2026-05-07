@@ -1,22 +1,14 @@
 'use client'
 
-import { getConsent, hasConsent } from '@/components/compliance/ConsentManager'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getConsent, type ConsentState } from '@/components/compliance/ConsentManager'
 
 export function useConsentState() {
-  const [consent, setConsent] = useState(() => {
-    if (typeof window === 'undefined') return null
-    return getConsent()
-  })
+  const [consent, setConsent] = useState<ConsentState | null>(null)
 
   useEffect(() => {
     setConsent(getConsent())
   }, [])
 
-  return {
-    consent,
-    hasAnalytics: hasConsent('analytics'),
-    hasMarketing: hasConsent('marketing'),
-    hasFunctional: hasConsent('functional'),
-  }
+  return consent
 }

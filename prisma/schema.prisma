@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -53,8 +52,8 @@ model User {
   subscription Subscription?
   projects     Project[]
   teamMembers  TeamMember[]
-  ownedTeams   Team[]       @relation("TeamOwner")
   auditLogs    AuditLog[]
+  ownedTeams   Team[]        @relation("TeamOwner")
 }
 
 model Account {
@@ -98,7 +97,7 @@ model Subscription {
   stripeCustomerId     String?            @unique
   stripePriceId        String?
   stripeSubscriptionId String?            @unique
-  status               SubscriptionStatus @default(trialing)
+  status               SubscriptionStatus @default(incomplete)
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean            @default(false)
@@ -116,9 +115,9 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner    User         @relation("TeamOwner", fields: [ownerId], references: [id])
-  members  TeamMember[]
-  invites  TeamInvite[]
+  owner   User         @relation("TeamOwner", fields: [ownerId], references: [id])
+  members TeamMember[]
+  invites TeamInvite[]
   projects Project[]
 }
 
@@ -140,7 +139,7 @@ model TeamInvite {
   teamId    String
   email     String
   role      TeamRole @default(MEMBER)
-  token     String   @unique @default(cuid())
+  token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
 
