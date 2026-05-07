@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { createCheckoutSession } from '@/lib/stripe'
-import { checkoutSchema } from '@/lib/validations/billing'
+import { createCheckoutSession, getOrCreateStripeCustomer } from '@/lib/stripe'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -10,18 +9,21 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const parsed = checkoutSchema.safeParse(body)
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+  const { priceId } = body as { priceId: string }
+
+  if (!priceId) {
+    return NextResponse.json({ error: 'priceId is required' }, { status: 400 })
   }
 
+  const customerId = await getOrCreateStripeCustomer(session.user.id)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  const url = await createCheckoutSession(
+
+  const checkoutSession = await createCheckoutSession(
     session.user.id,
-    parsed.data.priceId,
-    `${appUrl}/dashboard/settings/billing?success=1`,
-    `${appUrl}/pricing`
+    priceId,
+    `${appUrl}/dashboard?checkout=success`,
+    `${appUrl}/pricing?checkout=cancelled`
   )
 
-  return NextResponse.json({ url })
+  return NextResponse.json({ url: checkoutSession.url })
 }

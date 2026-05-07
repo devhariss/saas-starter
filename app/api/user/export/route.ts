@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { db } from '@/lib/db'
 
 export async function GET() {
   const session = await auth()
@@ -8,15 +8,14 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await db.user.findUnique({
     where: { id: session.user.id },
     include: {
       accounts: { select: { provider: true, type: true } },
-      subscription: {
-        select: { status: true, currentPeriodStart: true, currentPeriodEnd: true, cancelAtPeriodEnd: true },
-      },
-      projects: { select: { name: true, slug: true, status: true, createdAt: true } },
-      auditLogs: { select: { action: true, resource: true, createdAt: true }, take: 100, orderBy: { createdAt: 'desc' } },
+      subscription: { select: { status: true, stripePriceId: true, currentPeriodEnd: true } },
+      projects: { select: { id: true, name: true, slug: true, status: true, createdAt: true } },
+      teamMembers: { include: { team: { select: { name: true, slug: true } } } },
+      auditLogs: { select: { action: true, resource: true, createdAt: true }, take: 100 },
     },
   })
 
@@ -30,20 +29,21 @@ export async function GET() {
       id: user.id,
       name: user.name,
       email: user.email,
-      emailVerified: user.emailVerified,
       role: user.role,
       createdAt: user.createdAt,
     },
-    connectedAccounts: user.accounts,
+    connectedProviders: user.accounts.map((a) => a.provider),
     subscription: user.subscription,
     projects: user.projects,
-    activityLog: user.auditLogs,
+    teamMemberships: user.teamMembers.map((m) => ({ team: m.team.name, role: m.role, joinedAt: m.joinedAt })),
+    recentActivity: user.auditLogs,
   }
 
-  return new NextResponse(JSON.stringify(exportData, null, 2), {
+  return new Response(JSON.stringify(exportData, null, 2), {
+    status: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Content-Disposition': `attachment; filename="saas-starter-data-export-${user.id}.json"`,
+      'Content-Disposition': `attachment; filename="user-data-${user.id}.json"`,
     },
   })
 }
