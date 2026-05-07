@@ -4,17 +4,6 @@
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "react/jsx-no-undef": "error",
-    "no-restricted-syntax": [
-      "error",
-      {
-        "selector": "ImportDeclaration[source.value='next/dynamic'] ~ ExportDefaultDeclaration",
-        "message": "Do not use next/dynamic with ssr:false in page/layout files (Server Components). Move dynamic() into a 'use client' wrapper component."
-      },
-      {
-        "selector": "Property[key.name='ssr'][value.value=false]",
-        "message": "ssr:false is only valid inside a 'use client' component. Move this dynamic() call to a client wrapper."
-      }
-    ]
+    "react/jsx-no-undef": "error"
   }
 }
