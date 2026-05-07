@@ -3,8 +3,8 @@
 import dynamic from 'next/dynamic'
 import { SkeletonCard } from '@/components/shared/SkeletonCard'
 
-const AreaChart = dynamic(
-  () => import('@/components/dashboard/AreaChart'),
+const DashboardAreaChart = dynamic(
+  () => import('@/components/dashboard/AreaChart').then((m) => m.DashboardAreaChart),
   {
     loading: () => <SkeletonCard className="h-64 w-full" />,
     ssr: false,
@@ -12,5 +12,5 @@ const AreaChart = dynamic(
 )
 
 export function AreaChartWrapper() {
-  return <AreaChart />
+  return <DashboardAreaChart />
 }
