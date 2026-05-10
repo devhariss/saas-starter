@@ -1,142 +1,276 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Plus, Minus } from "lucide-react";
+import { useState } from 'react';
+import { Plus, Minus } from 'lucide-react';
 
+/* ─── CSS vars (flip per theme, same pattern as Hero) ─── */
+const themeVars = `
+  :root, [data-theme="light"] {
+    --faq-dot-color: oklch(0.45 0.06 285 / 0.35);
+    --faq-glow: oklch(0.52 0.22 285 / 0.07);
+  }
+  [data-theme="dark"] {
+    --faq-dot-color: oklch(0.72 0.08 285 / 0.20);
+    --faq-glow: oklch(0.52 0.22 285 / 0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --faq-dot-color: oklch(0.72 0.08 285 / 0.20);
+      --faq-glow: oklch(0.52 0.22 285 / 0.12);
+    }
+  }
+`;
+
+/* ─── Data ──────────────────────────────────── */
 interface FaqItem {
   q: string;
   a: string;
-  category?: string;
+  category: string;
 }
 
 const faqs: FaqItem[] = [
   {
-    q: "Is there a free trial?",
-    a: "Yes. The Free plan is free forever \u2014 no credit card required. Pro and Team plans include a 14-day free trial, and all paid plans come with a 30-day money-back guarantee.",
-    category: "Billing",
+    category: 'Billing',
+    q: 'Is there a free trial?',
+    a: 'Yes. The Free plan is free forever — no credit card required. Pro and Team plans include a 14-day free trial, and all paid plans come with a 30-day money-back guarantee.',
   },
   {
-    q: "Can I cancel at any time?",
-    a: "Absolutely. You can cancel from Settings \u203a Billing at any time. You\u2019ll retain access until the end of your billing period and won\u2019t be charged again.",
-    category: "Billing",
+    category: 'Billing',
+    q: 'Can I cancel at any time?',
+    a: 'Absolutely. Cancel from Settings › Billing at any time. You’ll retain access until the end of your billing period and won’t be charged again.',
   },
   {
-    q: "Can I upgrade or downgrade my plan?",
-    a: "Yes, instantly. Upgrades are prorated and take effect immediately. Downgrades kick in at the end of your billing period. All plan changes go through the Stripe billing portal.",
-    category: "Billing",
+    category: 'Billing',
+    q: 'Can I upgrade or downgrade my plan?',
+    a: 'Yes, instantly. Upgrades are prorated and take effect immediately. Downgrades kick in at the end of your billing period — all through the Stripe billing portal.',
   },
   {
-    q: "Is Stripe the only payment option?",
-    a: "Currently yes. Stripe supports 135+ currencies and most global payment methods \u2014 cards, SEPA, iDEAL, Alipay, and more. Additional providers can be added by extending lib/stripe.ts.",
-    category: "Billing",
+    category: 'Billing',
+    q: 'Is Stripe the only payment option?',
+    a: 'Currently yes. Stripe supports 135+ currencies and most global payment methods — cards, SEPA, iDEAL, Alipay, and more. Additional providers can be added by extending lib/stripe.ts.',
   },
   {
-    q: "Who owns my data?",
-    a: "You do, entirely. Your data lives in your own database (Neon or Supabase PostgreSQL). Export everything via Settings \u203a Privacy \u203a Download my data, or request deletion anytime.",
-    category: "Privacy",
+    category: 'Privacy',
+    q: 'Who owns my data?',
+    a: 'You do, entirely. Your data lives in your own database. Export everything via Settings › Privacy › Download my data, or request deletion at any time.',
   },
   {
-    q: "Is this GDPR and CCPA compliant?",
-    a: "Yes. The starter ships with a cookie consent banner, GPC signal detection, granular consent categories, Privacy Policy, Terms of Service, Cookie Policy, and data export/deletion endpoints out of the box.",
-    category: "Privacy",
+    category: 'Privacy',
+    q: 'Is this GDPR and CCPA compliant?',
+    a: 'Yes. Ships with a cookie consent banner, GPC signal detection, granular consent categories, Privacy Policy, Terms of Service, Cookie Policy, and data export/deletion endpoints out of the box.',
   },
   {
-    q: "What kind of support is available?",
-    a: "Free plan: community support via GitHub Discussions. Pro: priority email support with a 24-hour response SLA. Team: dedicated Slack channel and a 99.9% uptime SLA.",
-    category: "Support",
+    category: 'Support',
+    q: 'What kind of support is available?',
+    a: 'Free plan: community support via GitHub Discussions. Pro: priority email with a 24-hour response SLA. Business: dedicated Slack channel and 99.9% uptime SLA.',
   },
   {
-    q: "Is this open source?",
-    a: "Yes \u2014 MIT licensed. Fork it, modify it, ship your product. No attribution required, though a GitHub star is always appreciated.",
-    category: "General",
+    category: 'General',
+    q: 'Is this open source?',
+    a: 'Yes — MIT licensed. Fork it, modify it, ship your product. No attribution required, though a GitHub star is always appreciated.',
   },
 ];
 
-export function FAQ() {
-  const [open, setOpen] = useState<number | null>(null);
+const categoryHue: Record<string, number> = {
+  Billing: 285,
+  Privacy: 145,
+  Support: 192,
+  General: 75,
+};
 
-  const toggle = (index: number): void => {
-    setOpen((prev) => (prev === index ? null : index));
-  };
+/* ─── Component ───────────────────────────────── */
+export function FAQ() {
+  const [open, setOpen] = useState<number | null>(0);
+  const toggle = (i: number) => setOpen((prev) => (prev === i ? null : i));
 
   return (
     <section
       id="faq"
-      className="relative py-28 overflow-hidden"
-      style={{ background: "var(--color-bg)", borderTop: "1px solid var(--color-border)" }}
+      aria-labelledby="faq-heading"
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        padding: '7rem 0',
+        background: 'var(--color-bg)',
+        borderTop: '1px solid var(--color-border)',
+      }}
     >
-      <div className="mx-auto max-w-[1200px] px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-16 lg:gap-24">
+      <style>{themeVars}</style>
 
-          {/* Left — sticky header */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <div
-              className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide uppercase mb-5"
-              style={{
-                background: "oklch(0.52 0.22 285 / 0.10)",
-                color: "var(--color-primary)",
-                border: "1px solid oklch(0.52 0.22 285 / 0.20)",
-              }}
-            >
-              FAQ
-            </div>
-            <h2
-              className="font-display font-semibold leading-[1.1] tracking-tight mb-4"
-              style={{
-                fontSize: "clamp(1.75rem, 1rem + 1.75vw, 2.75rem)",
-                color: "var(--color-text)",
-              }}
-            >
-              Got questions?
-            </h2>
-            <p
-              className="leading-relaxed mb-8"
-              style={{ fontSize: "var(--text-base)", color: "var(--color-text-muted)" }}
-            >
-              Everything you need to know before you start building. Can&apos;t find the answer?
-            </p>
-            <a
-              href="mailto:support@example.com"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 hover:-translate-y-px"
-              style={{
-                fontSize: "var(--text-sm)",
-                background: "var(--color-surface-2)",
-                color: "var(--color-text)",
-                border: "1px solid var(--color-border)",
-              }}
-            >
-              Contact support
-            </a>
+      {/* dot grid */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'radial-gradient(var(--faq-dot-color) 1.2px, transparent 1.2px)',
+          backgroundSize: '24px 24px',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%)',
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+
+      {/* ambient glow */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: '-10%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '60%',
+          height: '50%',
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse at 50% 30%, var(--faq-glow) 0%, transparent 65%)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: '0 auto',
+          padding: '0 24px',
+          position: 'relative',
+          zIndex: 1,
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)',
+          gap: '4rem',
+          alignItems: 'start',
+        }}
+        className="faq-grid"
+      >
+        {/* ── Left sticky header ── */}
+        <div style={{ position: 'sticky', top: 96 }}>
+          {/* pill badge */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '4px 12px',
+              borderRadius: 9999,
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              background: 'oklch(0.52 0.22 285 / 0.10)',
+              color: 'var(--color-accent)',
+              border: '1px solid oklch(0.52 0.22 285 / 0.20)',
+              marginBottom: 20,
+            }}
+          >
+            FAQ
           </div>
 
-          {/* Right — accordion list */}
-          <dl className="divide-y" style={{ borderColor: "var(--color-border)" }}>
-            {faqs.map((faq, i) => (
-              <FaqRow
-                key={i}
-                faq={faq}
-                index={i}
-                isOpen={open === i}
-                onToggle={toggle}
-              />
-            ))}
-          </dl>
+          <h2
+            id="faq-heading"
+            style={{
+              fontSize: 'clamp(1.75rem, 1rem + 1.75vw, 2.75rem)',
+              fontWeight: 700,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.1,
+              color: 'var(--color-text)',
+              margin: '0 0 16px',
+            }}
+          >
+            Got questions?
+          </h2>
+
+          <p
+            style={{
+              fontSize: 15,
+              lineHeight: 1.7,
+              color: 'var(--color-text-muted)',
+              margin: '0 0 32px',
+              maxWidth: '28ch',
+            }}
+          >
+            Everything you need to know before you start building.
+          </p>
+
+          <a
+            href="mailto:support@example.com"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '9px 18px',
+              borderRadius: 9,
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--color-text)',
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+              textDecoration: 'none',
+              transition: 'border-color 0.15s, color 0.15s',
+            }}
+          >
+            Contact support
+          </a>
         </div>
+
+        {/* ── Right accordion ── */}
+        <dl style={{ margin: 0 }}>
+          {faqs.map((faq, i) => (
+            <FaqRow
+              key={i}
+              faq={faq}
+              index={i}
+              isOpen={open === i}
+              onToggle={toggle}
+              hue={categoryHue[faq.category] ?? 285}
+              isLast={i === faqs.length - 1}
+            />
+          ))}
+        </dl>
       </div>
+
+      {/* responsive: stack on mobile */}
+      <style>{`
+        @media (max-width: 767px) {
+          .faq-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </section>
   );
 }
 
+/* ─── FaqRow ──────────────────────────────────── */
 interface FaqRowProps {
   faq: FaqItem;
   index: number;
   isOpen: boolean;
-  onToggle: (index: number) => void;
+  isLast: boolean;
+  hue: number;
+  onToggle: (i: number) => void;
 }
 
-function FaqRow({ faq, index, isOpen, onToggle }: FaqRowProps) {
+function FaqRow({ faq, index, isOpen, isLast, hue, onToggle }: FaqRowProps) {
   return (
-    <div className="group">
+    <div
+      style={{
+        borderBottom: isLast ? 'none' : '1px solid var(--color-border)',
+        position: 'relative',
+      }}
+    >
+      {/* accent left bar when open */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 2,
+          borderRadius: 9999,
+          background: isOpen ? `oklch(0.62 0.18 ${hue})` : 'transparent',
+          transition: 'background 0.2s',
+        }}
+      />
+
       <dt>
         <button
           type="button"
@@ -144,48 +278,76 @@ function FaqRow({ faq, index, isOpen, onToggle }: FaqRowProps) {
           aria-expanded={isOpen}
           aria-controls={`faq-answer-${index}`}
           id={`faq-question-${index}`}
-          className="flex w-full items-start justify-between py-6 text-left gap-6 cursor-pointer"
+          style={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: 20,
+            padding: '22px 0 22px 16px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'left',
+          }}
         >
-          <span
-            className="font-medium leading-snug transition-colors duration-150"
-            style={{
-              fontSize: "var(--text-base)",
-              color: isOpen ? "var(--color-primary)" : "var(--color-text)",
-            }}
-          >
-            {faq.category && (
-              <span
-                className="inline-block mr-2.5 mb-1 px-2 py-0.5 rounded-md text-[10px] font-semibold align-middle"
-                style={{
-                  background: "oklch(0.52 0.22 285 / 0.08)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                {faq.category}
-              </span>
-            )}
-            {faq.q}
+          <span style={{ flex: 1 }}>
+            {/* category pill */}
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginRight: 10,
+                marginBottom: 2,
+                padding: '2px 8px',
+                borderRadius: 4,
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                background: `oklch(0.52 0.18 ${hue} / 0.10)`,
+                color: `oklch(0.70 0.18 ${hue})`,
+                verticalAlign: 'middle',
+              }}
+            >
+              {faq.category}
+            </span>
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 500,
+                lineHeight: 1.5,
+                color: isOpen ? 'var(--color-accent)' : 'var(--color-text)',
+                transition: 'color 0.15s',
+                verticalAlign: 'middle',
+              }}
+            >
+              {faq.q}
+            </span>
           </span>
 
+          {/* toggle icon */}
           <span
-            className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full mt-0.5 transition-all duration-200"
             style={{
-              background: isOpen
-                ? "var(--color-primary)"
-                : "var(--color-surface-offset)",
+              flexShrink: 0,
+              width: 24,
+              height: 24,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 2,
+              transition: 'background 0.15s, border-color 0.15s',
+              background: isOpen ? `oklch(0.62 0.18 ${hue})` : 'var(--color-surface)',
               border: isOpen
-                ? "1px solid var(--color-primary)"
-                : "1px solid var(--color-border)",
+                ? `1px solid oklch(0.62 0.18 ${hue})`
+                : '1px solid var(--color-border)',
             }}
           >
             {isOpen ? (
               <Minus size={12} color="white" aria-hidden="true" />
             ) : (
-              <Plus
-                size={12}
-                aria-hidden="true"
-                style={{ color: "var(--color-text-muted)" }}
-              />
+              <Plus size={12} aria-hidden="true" style={{ color: 'var(--color-text-muted)' }} />
             )}
           </span>
         </button>
@@ -195,16 +357,24 @@ function FaqRow({ faq, index, isOpen, onToggle }: FaqRowProps) {
         id={`faq-answer-${index}`}
         role="region"
         aria-labelledby={`faq-question-${index}`}
-        className="overflow-hidden transition-all duration-300 ease-in-out"
         style={{
-          maxHeight: isOpen ? "600px" : "0px",
+          overflow: 'hidden',
+          maxHeight: isOpen ? 400 : 0,
           opacity: isOpen ? 1 : 0,
-          paddingBottom: isOpen ? "1.5rem" : "0",
+          paddingBottom: isOpen ? 20 : 0,
+          paddingLeft: 16,
+          transition: 'max-height 0.3s ease, opacity 0.25s ease, padding-bottom 0.25s ease',
+          margin: 0,
         }}
       >
         <p
-          className="leading-relaxed"
-          style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}
+          style={{
+            fontSize: 14,
+            lineHeight: 1.75,
+            color: 'var(--color-text-muted)',
+            margin: 0,
+            maxWidth: '64ch',
+          }}
         >
           {faq.a}
         </p>
