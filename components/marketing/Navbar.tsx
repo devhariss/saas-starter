@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -62,7 +63,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop nav links */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: 2 }} className="hidden-mobile">
           {links.map((l) => (
             <Link
@@ -77,12 +78,12 @@ export function Navbar() {
                 transition: 'color 0.15s, background 0.15s',
               }}
               onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.color = 'var(--color-accent)';
-                (e.target as HTMLElement).style.background = 'var(--color-surface)';
+                (e.currentTarget as HTMLElement).style.color = 'var(--color-accent)';
+                (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
               }}
               onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.color = 'var(--color-text-muted)';
-                (e.target as HTMLElement).style.background = 'transparent';
+                (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)';
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
               }}
             >
               {l.label}
@@ -90,8 +91,8 @@ export function Navbar() {
           ))}
         </nav>
 
-        {/* Desktop CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="hidden-mobile">
+        {/* Desktop right: sign in + get started + theme toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} className="hidden-mobile">
           <Link
             href="/sign-in"
             style={{
@@ -116,30 +117,36 @@ export function Navbar() {
               textDecoration: 'none',
               transition: 'filter 0.15s',
             }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.filter = 'brightness(1.1)')}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.filter = 'brightness(1)')}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.filter = 'brightness(1.1)')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.filter = 'brightness(1)')}
           >
             Get started
           </Link>
+          {/* Theme toggle — wired back in */}
+          <ThemeToggle />
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          onClick={() => setOpen((s) => !s)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 8,
-            borderRadius: 6,
-            color: 'var(--color-text)',
-            display: 'none',
-          }}
-          className="show-mobile"
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        {/* Mobile: theme toggle + hamburger */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} className="show-mobile">
+          <ThemeToggle />
+          <button
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            onClick={() => setOpen((s) => !s)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 8,
+              borderRadius: 6,
+              color: 'var(--color-text)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile drawer */}
@@ -219,11 +226,11 @@ export function Navbar() {
       <style>{`
         @media (min-width: 768px) {
           .hidden-mobile { display: flex !important; }
-          .show-mobile { display: none !important; }
+          .show-mobile   { display: none  !important; }
         }
         @media (max-width: 767px) {
-          .hidden-mobile { display: none !important; }
-          .show-mobile { display: block !important; }
+          .hidden-mobile { display: none  !important; }
+          .show-mobile   { display: flex  !important; }
         }
       `}</style>
     </header>
