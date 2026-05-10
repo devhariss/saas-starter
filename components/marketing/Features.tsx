@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Shield, CreditCard, Mail, BarChart3, ArrowRight } from 'lucide-react';
 
 const themeVars = `
@@ -225,7 +226,7 @@ function FeatureCard({ f }: { f: typeof features[number] }) {
               </div>
             </div>
             <div style={{ padding: '12px 14px' }}>
-              <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 5, color: 'var(--color-text)' }}>You're all set 🎉</div>
+              <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 5, color: 'var(--color-text)' }}>You&apos;re all set 🎉</div>
               <div style={{ fontSize: 11, lineHeight: 1.65, color: 'var(--color-text-muted)', marginBottom: 10 }}>Your account is live. Click below to open your dashboard and start building.</div>
               <div style={{ display: 'inline-block', padding: '7px 14px', borderRadius: 6, background: 'var(--color-text)', color: 'var(--color-bg)', fontSize: 10.5, fontWeight: 600 }}>Open dashboard →</div>
             </div>
