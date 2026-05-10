@@ -1,4 +1,5 @@
 // components/marketing/SocialProof.tsx
+import React from 'react';
 import { Star, Quote } from 'lucide-react';
 
 const themeVars = `
@@ -36,8 +37,7 @@ const themeVars = `
 `;
 
 /* ─── Brand SVG icons ──────────────────────────────── */
-// All icons use currentColor so they inherit --sp-logo-fill via the wrapper div
-const icons: Record<string, JSX.Element> = {
+const icons: Record<string, React.ReactElement> = {
   Stripe: (
     <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
       <path d="M13.3 10.9c0-.9.7-1.2 1.9-1.2 1.7 0 3.8.5 5.5 1.4V6.4A14.6 14.6 0 0 0 15.2 5.5c-3.8 0-6.3 2-6.3 5.3 0 5.2 7.1 4.4 7.1 6.6 0 1-.9 1.4-2.1 1.4-1.8 0-4.2-.8-6-1.8v4.8c2 .9 4.1 1.2 6 1.2 3.9 0 6.5-1.9 6.5-5.3-.1-5.6-7.1-4.6-7.1-6.8z" fill="currentColor"/>
@@ -165,7 +165,6 @@ const row2 = [
   { name: 'Linear',     color: 'oklch(0.55 0.18 275)' },
 ];
 
-/* display names override */
 const displayName: Record<string, string> = {
   NextJS: 'Next.js',
   NextAuth: 'NextAuth',
@@ -175,10 +174,10 @@ const displayName: Record<string, string> = {
 
 /* ─── Other data ─────────────────────────────────── */
 const stats = [
-  { value: '2,400+',  label: 'developers using this',          hue: 285 },
-  { value: '11 days', label: 'avg. time to first paying user',  hue: 192 },
-  { value: '100',     label: 'Lighthouse score',               hue: 145 },
-  { value: 'MIT',     label: 'open source license',            hue: 75  },
+  { value: '2,400+',  label: 'developers using this',         hue: 285 },
+  { value: '11 days', label: 'avg. time to first paying user', hue: 192 },
+  { value: '100',     label: 'Lighthouse score',              hue: 145 },
+  { value: 'MIT',     label: 'open source license',           hue: 75  },
 ];
 
 const testimonials = [
@@ -205,19 +204,12 @@ function LogoChip({ name, color }: { name: string; color: string | null }) {
       style={{
         display: 'flex', alignItems: 'center', gap: 9,
         margin: '0 28px', userSelect: 'none', flexShrink: 0,
-        padding: '7px 14px',
-        borderRadius: 10,
+        padding: '7px 14px', borderRadius: 10,
         background: 'var(--sp-logo-bg)',
         border: '1px solid var(--sp-logo-border)',
       }}
     >
-      <span
-        style={{
-          width: 20, height: 20, flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: iconColor,
-        }}
-      >
+      <span style={{ width: 20, height: 20, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: iconColor }}>
         {icons[name]}
       </span>
       <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', color: 'var(--sp-logo-name)' }}>
@@ -274,12 +266,11 @@ export function SocialProof() {
           Trusted by teams building with the best stack
         </p>
 
-        {/* ── Dual-row marquee ── */}
+        {/* Dual-row marquee */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: '5rem' }}>
           {[{ items: loop1, cls: 'sp-row-fwd' }, { items: loop2, cls: 'sp-row-rev' }].map(({ items, cls }) => (
             <div key={cls} style={{ position: 'relative', overflow: 'hidden' }}>
-              {/* fade edges */}
-              {(['left','right'] as const).map((side) => (
+              {(['left', 'right'] as const).map((side) => (
                 <div key={side} aria-hidden="true" style={{
                   position: 'absolute', insetBlock: 0, [side]: 0, width: 80,
                   background: `linear-gradient(to ${side === 'left' ? 'right' : 'left'}, var(--color-bg), transparent)`,
