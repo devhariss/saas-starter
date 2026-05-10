@@ -1,93 +1,170 @@
-import Link from "next/link";
-import { Github } from "lucide-react";
-import { Logo } from "@/components/shared/Logo";
+import Link from 'next/link';
+import { Github, Twitter, Star } from 'lucide-react';
 
-const links = {
-  Product: [
-    { label: "Features", href: "/#features" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Changelog", href: "/changelog" },
-    { label: "Roadmap", href: "/changelog" },
-  ],
-  Developers: [
-    { label: "Documentation", href: "/docs" },
-    { label: "GitHub", href: "https://github.com/devhariss/saas-starter" },
-    { label: "Blog", href: "/blog" },
-  ],
-  Company: [
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
-  ],
-  Legal: [
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Cookie Policy", href: "/cookies" },
-  ],
-};
+const themeVars = `
+  :root, [data-theme="light"] {
+    --footer-dot: oklch(0.45 0.06 285 / 0.28);
+  }
+  [data-theme="dark"] {
+    --footer-dot: oklch(0.72 0.08 285 / 0.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) { --footer-dot: oklch(0.72 0.08 285 / 0.14); }
+  }
+  @media (max-width: 767px) {
+    .footer-grid { grid-template-columns: 1fr 1fr !important; }
+    .footer-brand { grid-column: 1 / -1 !important; }
+  }
+`;
+
+const cols = [
+  {
+    heading: 'Product',
+    links: [
+      { label: 'Features',   href: '/#features'  },
+      { label: 'Pricing',    href: '/#pricing'   },
+      { label: 'Changelog',  href: '/changelog'  },
+      { label: 'Roadmap',    href: '/changelog'  },
+    ],
+  },
+  {
+    heading: 'Developers',
+    links: [
+      { label: 'Documentation', href: '/docs'  },
+      { label: 'GitHub',        href: 'https://github.com/devhariss/saas-starter' },
+      { label: 'Blog',          href: '/blog'  },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { label: 'About',   href: '/about'   },
+      { label: 'Contact', href: '/contact' },
+    ],
+  },
+  {
+    heading: 'Legal',
+    links: [
+      { label: 'Privacy Policy',   href: '/privacy' },
+      { label: 'Terms of Service', href: '/terms'   },
+      { label: 'Cookie Policy',    href: '/cookies' },
+    ],
+  },
+];
+
+const socialLinks = [
+  { href: 'https://github.com/devhariss/saas-starter', Icon: Github, label: 'GitHub' },
+  { href: 'https://twitter.com', Icon: Twitter, label: 'Twitter' },
+];
+
+const badges = [
+  { label: 'GDPR',  title: 'GDPR Compliant',       hue: 145 },
+  { label: 'SOC 2', title: 'SOC 2 Type II',         hue: 192 },
+  { label: '100⚡', title: 'Lighthouse Score 100',  hue: 75  },
+  { label: 'MIT',   title: 'MIT Licensed',          hue: 285 },
+];
 
 export function Footer() {
+  const year = new Date().getFullYear();
+
   return (
     <footer
-      style={{
-        background: "var(--color-surface)",
-        borderTop: "1px solid var(--color-border)",
-      }}
       aria-label="Site footer"
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'var(--color-bg)',
+        borderTop: '1px solid var(--color-border)',
+      }}
     >
-      <div className="mx-auto max-w-[1200px] px-6 py-16">
-        {/* Top: brand + columns */}
-        <div className="grid grid-cols-2 md:grid-cols-[220px_1fr_1fr_1fr_1fr] gap-10 mb-14">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-2.5 mb-4" aria-label="SaasStarter home">
-              <Logo className="w-6 h-6" />
-              <span
-                className="font-display font-semibold"
-                style={{ fontSize: "var(--text-base)", color: "var(--color-text)" }}
-              >
-                SaasStarter
+      <style>{themeVars}</style>
+
+      {/* Subtle dot grid — lighter than sections */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: 'radial-gradient(var(--footer-dot) 1.2px, transparent 1.2px)',
+        backgroundSize: '28px 28px',
+        WebkitMaskImage: 'radial-gradient(ellipse 100% 100% at 50% 100%, black 0%, transparent 75%)',
+        maskImage: 'radial-gradient(ellipse 100% 100% at 50% 100%, black 0%, transparent 75%)',
+        pointerEvents: 'none', zIndex: 0,
+      }} />
+
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '64px 24px 0', position: 'relative', zIndex: 1 }}>
+
+        {/* Top accent line */}
+        <div aria-hidden="true" style={{
+          height: 1, marginBottom: 52,
+          background: 'linear-gradient(to right, transparent, oklch(0.62 0.20 285 / 0.20) 50%, transparent)',
+        }} />
+
+        {/* Main grid */}
+        <div
+          className="footer-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '220px repeat(4, 1fr)',
+            gap: '40px 32px',
+            marginBottom: 56,
+          }}
+        >
+          {/* Brand col */}
+          <div className="footer-brand">
+            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', marginBottom: 14 }} aria-label="SaasStarter home">
+              <FooterLogo />
+              <span style={{ fontWeight: 700, letterSpacing: '-0.03em', fontSize: 15, color: 'var(--color-text)' }}>
+                SaaS<span style={{ color: 'var(--color-accent)' }}>Starter</span>
               </span>
             </Link>
-            <p
-              className="mb-5 max-w-[22ch]"
-              style={{ fontSize: "var(--text-sm)", color: "var(--color-text-faint)", lineHeight: 1.7 }}
-            >
-              Production-ready Next.js 15 SaaS starter. Ship faster.
+
+            <p style={{ fontSize: 13, color: 'var(--color-text-faint)', lineHeight: 1.7, maxWidth: '22ch', margin: '0 0 20px' }}>
+              Production-ready Next.js 15 SaaS starter. Auth, billing, email, analytics — all wired up.
             </p>
-            <div className="flex items-center gap-2">
-              <a
-                href="https://github.com/devhariss/saas-starter"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub repository"
-                className="p-2 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--color-surface-offset)]"
-                style={{ color: "var(--color-text-faint)" }}
-              >
-                <Github size={17} aria-hidden="true" />
-              </a>
+
+            {/* Social icons */}
+            <div style={{ display: 'flex', gap: 6 }}>
+              {socialLinks.map(({ href, Icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 32, height: 32, borderRadius: 8,
+                    background: 'var(--color-surface)',
+                    border: '1px solid var(--color-border)',
+                    color: 'var(--color-text-faint)',
+                    textDecoration: 'none',
+                    transition: 'border-color 0.15s, color 0.15s',
+                  }}
+                >
+                  <Icon size={15} aria-hidden="true" />
+                </a>
+              ))}
             </div>
           </div>
 
           {/* Link columns */}
-          {Object.entries(links).map(([group, items]) => (
-            <div key={group}>
-              <p
-                className="font-semibold mb-4"
-                style={{ fontSize: "var(--text-xs)", color: "var(--color-text)", letterSpacing: "0.06em", textTransform: "uppercase" }}
-              >
-                {group}
+          {cols.map(({ heading, links }) => (
+            <div key={heading}>
+              <p style={{
+                fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.10em', textTransform: 'uppercase',
+                color: 'var(--color-text)', marginBottom: 16,
+              }}>
+                {heading}
               </p>
-              <ul className="space-y-2.5" role="list">
-                {items.map((item) => (
-                  <li key={item.label}>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }} role="list">
+                {links.map(({ label, href }) => (
+                  <li key={label}>
                     <Link
-                      href={item.href}
-                      target={item.href.startsWith("http") ? "_blank" : undefined}
-                      rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="transition-colors hover:text-[var(--color-text)]"
-                      style={{ fontSize: "var(--text-sm)", color: "var(--color-text-faint)" }}
+                      href={href}
+                      target={href.startsWith('http') ? '_blank' : undefined}
+                      rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      style={{ fontSize: 13, color: 'var(--color-text-faint)', textDecoration: 'none', transition: 'color 0.15s' }}
                     >
-                      {item.label}
+                      {label}
                     </Link>
                   </li>
                 ))}
@@ -97,37 +174,71 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div
-          className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6"
-          style={{ borderTop: "1px solid var(--color-border)" }}
-        >
-          <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-faint)" }}>
-            &copy; {new Date().getFullYear()} SaasStarter. MIT Licensed.
-          </p>
-          <div className="flex items-center gap-4">
-            {[
-              { label: "GDPR", title: "GDPR Compliant" },
-              { label: "SOC 2", title: "SOC 2 Type II" },
-              { label: "100", title: "Lighthouse Score 100" },
-            ].map((badge) => (
+        <div style={{
+          borderTop: '1px solid var(--color-border)',
+          padding: '20px 0 28px',
+          display: 'flex', flexWrap: 'wrap',
+          alignItems: 'center', justifyContent: 'space-between',
+          gap: 16,
+        }}>
+          {/* Copyright + GitHub */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <p style={{ fontSize: 12, color: 'var(--color-text-faint)', margin: 0 }}>
+              &copy; {year} SaasStarter. MIT Licensed.
+            </p>
+            <a
+              href="https://github.com/devhariss/saas-starter"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                fontSize: 12, color: 'var(--color-text-faint)',
+                textDecoration: 'none', transition: 'color 0.15s',
+              }}
+            >
+              <Github size={12} aria-hidden="true" />
+              <Star size={10} style={{ fill: 'oklch(0.78 0.18 75)', color: 'oklch(0.78 0.18 75)' }} aria-hidden="true" />
+              Star on GitHub
+            </a>
+          </div>
+
+          {/* Trust badges */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {badges.map((b) => (
               <span
-                key={badge.label}
-                title={badge.title}
-                className="px-2.5 py-1 rounded-full font-semibold"
+                key={b.label}
+                title={b.title}
                 style={{
-                  fontSize: "10px",
-                  background: "var(--color-surface-offset)",
-                  color: "var(--color-text-faint)",
-                  border: "1px solid var(--color-border)",
-                  letterSpacing: "0.04em",
+                  display: 'inline-flex', alignItems: 'center',
+                  padding: '3px 10px', borderRadius: 6,
+                  fontSize: 10, fontWeight: 700,
+                  background: `oklch(0.52 0.18 ${b.hue} / 0.08)`,
+                  color: `oklch(0.68 0.18 ${b.hue})`,
+                  border: `1px solid oklch(0.52 0.18 ${b.hue} / 0.18)`,
+                  letterSpacing: '0.04em',
                 }}
               >
-                {badge.label}
+                {b.label}
               </span>
             ))}
           </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterLogo() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="footergrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="oklch(0.52 0.22 285)" />
+          <stop offset="100%" stopColor="oklch(0.62 0.18 192)" />
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#footergrad)" />
+      <path d="M7 12h10M12 7v10" stroke="white" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   );
 }
