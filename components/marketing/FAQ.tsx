@@ -11,14 +11,14 @@ const themeVars = `
 `;
 
 const faqs = [
-  { q: 'Is there a free trial?',              cat: 'Billing',  hue: 285, a: 'Yes. The Free plan is free forever with no credit card required. Pro and Team plans include a 14-day free trial, and all paid plans come with a 30-day money-back guarantee.' },
-  { q: 'Can I cancel at any time?',            cat: 'Billing',  hue: 285, a: 'Absolutely. Cancel from Settings › Billing at any time. You'll retain access until the end of your billing period and won't be charged again.' },
-  { q: 'Can I upgrade or downgrade?',          cat: 'Billing',  hue: 285, a: 'Yes, instantly. Upgrades are prorated and take effect immediately. Downgrades kick in at the end of your billing period through the Stripe billing portal.' },
-  { q: 'Is Stripe the only payment option?',   cat: 'Billing',  hue: 285, a: 'Currently yes. Stripe supports 135+ currencies and most global payment methods including cards, SEPA, iDEAL, and Alipay. Other providers can be added via lib/stripe.ts.' },
-  { q: 'Who owns my data?',                    cat: 'Privacy',  hue: 145, a: 'You do, entirely. Your data lives in your own database. Export everything via Settings › Privacy › Download my data, or request deletion at any time.' },
-  { q: 'Is this GDPR and CCPA compliant?',     cat: 'Privacy',  hue: 145, a: 'Yes. Ships with a cookie consent banner, GPC signal detection, granular consent categories, Privacy Policy, Terms of Service, Cookie Policy, and data export/deletion endpoints.' },
-  { q: 'What support is available?',           cat: 'Support',  hue: 192, a: 'Free plan: community support via GitHub Discussions. Pro: priority email with 24h SLA. Business: dedicated Slack channel and 99.9% uptime SLA.' },
-  { q: 'Is this open source?',                 cat: 'General',  hue: 75,  a: 'Yes — MIT licensed. Fork it, modify it, ship it. No attribution required, though a GitHub star is always appreciated.' },
+  { q: 'Is there a free trial?',              cat: 'Billing',  hue: 285, a: "Yes. The Free plan is free forever with no credit card required. Pro and Team plans include a 14-day free trial, and all paid plans come with a 30-day money-back guarantee." },
+  { q: 'Can I cancel at any time?',            cat: 'Billing',  hue: 285, a: "Absolutely. Cancel from Settings \u203a Billing at any time. You'll retain access until the end of your billing period and won't be charged again." },
+  { q: 'Can I upgrade or downgrade?',          cat: 'Billing',  hue: 285, a: "Yes, instantly. Upgrades are prorated and take effect immediately. Downgrades kick in at the end of your billing period through the Stripe billing portal." },
+  { q: 'Is Stripe the only payment option?',   cat: 'Billing',  hue: 285, a: "Currently yes. Stripe supports 135+ currencies and most global payment methods including cards, SEPA, iDEAL, and Alipay. Other providers can be added via lib/stripe.ts." },
+  { q: 'Who owns my data?',                    cat: 'Privacy',  hue: 145, a: "You do, entirely. Your data lives in your own database. Export everything via Settings \u203a Privacy \u203a Download my data, or request deletion at any time." },
+  { q: 'Is this GDPR and CCPA compliant?',     cat: 'Privacy',  hue: 145, a: "Yes. Ships with a cookie consent banner, GPC signal detection, granular consent categories, Privacy Policy, Terms of Service, Cookie Policy, and data export/deletion endpoints." },
+  { q: 'What support is available?',           cat: 'Support',  hue: 192, a: "Free plan: community support via GitHub Discussions. Pro: priority email with 24h SLA. Business: dedicated Slack channel and 99.9% uptime SLA." },
+  { q: 'Is this open source?',                 cat: 'General',  hue: 75,  a: "Yes \u2014 MIT licensed. Fork it, modify it, ship it. No attribution required, though a GitHub star is always appreciated." },
 ];
 
 export function FAQ() {
