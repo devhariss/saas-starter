@@ -2,14 +2,16 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // ---------------------------------------------------------------------------
-// Route matchers
+// DEMO / PREVIEW MODE
+// All auth checks are bypassed. A fake session cookie is injected so any
+// downstream code that reads `authjs.session-token` sees a non-empty value.
+// DO NOT merge this branch into main.
 // ---------------------------------------------------------------------------
+const DEMO_MODE = true
+
 const PROTECTED_PATHS = ['/dashboard']
 const PROTECTED_API_PATHS = ['/api/user', '/api/stripe/checkout', '/api/stripe/portal']
 
-// ---------------------------------------------------------------------------
-// Security headers
-// ---------------------------------------------------------------------------
 function applySecurityHeaders(response: NextResponse): NextResponse {
   const h = response.headers
   h.set(
@@ -36,31 +38,28 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   return response
 }
 
-// ---------------------------------------------------------------------------
-// Session check — reads the NextAuth session cookie without importing lib/auth.
-// lib/auth pulls in Prisma + bcryptjs + Resend which exceed the 1 MB Edge limit.
-// The cookie name used by next-auth v5 in production is:
-//   __Secure-authjs.session-token  (HTTPS)
-//   authjs.session-token           (HTTP / dev)
-// A non-empty cookie value means a session exists; the actual JWT is verified
-// by the API routes and RSCs where Node.js is available.
-// ---------------------------------------------------------------------------
 function hasSessionCookie(request: NextRequest): boolean {
+  if (DEMO_MODE) return true // always authenticated in preview
   const secure = request.cookies.get('__Secure-authjs.session-token')
-  const dev = request.cookies.get('authjs.session-token')
+  const dev    = request.cookies.get('authjs.session-token')
   return !!(secure?.value || dev?.value)
 }
 
-// ---------------------------------------------------------------------------
-// Middleware
-// ---------------------------------------------------------------------------
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  // Build the base response (pass-through)
   const response = NextResponse.next()
 
-  // GPC detection — honor Global Privacy Control
+  // Inject a fake demo session cookie so RSCs that check cookies() see a value
+  if (DEMO_MODE) {
+    response.cookies.set('authjs.session-token', 'demo-preview-token', {
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+    })
+    // Tag the request so components can show the demo banner
+    response.headers.set('x-demo-mode', '1')
+  }
+
   if (request.headers.get('Sec-GPC') === '1') {
     response.cookies.set('gpc_detected', '1', {
       path: '/',
@@ -70,11 +69,10 @@ export default function middleware(request: NextRequest) {
     })
   }
 
-  // Route protection
   const isProtectedPage = PROTECTED_PATHS.some((p) => pathname.startsWith(p))
-  const isProtectedApi = PROTECTED_API_PATHS.some((p) => pathname.startsWith(p))
+  const isProtectedApi  = PROTECTED_API_PATHS.some((p) => pathname.startsWith(p))
 
-  if (isProtectedPage || isProtectedApi) {
+  if (!DEMO_MODE && (isProtectedPage || isProtectedApi)) {
     if (!hasSessionCookie(request)) {
       if (isProtectedApi) {
         return applySecurityHeaders(
@@ -92,15 +90,6 @@ export default function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths except:
-     * - _next/static  (Next.js static assets)
-     * - _next/image   (image optimisation)
-     * - favicon / public
-     * - api/auth      (NextAuth routes — handle their own auth)
-     * - api/health    (public health check)
-     * - api/stripe/webhook (Stripe sends raw POST, no session cookie)
-     */
     '/((?!_next/static|_next/image|favicon|public|api/auth|api/health|api/stripe/webhook).*)',
   ],
 }
