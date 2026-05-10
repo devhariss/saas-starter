@@ -1,353 +1,372 @@
-"use client";
+// components/marketing/Pricing.tsx
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { Check, Zap } from "lucide-react";
+import { useState } from 'react';
+import Link from 'next/link';
+import { Check, X } from 'lucide-react';
 
-const plans = [
+type Feature = { label: string; included: boolean };
+
+type Plan = {
+  name: string;
+  priceMonthly: number;
+  priceYearly: number;
+  description: string;
+  features: Feature[];
+  cta: string;
+  ctaHref: string;
+  highlight?: boolean;
+  badge?: string;
+};
+
+const plans: Plan[] = [
   {
-    name: "Free",
-    badge: null,
-    monthlyPrice: 0,
-    description: "Perfect for solo builders and side projects.",
-    cta: "Start for free",
-    ctaHref: "/register",
-    popular: false,
+    name: 'Starter',
+    priceMonthly: 0,
+    priceYearly: 0,
+    description: 'Everything you need to get started — free forever.',
+    cta: 'Get started free',
+    ctaHref: '/sign-up',
     features: [
-      "1 project",
-      "100 API calls / day",
-      "Community support",
-      "Core auth (OAuth + magic link)",
-      "Public changelog",
-      "MIT license",
+      { label: 'Up to 3 projects', included: true },
+      { label: '1 team member', included: true },
+      { label: 'Community support', included: true },
+      { label: 'Basic analytics', included: true },
+      { label: 'Advanced permissions', included: false },
+      { label: 'SSO & SAML', included: false },
+      { label: 'Audit logs', included: false },
+      { label: 'Custom domains', included: false },
     ],
   },
   {
-    name: "Pro",
-    badge: "Most popular",
-    monthlyPrice: 29,
-    description: "For indie hackers and growing products.",
-    cta: "Start Pro trial",
-    ctaHref: "/register?plan=pro",
-    popular: true,
+    name: 'Pro',
+    priceMonthly: 29,
+    priceYearly: 290,
+    description: 'For growing teams that need power and flexibility.',
+    highlight: true,
+    badge: 'Most popular',
+    cta: 'Start 14-day trial',
+    ctaHref: '/sign-up?plan=pro',
     features: [
-      "Unlimited projects",
-      "10,000 API calls / day",
-      "Priority email support",
-      "Custom domain",
-      "Analytics dashboard",
-      "Billing portal access",
+      { label: 'Unlimited projects', included: true },
+      { label: 'Up to 10 team members', included: true },
+      { label: 'Priority email support', included: true },
+      { label: 'Advanced analytics', included: true },
+      { label: 'Advanced permissions', included: true },
+      { label: 'SSO & SAML', included: false },
+      { label: 'Audit logs', included: false },
+      { label: 'Custom domains', included: true },
     ],
   },
   {
-    name: "Team",
-    badge: null,
-    monthlyPrice: 79,
-    description: "For teams shipping together at scale.",
-    cta: "Start Team trial",
-    ctaHref: "/register?plan=team",
-    popular: false,
+    name: 'Business',
+    priceMonthly: 99,
+    priceYearly: 990,
+    description: 'Enterprise-grade security, compliance, and control.',
+    cta: 'Contact sales',
+    ctaHref: '/contact',
     features: [
-      "Everything in Pro",
-      "Up to 10 seats",
-      "SSO (SAML/OIDC)",
-      "Audit log",
-      "99.9% SLA",
-      "Dedicated Slack channel",
+      { label: 'Unlimited projects', included: true },
+      { label: 'Unlimited team members', included: true },
+      { label: '24/7 dedicated support', included: true },
+      { label: 'Custom analytics', included: true },
+      { label: 'Advanced permissions', included: true },
+      { label: 'SSO & SAML', included: true },
+      { label: 'Audit logs', included: true },
+      { label: 'Custom domains', included: true },
     ],
   },
 ];
 
 export function Pricing() {
-  const [annual, setAnnual] = useState(false);
-
-  const price = (monthly: number) =>
-    monthly === 0 ? 0 : annual ? Math.floor(monthly * 0.8) : monthly;
+  const [yearly, setYearly] = useState(true);
 
   return (
     <section
       id="pricing"
-      className="relative py-28 overflow-hidden"
-      style={{ background: "var(--color-bg)" }}
+      style={{
+        position: 'relative',
+        padding: '7rem 0',
+        background: 'var(--color-bg)',
+        overflow: 'hidden',
+      }}
     >
-      {/* Subtle background glow */}
+      {/* bg glow */}
       <div
         aria-hidden="true"
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none"
         style={{
+          position: 'absolute',
+          inset: 0,
           background:
-            "radial-gradient(ellipse, oklch(0.52 0.22 285 / 0.06) 0%, transparent 70%)",
+            'radial-gradient(700px circle at 50% -80px, oklch(0.55 0.18 285 / 0.10), transparent 60%)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+      {/* dot grid */}
+      <div
+        aria-hidden="true"
+        className="pricing-pattern"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
         }}
       />
 
-      <div className="relative mx-auto max-w-[1200px] px-6">
-
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1 }}>
         {/* Header */}
-        <div className="max-w-xl mb-16">
-          <div
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide uppercase mb-5"
-            style={{
-              background: "oklch(0.52 0.22 285 / 0.10)",
-              color: "var(--color-primary)",
-              border: "1px solid oklch(0.52 0.22 285 / 0.20)",
-            }}
-          >
-            <Zap size={10} aria-hidden="true" />
-            Pricing
-          </div>
-          <h2
-            className="font-display font-semibold leading-[1.1] tracking-tight mb-4"
-            style={{
-              fontSize: "clamp(1.75rem, 1.2rem + 1.5vw, 2.75rem)",
-              color: "var(--color-text)",
-            }}
-          >
-            Simple, transparent pricing
-          </h2>
-          <p style={{ fontSize: "var(--text-base)", color: "var(--color-text-muted)" }}>
-            Start free. Upgrade when you&apos;re ready. No hidden fees, cancel anytime.
-          </p>
-
-          {/* Billing toggle */}
-          <div className="flex items-center gap-3 mt-8">
-            <span
-              className="text-[var(--text-sm)] font-medium"
-              style={{ color: !annual ? "var(--color-text)" : "var(--color-text-faint)" }}
-            >
-              Monthly
-            </span>
-            <button
-              role="switch"
-              aria-checked={annual}
-              onClick={() => setAnnual(!annual)}
-              className="relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-200"
-              style={{
-                background: annual ? "var(--color-primary)" : "var(--color-surface-offset)",
-                boxShadow: annual ? "0 0 0 3px oklch(0.52 0.22 285 / 0.15)" : "none",
-              }}
-              aria-label="Toggle annual billing"
-            >
-              <span
-                className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
-                style={{ transform: annual ? "translateX(1.375rem)" : "translateX(0.25rem)" }}
-              />
-            </button>
-            <span
-              className="text-[var(--text-sm)] font-medium flex items-center gap-2"
-              style={{ color: annual ? "var(--color-text)" : "var(--color-text-faint)" }}
-            >
-              Annual
-              <span
-                className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                style={{
-                  background: "oklch(0.55 0.15 145 / 0.12)",
-                  color: "var(--color-success)",
-                  border: "1px solid oklch(0.55 0.15 145 / 0.20)",
-                }}
-              >
-                Save 20%
-              </span>
-            </span>
-          </div>
-        </div>
-
-        {/* Cards grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
-          {plans.map((plan) => (
-            <PricingCard
-              key={plan.name}
-              plan={plan}
-              price={price(plan.monthlyPrice)}
-              annual={annual}
-            />
-          ))}
-        </div>
-
-        {/* Footer note */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div style={{ textAlign: 'center', maxWidth: 600, margin: '0 auto 56px' }}>
           <p
-            className="text-center"
-            style={{ fontSize: "var(--text-sm)", color: "var(--color-text-faint)" }}
+            style={{
+              textTransform: 'uppercase',
+              letterSpacing: '0.12em',
+              fontSize: 12,
+              fontWeight: 600,
+              color: 'var(--color-accent)',
+              marginBottom: 12,
+            }}
           >
-            All plans include a 30-day money-back guarantee.
+            Pricing
           </p>
-          <Link
-            href="/pricing"
-            className="text-[var(--text-sm)] font-medium hover:underline transition-colors"
-            style={{ color: "var(--color-primary)" }}
+          <h2
+            style={{
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontWeight: 700,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.1,
+              color: 'var(--color-text)',
+              margin: '0 0 16px',
+            }}
           >
-            See full comparison &rarr;
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
+            Plans that scale with you
+          </h2>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: 16, lineHeight: 1.6, margin: '0 0 32px' }}>
+            Start free. Upgrade when you&apos;re ready. No contracts, no hidden fees.
+          </p>
 
-type Plan = (typeof plans)[number];
-
-function PricingCard({
-  plan,
-  price,
-  annual,
-}: {
-  plan: Plan;
-  price: number;
-  annual: boolean;
-}) {
-  const { popular } = plan;
-
-  return (
-    <div
-      className="relative flex flex-col rounded-2xl transition-all duration-300"
-      style={{
-        background: popular
-          ? "linear-gradient(160deg, oklch(0.14 0.010 285), oklch(0.11 0.008 285))"
-          : "var(--color-surface)",
-        border: popular
-          ? "1px solid oklch(0.52 0.22 285 / 0.45)"
-          : "1px solid var(--color-border)",
-        boxShadow: popular
-          ? "0 0 0 1px oklch(0.52 0.22 285 / 0.10), 0 8px 32px oklch(0.52 0.22 285 / 0.15), 0 2px 8px oklch(0 0 0 / 0.20)"
-          : "var(--shadow-sm)",
-      }}
-    >
-      {/* Popular glow top edge */}
-      {popular && (
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-px"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, oklch(0.68 0.22 285 / 0.8), transparent)",
-          }}
-        />
-      )}
-
-      <div className="p-7 flex flex-col flex-1">
-        {/* Plan header */}
-        <div className="flex items-center justify-between mb-6">
-          <span
-            className="text-[var(--text-sm)] font-semibold tracking-wide"
-            style={{ color: popular ? "oklch(0.85 0.10 285)" : "var(--color-text-muted)" }}
+          {/* Toggle */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '4px',
+              borderRadius: 10,
+              border: '1px solid var(--color-border)',
+              background: 'var(--color-surface)',
+            }}
           >
-            {plan.name}
-          </span>
-          {plan.badge && (
-            <span
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold"
-              style={{
-                background: "oklch(0.52 0.22 285 / 0.18)",
-                color: "oklch(0.82 0.15 285)",
-                border: "1px solid oklch(0.52 0.22 285 / 0.30)",
-              }}
-            >
-              <Zap size={9} aria-hidden="true" />
-              {plan.badge}
-            </span>
-          )}
-        </div>
-
-        {/* Price */}
-        <div className="mb-2">
-          <div className="flex items-end gap-1.5 leading-none">
-            <span
-              className="font-display font-bold tracking-tight"
-              style={{
-                fontSize: "clamp(2.2rem, 1rem + 2vw, 3rem)",
-                color: popular ? "#fff" : "var(--color-text)",
-              }}
-            >
-              ${price}
-            </span>
-            {plan.monthlyPrice > 0 && (
-              <span
-                className="mb-1.5"
-                style={{ fontSize: "var(--text-sm)", color: popular ? "oklch(0.65 0.08 285)" : "var(--color-text-faint)" }}
-              >
-                /mo
-              </span>
-            )}
+            {(['Monthly', 'Yearly'] as const).map((label) => {
+              const isYearly = label === 'Yearly';
+              const active = isYearly === yearly;
+              return (
+                <button
+                  key={label}
+                  onClick={() => setYearly(isYearly)}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 7,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                    background: active ? 'var(--color-accent)' : 'transparent',
+                    color: active ? 'var(--color-bg)' : 'var(--color-text-muted)',
+                  }}
+                >
+                  {label}
+                  {isYearly && (
+                    <span
+                      style={{
+                        marginLeft: 6,
+                        fontSize: 11,
+                        opacity: active ? 1 : 0.7,
+                        fontWeight: 400,
+                      }}
+                    >
+                      −15%
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-          {annual && plan.monthlyPrice > 0 && (
-            <p
-              className="mt-1"
-              style={{ fontSize: "var(--text-xs)", color: popular ? "oklch(0.55 0.08 285)" : "var(--color-text-faint)" }}
-            >
-              <s className="opacity-60">${plan.monthlyPrice}/mo</s>
-              {" "}&mdash; billed ${Math.floor(plan.monthlyPrice * 0.8 * 12)}/yr
-            </p>
-          )}
         </div>
 
-        {/* Description */}
-        <p
-          className="mb-7 leading-relaxed"
-          style={{
-            fontSize: "var(--text-sm)",
-            color: popular ? "oklch(0.60 0.06 285)" : "var(--color-text-muted)",
-          }}
-        >
-          {plan.description}
-        </p>
-
-        {/* CTA */}
-        <Link
-          href={plan.ctaHref}
-          className="block text-center px-5 py-3 rounded-xl font-semibold transition-all duration-200 hover:-translate-y-px active:translate-y-0 mb-8"
-          style={{
-            fontSize: "var(--text-sm)",
-            ...(popular
-              ? {
-                  background: "var(--color-primary)",
-                  color: "#fff",
-                  boxShadow:
-                    "0 1px 3px oklch(0.52 0.22 285 / 0.40), 0 4px 16px oklch(0.52 0.22 285 / 0.20)",
-                }
-              : {
-                  background: "var(--color-surface-2)",
-                  color: "var(--color-text)",
-                  border: "1px solid var(--color-border)",
-                }),
-          }}
-        >
-          {plan.cta}
-        </Link>
-
-        {/* Divider */}
+        {/* Cards */}
         <div
-          className="mb-6"
-          style={{ height: "1px", background: popular ? "oklch(0.52 0.22 285 / 0.18)" : "var(--color-border)" }}
-        />
-
-        {/* Features */}
-        <ul className="space-y-3 flex-1">
-          {plan.features.map((f) => (
-            <li
-              key={f}
-              className="flex items-center gap-2.5"
-              style={{ fontSize: "var(--text-sm)", color: popular ? "oklch(0.75 0.06 285)" : "var(--color-text-muted)" }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 24,
+            alignItems: 'start',
+          }}
+        >
+          {plans.map((p) => (
+            <div
+              key={p.name}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: 16,
+                border: p.highlight
+                  ? '2px solid var(--color-accent)'
+                  : '1px solid var(--color-border)',
+                background: 'var(--color-surface)',
+                overflow: 'hidden',
+                position: 'relative',
+                transform: p.highlight ? 'scale(1.03)' : 'scale(1)',
+                boxShadow: p.highlight
+                  ? '0 8px 40px oklch(0.55 0.18 285 / 0.15)'
+                  : '0 1px 4px oklch(0 0 0 / 0.06)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
             >
-              <span
-                className="flex-shrink-0 flex items-center justify-center w-4 h-4 rounded-full"
+              {/* Most popular badge */}
+              {p.badge && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    background: 'var(--color-accent)',
+                    color: 'var(--color-bg)',
+                    padding: '3px 10px',
+                    borderRadius: 20,
+                  }}
+                >
+                  {p.badge}
+                </div>
+              )}
+
+              {/* Card header */}
+              <div
                 style={{
-                  background: popular
-                    ? "oklch(0.52 0.22 285 / 0.20)"
-                    : "oklch(0.55 0.15 145 / 0.12)",
+                  padding: '28px 28px 20px',
+                  borderBottom: '1px solid var(--color-border)',
                 }}
               >
-                <Check
-                  size={9}
-                  strokeWidth={2.5}
-                  style={{ color: popular ? "oklch(0.75 0.18 285)" : "var(--color-success)" }}
-                  aria-hidden="true"
-                />
-              </span>
-              {f}
-            </li>
+                <h3
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 600,
+                    color: 'var(--color-text)',
+                    margin: '0 0 6px',
+                  }}
+                >
+                  {p.name}
+                </h3>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}>
+                  {p.description}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
+                  <span
+                    style={{
+                      fontSize: 40,
+                      fontWeight: 700,
+                      letterSpacing: '-0.04em',
+                      color: 'var(--color-text)',
+                      lineHeight: 1,
+                    }}
+                  >
+                    ${p.priceMonthly === 0 ? '0' : yearly ? Math.floor(p.priceYearly / 12) : p.priceMonthly}
+                  </span>
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: 14, paddingBottom: 4 }}>/mo</span>
+                </div>
+                {yearly && p.priceYearly > 0 && (
+                  <p style={{ color: 'var(--color-text-muted)', fontSize: 12, marginTop: 4 }}>
+                    Billed ${p.priceYearly}/yr
+                  </p>
+                )}
+              </div>
+
+              {/* Features */}
+              <ul
+                style={{
+                  flex: 1,
+                  listStyle: 'none',
+                  margin: 0,
+                  padding: '24px 28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 12,
+                }}
+              >
+                {p.features.map((f) => (
+                  <li
+                    key={f.label}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      opacity: f.included ? 1 : 0.4,
+                    }}
+                  >
+                    {f.included ? (
+                      <Check
+                        size={16}
+                        style={{ color: 'var(--color-accent)', flexShrink: 0, marginTop: 2 }}
+                      />
+                    ) : (
+                      <X
+                        size={16}
+                        style={{ color: 'var(--color-text-muted)', flexShrink: 0, marginTop: 2 }}
+                      />
+                    )}
+                    <span style={{ fontSize: 14, color: 'var(--color-text)', lineHeight: 1.5 }}>{f.label}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <div style={{ padding: '0 28px 28px' }}>
+                <Link
+                  href={p.ctaHref}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'center',
+                    padding: '11px 20px',
+                    borderRadius: 9,
+                    fontSize: 14,
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    transition: 'filter 0.15s, background 0.15s',
+                    background: p.highlight ? 'var(--color-accent)' : 'transparent',
+                    color: p.highlight ? 'var(--color-bg)' : 'var(--color-text)',
+                    border: p.highlight ? 'none' : '1px solid var(--color-border)',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {p.cta}
+                </Link>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
-    </div>
+
+      <style>{`
+        .pricing-pattern {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='oklch(0.55 0.04 285)' fill-opacity='0.06'/%3E%3C/svg%3E");
+          background-size: 32px 32px;
+        }
+        [data-theme='light'] .pricing-pattern {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='oklch(0.2 0.02 285)' fill-opacity='0.05'/%3E%3C/svg%3E");
+        }
+        @media (prefers-color-scheme: light) {
+          .pricing-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='1' cy='1' r='1' fill='oklch(0.2 0.02 285)' fill-opacity='0.05'/%3E%3C/svg%3E");
+          }
+        }
+      `}</style>
+    </section>
   );
 }

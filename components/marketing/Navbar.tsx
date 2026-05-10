@@ -1,18 +1,9 @@
-"use client";
+// components/marketing/Navbar.tsx
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import { Logo } from "@/components/shared/Logo";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
-
-const navLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Docs", href: "/docs" },
-  { label: "Blog", href: "/blog" },
-  { label: "Changelog", href: "/changelog" },
-];
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Menu, X } from 'lucide-react';
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -20,153 +11,236 @@ export function Navbar() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const links = [
+    { href: '/#features', label: 'Features' },
+    { href: '/#pricing', label: 'Pricing' },
+    { href: '/#testimonials', label: 'Testimonials' },
+    { href: '/#faq', label: 'FAQ' },
+  ];
 
   return (
     <header
-      className="sticky top-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? "oklch(from var(--color-bg) l c h / 0.85)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px) saturate(180%)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(12px) saturate(180%)" : "none",
-        borderBottom: scrolled ? "1px solid var(--color-border)" : "1px solid transparent",
-        boxShadow: scrolled ? "var(--shadow-sm)" : "none",
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        height: 64,
+        transition: 'all 0.2s',
+        background: scrolled ? 'var(--color-bg)' : 'transparent',
+        borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid transparent',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
       }}
     >
-      <div className="mx-auto max-w-[1200px] px-6">
-        <nav
-          className="flex items-center justify-between h-16"
-          aria-label="Main navigation"
+      <div
+        style={{
+          maxWidth: 1280,
+          margin: '0 auto',
+          height: '100%',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {/* Logo */}
+        <Link
+          href="/"
+          onClick={() => setOpen(false)}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}
         >
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 flex-shrink-0"
-            aria-label="SaasStarter home"
-          >
-            <Logo className="w-7 h-7" />
-            <span
-              className="font-display font-semibold tracking-tight"
-              style={{ fontSize: "var(--text-base)", color: "var(--color-text)" }}
-            >
-              SaasStarter
-            </span>
-          </Link>
+          <NavLogo />
+          <span style={{ fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--color-text)', fontSize: 15 }}>
+            SaaS Starter
+          </span>
+        </Link>
 
-          {/* Desktop links */}
-          <ul className="hidden md:flex items-center gap-1" role="list">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="px-3.5 py-2 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--color-surface)]"
-                  style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {/* Desktop actions */}
-          <div className="hidden md:flex items-center gap-2">
-            <ThemeToggle />
+        {/* Desktop nav */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 2 }} className="hidden-mobile">
+          {links.map((l) => (
             <Link
-              href="/login"
-              className="px-4 py-2 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--color-surface)]"
-              style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="px-4 py-2 rounded-[var(--radius-md)] font-medium transition-all hover:-translate-y-px"
+              key={l.href}
+              href={l.href}
               style={{
-                background: "var(--color-primary)",
-                color: "#fff",
-                fontSize: "var(--text-sm)",
-                boxShadow: "0 1px 3px oklch(0.52 0.22 285 / 0.3)",
+                padding: '6px 12px',
+                borderRadius: 6,
+                fontSize: 14,
+                color: 'var(--color-text-muted)',
+                textDecoration: 'none',
+                transition: 'color 0.15s, background 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.color = 'var(--color-accent)';
+                (e.target as HTMLElement).style.background = 'var(--color-surface)';
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.color = 'var(--color-text-muted)';
+                (e.target as HTMLElement).style.background = 'transparent';
               }}
             >
-              Get started
+              {l.label}
             </Link>
-          </div>
-
-          {/* Mobile toggle */}
-          <div className="flex md:hidden items-center gap-2">
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={() => setOpen(!open)}
-              aria-expanded={open}
-              aria-controls="mobile-menu"
-              aria-label={open ? "Close menu" : "Open menu"}
-              className="p-2 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--color-surface)]"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              {open ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
+          ))}
         </nav>
+
+        {/* Desktop CTA */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="hidden-mobile">
+          <Link
+            href="/sign-in"
+            style={{
+              padding: '6px 12px',
+              fontSize: 14,
+              color: 'var(--color-text)',
+              textDecoration: 'none',
+              transition: 'color 0.15s',
+            }}
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/sign-up"
+            style={{
+              padding: '8px 16px',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 500,
+              background: 'var(--color-accent)',
+              color: 'var(--color-bg)',
+              textDecoration: 'none',
+              transition: 'filter 0.15s',
+            }}
+            onMouseEnter={(e) => ((e.target as HTMLElement).style.filter = 'brightness(1.1)')}
+            onMouseLeave={(e) => ((e.target as HTMLElement).style.filter = 'brightness(1)')}
+          >
+            Get started
+          </Link>
+        </div>
+
+        {/* Mobile hamburger */}
+        <button
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          onClick={() => setOpen((s) => !s)}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 8,
+            borderRadius: 6,
+            color: 'var(--color-text)',
+            display: 'none',
+          }}
+          className="show-mobile"
+        >
+          {open ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile drawer */}
       {open && (
         <div
-          id="mobile-menu"
-          className="md:hidden px-6 pb-5 pt-2"
           style={{
-            background: "var(--color-bg)",
-            borderTop: "1px solid var(--color-border)",
+            position: 'absolute',
+            top: 64,
+            left: 0,
+            right: 0,
+            background: 'var(--color-bg)',
+            borderBottom: '1px solid var(--color-border)',
+            padding: '12px 16px 20px',
           }}
         >
-          <ul className="space-y-1" role="list">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="block px-3 py-2.5 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--color-surface)]"
-                  style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}
-                >
-                  {link.label}
-                </Link>
-              </li>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {links.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 6,
+                  color: 'var(--color-text)',
+                  textDecoration: 'none',
+                  fontSize: 15,
+                }}
+              >
+                {l.label}
+              </Link>
             ))}
-          </ul>
-          <div
-            className="flex flex-col gap-2 mt-4 pt-4"
-            style={{ borderTop: "1px solid var(--color-border)" }}
-          >
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="flex justify-center px-4 py-2.5 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--color-surface)]"
+            <div
               style={{
-                fontSize: "var(--text-sm)",
-                color: "var(--color-text-muted)",
-                border: "1px solid var(--color-border)",
+                marginTop: 12,
+                paddingTop: 12,
+                borderTop: '1px solid var(--color-border)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
               }}
             >
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setOpen(false)}
-              className="flex justify-center px-4 py-2.5 rounded-[var(--radius-md)] font-medium"
-              style={{
-                background: "var(--color-primary)",
-                color: "#fff",
-                fontSize: "var(--text-sm)",
-              }}
-            >
-              Get started free
-            </Link>
-          </div>
+              <Link
+                href="/sign-in"
+                onClick={() => setOpen(false)}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 6,
+                  color: 'var(--color-text)',
+                  textDecoration: 'none',
+                  fontSize: 15,
+                }}
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/sign-up"
+                onClick={() => setOpen(false)}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  background: 'var(--color-accent)',
+                  color: 'var(--color-bg)',
+                  textDecoration: 'none',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  textAlign: 'center',
+                }}
+              >
+                Get started
+              </Link>
+            </div>
+          </nav>
         </div>
       )}
+
+      <style>{`
+        @media (min-width: 768px) {
+          .hidden-mobile { display: flex !important; }
+          .show-mobile { display: none !important; }
+        }
+        @media (max-width: 767px) {
+          .hidden-mobile { display: none !important; }
+          .show-mobile { display: block !important; }
+        }
+      `}</style>
     </header>
+  );
+}
+
+function NavLogo() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+      <defs>
+        <linearGradient id="navgrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="var(--color-accent)" />
+          <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0.7" />
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#navgrad)" />
+      <path d="M7 12h10M12 7v10" stroke="var(--color-bg)" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   );
 }
