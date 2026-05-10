@@ -1,40 +1,56 @@
 import type { Metadata, Viewport } from 'next';
-import './globals.css';
-import { ThemeProvider } from '@/components/shared/ThemeProvider';
+import { Inter } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
+import { SessionProvider } from 'next-auth/react';
+import CookieBanner from '@/components/compliance/CookieBanner';
 import { DemoBanner } from '@/components/shared/DemoBanner';
+import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+  preload: true,
+});
 
 export const metadata: Metadata = {
-  title: {
-    default: 'SaasStarter — Ship your SaaS in days',
-    template: '%s | SaasStarter',
-  },
+  title: { default: 'SaasStarter — Ship faster', template: '%s | SaasStarter' },
   description:
-    'Production-ready Next.js 15 SaaS starter. Auth, billing, email, and analytics — all wired up from day one.',
-  keywords: ['saas', 'nextjs', 'starter', 'boilerplate', 'stripe', 'prisma', 'auth'],
-  authors: [{ name: 'Mohammed Hariss' }],
-  creator: 'Mohammed Hariss',
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
-  ),
+    'Production-ready Next.js 15 SaaS starter with auth, billing, and analytics. Ship in days, not months.',
+  keywords: ['saas', 'nextjs', 'typescript', 'tailwind', 'starter'],
+  authors: [{ name: 'SaasStarter' }],
   openGraph: {
     type: 'website',
     locale: 'en_US',
+    url: process.env.NEXT_PUBLIC_APP_URL,
     siteName: 'SaasStarter',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'SaasStarter dashboard preview',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    creator: '@devhariss',
+    creator: '@saastarter',
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: { index: true, follow: true },
   },
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  ),
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)',  color: '#0a0a0f' },
+    { media: '(prefers-color-scheme: light)', color: '#f8f8fc' },
+    { media: '(prefers-color-scheme: dark)',  color: '#0d0d12' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -46,13 +62,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <head>
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=cal-sans@400&display=swap"
+          rel="stylesheet"
+        />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
       <body>
-        <ThemeProvider>
-          {children}
-          {/* Demo-mode floating banner — preview branch only */}
-          <DemoBanner />
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider
+            attribute="data-theme"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <CookieBanner />
+            {/* Preview-branch only — floating demo mode warning */}
+            <DemoBanner />
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
